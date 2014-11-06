@@ -12,7 +12,7 @@ LINETHICKNESS = 10
 PADDLESIZE = 35
 PADDLEOFFSET = 50
 XBALLSPEED = 3
-YBALLSPEED = 3
+YBALLSPEED = 2
 NUMHITS = 0
 
 # Set up colors
@@ -99,24 +99,21 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX):
               (paddle1.bottom, ball.top, ball.bottom))
         NUMHITS += 1
         pong_sound()
-        if ball.top >= paddle1.bottom - 7:
+        if ball.top <= paddle1.bottom - 35:
             YBALLSPEED = 5
-            ballDirY = 1
-        elif ball.top >= paddle1.bottom - 14 and ball.bottom <= paddle1.bottom - 7:
+            ballDirY = -1
+        elif ball.top <= paddle1.bottom - 28:
             YBALLSPEED = 4
-            ballDirY = 1
-        elif ball.top >= paddle1.bottom - 21 and ball.bottom <= paddle1.bottom - 14:
+            ballDirY = -1
+        elif ball.top <= paddle1.bottom - 21:
             YBALLSPEED = 0
             ballDirY = 0
-        elif ball.top >= paddle1.bottom - 28 and ball.bottom <= paddle1.bottom - 21:
+        elif ball.top >= paddle1.bottom - 7:
             YBALLSPEED = 4
-            ballDirY = -1
-        elif ball.top >= paddle1.bottom - 35 and ball.bottom <= paddle1.bottom - 28:
+            ballDirY = 1
+        elif ball.top >= paddle1.bottom - 14:
             YBALLSPEED = 5
-            ballDirY = -1
-        # else:
-        #     YBALLSPEED = 1
-        #     XBALLSPEED = 1
+            ballDirY = 1
         return -1
     #elif ballDirX == 1 and paddle2.left == ball.right and paddle2.top <= ball.top and paddle2.bottom >= ball.bottom:
     elif ballDirX == 1 and paddle2.colliderect(ball):
@@ -124,21 +121,21 @@ def checkHitBall(ball, paddle1, paddle2, ballDirX):
         pong_sound()
         print("general hit: paddle1.bottom = %s, ball.top = %s, ball.bottom = %s" %
               (paddle2.bottom, ball.top, ball.bottom))
-        if ball.top >= paddle2.bottom - 7:
+        if ball.top <= paddle2.bottom - 35:
             YBALLSPEED = 5
-            ballDirY = 1
-        elif ball.top >= paddle2.bottom - 14 and ball.bottom <= paddle2.bottom - 7:
+            ballDirY = -1
+        elif ball.top <= paddle2.bottom - 28:
             YBALLSPEED = 4
-            ballDirY = 1
-        elif ball.top >= paddle2.bottom - 21 and ball.bottom <= paddle2.bottom - 14:
+            ballDirY = -1
+        elif ball.top <= paddle2.bottom - 21:
             YBALLSPEED = 0
             ballDirY = 0
-        elif ball.top >= paddle2.bottom - 28 and ball.bottom <= paddle2.bottom - 21:
+        elif ball.top >= paddle2.bottom - 7:
             YBALLSPEED = 4
-            ballDirY = -1
-        elif ball.top >= paddle2.bottom - 35 and ball.bottom <= paddle2.bottom - 28:
+            ballDirY = 1
+        elif ball.top >= paddle2.bottom - 14:
             YBALLSPEED = 5
-            ballDirY = -1
+            ballDirY = 1
         return -1
     else:
         return 1
