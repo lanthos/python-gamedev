@@ -105,6 +105,9 @@ def checkHitBall(ball, paddle1, paddle2):
         pong_sound()
         YBALLSPEED = 5 * ((ball.centery - paddle2.centery) / (PADDLESIZE / 2))
         # print("numhits = %s, xspeed = %s" % (NUMHITS, XBALLSPEED))
+        pressed = pygame.key.get_pressed()
+        if pressed[K_SPACE]:
+            NUMHITS = 5
         return -1
     else:
         return 1
@@ -263,6 +266,8 @@ def main():
             elif event.type == MOUSEMOTION:
                 mousex, mousey = event.pos
                 paddle1.y = mousey
+                # To enable AI comment out this next line and also AI function call further down.
+                paddle2.y = mousey
             elif event.type == KEYDOWN:
                 if event.key == K_q:
                     pygame.quit()
@@ -289,7 +294,8 @@ def main():
         p1_score, p2_score = checkPointScored(p1_score, p2_score, ballX, ballY)
         XBALLSPEED *= checkHitBall(ball, paddle1, paddle2)
 
-        paddle2 = artificialIntelligence(ball, XBALLSPEED, paddle2)
+        # To enable AI uncomment the next line and also comment out line above for paddle2.y = mousey
+        #paddle2 = artificialIntelligence(ball, XBALLSPEED, paddle2)
 
         displayScore(p1_score, p2_score)
 
