@@ -13,7 +13,7 @@ WINDOWHEIGHT = 600
 LINETHICKNESS = 10
 PADDLESIZE = 35
 PADDLEOFFSET = 60
-XBALLSPEED = -4
+XBALLSPEED = -5
 YBALLSPEED = 2
 NUMHITS = 0
 
@@ -47,8 +47,8 @@ def drawPaddle(paddle):
     if paddle.top > WINDOWHEIGHT:
         paddle.top = WINDOWHEIGHT
     # Stops the paddle from moving too high
-    elif paddle.top < LINETHICKNESS + 15:
-        paddle.top = LINETHICKNESS + 15
+    elif paddle.top < LINETHICKNESS + 13:
+        paddle.top = LINETHICKNESS + 13
     # Draws paddle
     pygame.draw.rect(DISPLAYSURF, WHITE, paddle)
 
@@ -69,14 +69,14 @@ def tension():
     global NUMHITS, YBALLSPEED, XBALLSPEED
     if NUMHITS > 6:
         if XBALLSPEED > 0:
-            XBALLSPEED = 8
+            XBALLSPEED = 9
         else:
-            XBALLSPEED = -8
+            XBALLSPEED = -9
     if 3 < NUMHITS < 6:
         if XBALLSPEED > 0:
-            XBALLSPEED = 6
+            XBALLSPEED = 7
         else:
-            XBALLSPEED = -6
+            XBALLSPEED = -7
 
 
 #Checks for a collision with a wall, and 'bounces' ball off it.
@@ -123,7 +123,7 @@ def checkPointScored(p1_score, p2_score, ballX, ballY):
         NUMHITS = 0
         XBALLSPEED = -3
         random.seed()
-        YBALLSPEED = random.randint(-4, -1)
+        YBALLSPEED = random.randint(-3, -1)
     if ball.right >= WINDOWWIDTH - 25:
         p1_score += 1
         miss_sound.play()
@@ -131,7 +131,7 @@ def checkPointScored(p1_score, p2_score, ballX, ballY):
         NUMHITS = 0
         XBALLSPEED = 3
         random.seed()
-        YBALLSPEED = random.randint(1, 4)
+        YBALLSPEED = random.randint(1, 3)
     return p1_score, p2_score
 
 
