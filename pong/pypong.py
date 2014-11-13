@@ -115,10 +115,12 @@ def checkHitBall(ball, paddle1, paddle2):
 
 # Check to see if a score was made
 def checkPointScored(p1_score, p2_score, ballX, ballY):
-    global ball, NUMHITS, XBALLSPEED, YBALLSPEED
+    global ball, NUMHITS, XBALLSPEED, YBALLSPEED, scored, start
     if ball.left <= 25:
         p2_score += 1
         miss_sound.play()
+        # scored = True
+        # start = pygame.time.get_ticks()
         ball = pygame.Rect(ballX, ballY, 6, 6)
         NUMHITS = 0
         XBALLSPEED = -3
@@ -127,6 +129,8 @@ def checkPointScored(p1_score, p2_score, ballX, ballY):
     if ball.right >= WINDOWWIDTH - 25:
         p1_score += 1
         miss_sound.play()
+        # scored = True
+        # start = pygame.time.get_ticks()
         ball = pygame.Rect(ballX, ballY, 6, 6)
         NUMHITS = 0
         XBALLSPEED = 3
@@ -216,7 +220,7 @@ def main():
     global DISPLAYSURF
     global BASICFONT, BASICFONTSIZE, gameover_font
     global regular_sound, faster_sound, fastest_sound, wall_sound, miss_sound
-    global ball, paused, p1_score, p2_score
+    global ball, paused, p1_score, p2_score, scored
     BASICFONTSIZE = 70
     BASICFONT = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
     gameover_font = pygame.font.Font('visitor1.ttf', 50)
@@ -255,6 +259,7 @@ def main():
 
     # Paused variable
     paused = False
+    scored = False
 
     pygame.mouse.set_visible(0)  # hide the cursor
     while True:
@@ -287,6 +292,12 @@ def main():
         drawArena()
         drawPaddle(paddle1)
         drawPaddle(paddle2)
+        if scored:
+            global start
+            pygame.display.update()
+            if pygame.time.get_ticks() - start >= 5000:
+                scored = False
+            continue
         drawBall(ball, WHITE)
 
         ball = moveBall(ball, XBALLSPEED, YBALLSPEED)
