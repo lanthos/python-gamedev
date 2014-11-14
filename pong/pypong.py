@@ -1,7 +1,6 @@
 import pygame
 import sys
 import random
-import time
 from pygame.locals import *
 
 # Set FPS to allow for changing game speed

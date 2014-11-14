@@ -17,21 +17,21 @@ BLUE = (0, 0, 255)
 # Map definitions and dimensions.
 WALL = 1
 OPEN = 0
-TILESIZE = 30
-MAPWIDTH = 10
-MAPHEIGHT = 9
+TILESIZE = 20
+MAPWIDTH = 35
+MAPHEIGHT = 30
 
-tilemap = [
-    [WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL],
-    [WALL, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, WALL],
-    [WALL, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, WALL],
-    [WALL, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, WALL],
-    [WALL, OPEN, OPEN, OPEN, WALL, WALL, OPEN, OPEN, OPEN, WALL],
-    [WALL, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, WALL],
-    [WALL, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, WALL],
-    [WALL, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, OPEN, WALL],
-    [WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL, WALL]
-]
+# Generate blank map
+tilemap = [[OPEN for w in range(MAPWIDTH)] for h in range(MAPHEIGHT)]
+
+# Add borders
+for i in range(MAPHEIGHT):
+    tilemap[i][0] = WALL
+    tilemap[i][MAPWIDTH - 1] = WALL
+    if i == 0 or i == MAPHEIGHT - 1:
+        for w in range(MAPWIDTH):
+            tilemap[i][w] = WALL
+
 
 colors = {
     WALL: WHITE,
