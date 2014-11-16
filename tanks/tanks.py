@@ -49,11 +49,23 @@ def main():
     DISPLAYSURF = pygame.display.set_mode((MAPWIDTH*TILESIZE, MAPHEIGHT*TILESIZE))
     pygame.display.set_caption("Tanks")
 
+    #load the sprite sheet
+    spritesheet = pygame.image.load('red_tanks.bmp').convert()
+    tanks = []
+    for nbr in range(8):
+        tanks.append(spritesheet.subsurface((20*nbr), 0, 20, 20))
+    for nbr in range(8):
+        tanks.append(spritesheet.subsurface((20*nbr), 20, 20, 20))
+
+    for nbr in range(len(tanks)):
+        tanks[nbr].set_colorkey(WHITE)
+        tanks[nbr] = tanks[nbr].convert_alpha()
     #Loop until the user clicks the close button.
     done = False
 
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
+
 
     # -------- Main Program Loop -----------
     while not done:
@@ -63,21 +75,18 @@ def main():
                 done = True  # Flag that we are done so we exit this loop
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
-
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
-
-
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
-
-        # First, clear the screen to white. Don't put other drawing commands
-        # above this, or they will be erased with this command.
         for row in range(MAPHEIGHT):
             for column in range(MAPWIDTH):
                 pygame.draw.rect(DISPLAYSURF, colors[tilemap[row][column]],
                                  (column*TILESIZE, row*TILESIZE, TILESIZE, TILESIZE))
+
+        for nbr in range(len(tanks)):
+            DISPLAYSURF.blit(tanks[nbr], (nbr*20, 0))
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
 
         # Go ahead and update the screen with what we've drawn.
