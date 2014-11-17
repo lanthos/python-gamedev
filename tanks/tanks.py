@@ -86,7 +86,7 @@ def main():
                                  (column*TILESIZE, row*TILESIZE, TILESIZE, TILESIZE))
 
         for nbr in range(len(tanks)):
-            DISPLAYSURF.blit(tanks[nbr], (nbr*20, 0))
+            DISPLAYSURF.blit(tanks[nbr], (nbr*20, 40))
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
 
         # Go ahead and update the screen with what we've drawn.
