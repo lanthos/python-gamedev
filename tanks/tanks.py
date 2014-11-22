@@ -5,6 +5,7 @@
 
 import pygame
 import sys
+import math
 
 # Globals constants defined here.
 # Colors
@@ -17,12 +18,14 @@ BLUE = (0, 0, 255)
 
 class Tank():
 
-    def __init__(self, tank_x, tank_y, DISPLAYSURF, direction, color):
+    def __init__(self, tank_x, tank_y, DISPLAYSURF, color):
         self.tank_x = tank_x
         self.tank_y = tank_y
         self.DISPLAYSURF = DISPLAYSURF
-        self.directions = 'up 22.5R 45R 67.5R right 22.5D 45D 67.5D down 22.5L 45L 67.5L left 22.5U 45U 67.5U'.split()
-        self.tank_direction = direction
+        self.tank_direction = 4
+        self.angle_deg = 90
+        self.angle_rad = math.pi/2
+        self.speed = 2
         if color == 'red':
             self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
             self.tanks = []
@@ -39,98 +42,43 @@ class Tank():
             self.spritesheet.convert_alpha()
 
     def draw_red(self):
-        # for nbr in range(len(self.tanks)):
-        #     DISPLAYSURF.blit(self.tanks[nbr], (nbr*self.tank_x, self.tank_y))
-        if self.tank_direction == 'up':
-            self.DISPLAYSURF.blit(self.tanks[0], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '22.5R':
-            self.DISPLAYSURF.blit(self.tanks[1], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '45R':
-            self.DISPLAYSURF.blit(self.tanks[2], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '67.5R':
-            self.DISPLAYSURF.blit(self.tanks[3], (self.tank_x, self.tank_y))
-        elif self.tank_direction == 'right':
-            self.DISPLAYSURF.blit(self.tanks[4], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '22.5D':
-            self.DISPLAYSURF.blit(self.tanks[5], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '45D':
-            self.DISPLAYSURF.blit(self.tanks[6], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '67.5D':
-            self.DISPLAYSURF.blit(self.tanks[7], (self.tank_x, self.tank_y))
-        elif self.tank_direction == 'down':
-            self.DISPLAYSURF.blit(self.tanks[8], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '22.5L':
-            self.DISPLAYSURF.blit(self.tanks[9], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '45L':
-            self.DISPLAYSURF.blit(self.tanks[10], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '67.5L':
-            self.DISPLAYSURF.blit(self.tanks[11], (self.tank_x, self.tank_y))
-        elif self.tank_direction == 'left':
-            self.DISPLAYSURF.blit(self.tanks[12], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '22.5U':
-            self.DISPLAYSURF.blit(self.tanks[13], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '45U':
-            self.DISPLAYSURF.blit(self.tanks[14], (self.tank_x, self.tank_y))
-        elif self.tank_direction == '67.5U':
-            self.DISPLAYSURF.blit(self.tanks[15], (self.tank_x, self.tank_y))
+        self.DISPLAYSURF.blit(self.tanks[self.tank_direction % 16], (self.tank_x, self.tank_y))
 
     def draw_blue(self):
-        if self.tank_direction == 'up':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, 0), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '22.5R':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, -22.5), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '45R':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, -45), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '67.5R':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, -67.5), (self.tank_x, self.tank_y))
-        elif self.tank_direction == 'right':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, -90), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '22.5D':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, -112.5), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '45D':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, -135), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '67.5D':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, -157.5), (self.tank_x, self.tank_y))
-        elif self.tank_direction == 'down':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, -180), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '22.5L':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, 157.5), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '45L':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, 135), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '67.5L':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, 112.5), (self.tank_x, self.tank_y))
-        elif self.tank_direction == 'left':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, 90), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '22.5U':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, 67.5), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '45U':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, 45), (self.tank_x, self.tank_y))
-        elif self.tank_direction == '67.5U':
-            self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, 180), (self.tank_x, self.tank_y))
+        self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, self.angle_deg), (self.tank_x, self.tank_y))
 
     def move(self, move_direction, color):
         if color == 'red':
             if move_direction == 'left':
-                self.tank_direction = self.directions[self.directions.index(self.tank_direction) - 1]
+                self.tank_direction -= 1
+                self.angle_rad += math.pi/8
                 self.draw_red()
             if move_direction == 'right':
-                try:
-                    self.tank_direction = self.directions[self.directions.index(self.tank_direction) + 1]
-                except IndexError:
-                    self.tank_direction = 'up'
+                self.tank_direction += 1
+                self.angle_rad -= math.pi/8
                 self.draw_red()
+            if move_direction == 'forward':
+                self.tank_y += self.speed * math.cos(self.angle_rad)
+                self.tank_x += self.speed * math.sin(self.angle_rad)
+                print 'red tank_x: %s, red tank_y: %s' % (self.tank_x, self.tank_y)
+                print 'angle_rad: %s' % self.angle_rad
         if color == 'blue':
             if move_direction == 'left':
-                self.tank_direction = self.directions[self.directions.index(self.tank_direction) - 1]
+                self.angle_deg += 22.5
+                self.angle_rad = degree_to_radian(self.angle_deg)
                 self.draw_blue()
             if move_direction == 'right':
-                try:
-                    self.tank_direction = self.directions[self.directions.index(self.tank_direction) + 1]
-                except IndexError:
-                    self.tank_direction = 'up'
+                self.angle_deg -= 22.5
+                self.angle_rad = degree_to_radian(self.angle_deg)
                 self.draw_blue()
+            if move_direction == 'forward':
+                self.tank_y += self.speed * math.cos(self.angle_rad)
+                self.tank_x += self.speed * math.sin(self.angle_rad)
+                print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad)
 
 
+def degree_to_radian(degree):
+    return degree * math.pi/180
 # Map definitions and dimensions.
 WALL = 1
 OPEN = 0
@@ -167,8 +115,8 @@ def main():
     pygame.display.set_caption("Tanks")
 
     # initialize tank
-    red_tank = Tank(50, 100, DISPLAYSURF, 'right', 'red')
-    blue_tank = Tank(450, 100, DISPLAYSURF, 'left', 'blue')
+    red_tank = Tank(50, 100, DISPLAYSURF, 'red')
+    blue_tank = Tank(450, 100, DISPLAYSURF, 'blue')
 
 
 
@@ -191,10 +139,14 @@ def main():
                     sys.exit()
                 if event.key == pygame.K_a:
                     red_tank.move('left', 'red')
+                if event.key == pygame.K_w:
+                    red_tank.move('forward', 'red')
                 if event.key == pygame.K_d:
                     red_tank.move('right', 'red')
                 if event.key == pygame.K_LEFT:
                     blue_tank.move('left', 'blue')
+                if event.key == pygame.K_UP:
+                    blue_tank.move('forward', 'blue')
                 if event.key == pygame.K_RIGHT:
                     blue_tank.move('right', 'blue')
 
