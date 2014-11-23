@@ -23,7 +23,7 @@ class Tank():
         self.tank_y = tank_y
         self.DISPLAYSURF = DISPLAYSURF
         self.tank_direction = 4
-        self.angle_deg = 90
+        self.angle_deg = 0
         self.angle_rad = math.pi/2
         self.speed = 2
         if color == 'red':
