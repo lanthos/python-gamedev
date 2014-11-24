@@ -23,7 +23,8 @@ class Tank():
         self.tank_y = tank_y
         self.DISPLAYSURF = DISPLAYSURF
         self.tank_direction = 4
-        self.angle_deg = 0
+        self.angle_deg = 180
+        self.angle_rad_blue = math.pi
         self.angle_rad = math.pi/2
         self.speed = 2
         if color == 'red':
@@ -47,6 +48,10 @@ class Tank():
     def draw_blue(self):
         self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, self.angle_deg), (self.tank_x, self.tank_y))
 
+    def check_collision(self, game_map):
+        self.tileX = self.tank_x / game_map.MAPWIDTH
+        self.tileY = self.tank_y / game_map.MAPHEIGHT
+
     def move(self, move_direction, color):
         if color == 'red':
             if move_direction == 'left':
@@ -60,65 +65,77 @@ class Tank():
             if move_direction == 'forward':
                 self.tank_y += self.speed * math.cos(self.angle_rad)
                 self.tank_x += self.speed * math.sin(self.angle_rad)
-                print 'red tank_x: %s, red tank_y: %s' % (self.tank_x, self.tank_y)
+                print 'red tank_x: %s, red tank_y: %s, tilex: %s, tiley: %s' % (self.tank_x, self.tank_y, self.tileX, self.tileY)
                 print 'angle_rad: %s' % self.angle_rad
         if color == 'blue':
             if move_direction == 'left':
                 self.angle_deg += 22.5
-                self.angle_rad = degree_to_radian(self.angle_deg)
+                self.angle_rad_blue = degree_to_radian(self.angle_deg)
                 self.draw_blue()
             if move_direction == 'right':
                 self.angle_deg -= 22.5
-                self.angle_rad = degree_to_radian(self.angle_deg)
+                self.angle_rad_blue = degree_to_radian(self.angle_deg)
                 self.draw_blue()
             if move_direction == 'forward':
-                self.tank_y += self.speed * math.cos(self.angle_rad)
-                self.tank_x += self.speed * math.sin(self.angle_rad)
-                print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad)
+                self.tank_y += self.speed * math.cos(self.angle_rad_blue)
+                self.tank_x += self.speed * math.sin(self.angle_rad_blue)
+                print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad_blue)
 
 
 def degree_to_radian(degree):
     return degree * math.pi/180
-# Map definitions and dimensions.
-WALL = 1
-OPEN = 0
-TILESIZE = 20
-MAPWIDTH = 35
-MAPHEIGHT = 30
-
-# Generate blank map
-tilemap = [[OPEN for w in range(MAPWIDTH)] for h in range(MAPHEIGHT)]
-
-# Add borders
-for i in range(MAPHEIGHT):
-    tilemap[i][0] = WALL
-    tilemap[i][MAPWIDTH - 1] = WALL
-    if i == 0 or i == MAPHEIGHT - 1:
-        for w in range(MAPWIDTH):
-            tilemap[i][w] = WALL
 
 
-colors = {
-    WALL: WHITE,
-    OPEN: BLACK
-}
+class Map():
+
+    def __init__(self):
+        # Map definitions and dimensions.
+        self.wall = 1
+        self.open = 0
+        self.TILESIZE = 20
+        self.MAPWIDTH = 35
+        self.MAPHEIGHT = 30
+
+        # Generate blank map
+        self.tilemap = [[self.open for w in range(self.MAPWIDTH)] for h in range(self.MAPHEIGHT)]
+
+        # Add borders
+        for i in range(self.MAPHEIGHT):
+            self.tilemap[i][0] = self.wall
+            self.tilemap[i][self.MAPWIDTH - 1] = self.wall
+            if i == 0 or i == self.MAPHEIGHT - 1:
+                for w in range(self.MAPWIDTH):
+                    self.tilemap[i][w] = self.wall
+
+
+        self.colors = {
+            self.wall: WHITE,
+            self.open: BLACK
+        }
+
+    def draw(self, DISPLAYSURF):
+        for row in range(self.MAPHEIGHT):
+                for column in range(self.MAPWIDTH):
+                    pygame.draw.rect(DISPLAYSURF, self.colors[self.tilemap[row][column]],
+                                     (column*self.TILESIZE, row*self.TILESIZE, self.TILESIZE, self.TILESIZE))
 
 
 def main():
     """ Main function for the game. """
     pygame.init()
 
+    # initialize the map
+    game_map = Map()
+
     # Set the width and height of the screen [width,height]
     # size = [700, 500]
     # screen = pygame.display.set_mode(size)
-    DISPLAYSURF = pygame.display.set_mode((MAPWIDTH*TILESIZE, MAPHEIGHT*TILESIZE))
+    DISPLAYSURF = pygame.display.set_mode((game_map.MAPWIDTH*game_map.TILESIZE, game_map.MAPHEIGHT*game_map.TILESIZE))
     pygame.display.set_caption("Tanks")
 
     # initialize tank
     red_tank = Tank(50, 100, DISPLAYSURF, 'red')
     blue_tank = Tank(450, 100, DISPLAYSURF, 'blue')
-
-
 
     #Loop until the user clicks the close button.
     done = False
@@ -137,31 +154,35 @@ def main():
                 if event.key == pygame.K_q:
                     pygame.quit()
                     sys.exit()
-                if event.key == pygame.K_a:
-                    red_tank.move('left', 'red')
                 if event.key == pygame.K_w:
-                    red_tank.move('forward', 'red')
-                if event.key == pygame.K_d:
-                    red_tank.move('right', 'red')
-                if event.key == pygame.K_LEFT:
-                    blue_tank.move('left', 'blue')
-                if event.key == pygame.K_UP:
-                    blue_tank.move('forward', 'blue')
-                if event.key == pygame.K_RIGHT:
-                    blue_tank.move('right', 'blue')
+                    print 'W pressed down'
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
+                    print 'W let up'
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a]:
+            red_tank.move('left', 'red')
+        if keys[pygame.K_w]:
+            red_tank.move('forward', 'red')
+        if keys[pygame.K_d]:
+            red_tank.move('right', 'red')
+        if keys[pygame.K_LEFT]:
+            blue_tank.move('left', 'blue')
+        if keys[pygame.K_UP]:
+            blue_tank.move('forward', 'blue')
+        if keys[pygame.K_RIGHT]:
+            blue_tank.move('right', 'blue')
 
 
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
+        red_tank.check_collision(game_map)
 
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
-        for row in range(MAPHEIGHT):
-            for column in range(MAPWIDTH):
-                pygame.draw.rect(DISPLAYSURF, colors[tilemap[row][column]],
-                                 (column*TILESIZE, row*TILESIZE, TILESIZE, TILESIZE))
+        game_map.draw(DISPLAYSURF)
 
         red_tank.draw_red()
         blue_tank.draw_blue()
