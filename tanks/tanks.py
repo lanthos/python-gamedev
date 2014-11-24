@@ -18,15 +18,17 @@ BLUE = (0, 0, 255)
 
 class Tank():
 
-    def __init__(self, tank_x, tank_y, DISPLAYSURF, color):
+    def __init__(self, tank_x, tank_y, DISPLAYSURF, color, tilesize):
         self.tank_x = tank_x
         self.tank_y = tank_y
+        self.tileX = self.tank_x / tilesize
+        self.tileY = self.tank_y / tilesize
         self.DISPLAYSURF = DISPLAYSURF
         self.tank_direction = 0
         self.angle_deg = 180
         self.angle_rad_blue = math.pi
         self.angle_rad = 0
-        self.speed = 2
+        self.speed = 1
         if color == 'red':
             self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
             self.tanks = []
@@ -48,13 +50,26 @@ class Tank():
                                self.tank_y - self.tanks[self.tank_direction % 16].get_height() / 2))
 
     def draw_blue(self):
+        self.rotated_image = pygame.transform.rotate(self.spritesheet, self.angle_deg)
         self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, self.angle_deg),
-                              (self.tank_x - self.spritesheet.get_width() / 2, self.tank_y -
-                               self.spritesheet.get_height() / 2))
+                              (self.tank_x - self.rotated_image.get_width() / 2, self.tank_y -
+                               self.rotated_image.get_height() / 2))
 
-    def check_collision(self, game_map):
+    def check_collision_red(self, game_map, tank):
         self.tileX = int(self.tank_x / game_map.TILESIZE)
         self.tileY = int(self.tank_y / game_map.TILESIZE)
+        if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
+                and tank.tileY == self.tileY:
+            self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad) * -1
+            self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad) * -1
+
+    def check_collision_blue(self, game_map, tank):
+        self.tileX = int(self.tank_x / game_map.TILESIZE)
+        self.tileY = int(self.tank_y / game_map.TILESIZE)
+        if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
+                and tank.tileY == self.tileY:
+            self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad_blue) * -1
+            self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad_blue) * 1
 
     def move(self, move_direction, color):
         if color == 'red':
@@ -123,6 +138,19 @@ class Map():
                     pygame.draw.rect(DISPLAYSURF, self.colors[self.tilemap[row][column]],
                                      (column*self.TILESIZE, row*self.TILESIZE, self.TILESIZE, self.TILESIZE))
 
+    def add_wall(self, mousex, mousey):
+        tileX = int(mousex / self.TILESIZE)
+        tileY = int(mousey / self.TILESIZE)
+        self.tilemap[tileY][tileX] = self.wall
+        print 'added tile to X: %s and Y: %s' % (tileX, tileY)
+        print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
+
+    def remove_wall(self, mousex, mousey):
+        tileX = int(mousex / self.TILESIZE)
+        tileY = int(mousey / self.TILESIZE)
+        self.tilemap[tileY][tileX] = 0
+        print 'added tile to X: %s and Y: %s' % (tileX, tileY)
+        print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
 
 def main():
     """ Main function for the game. """
@@ -138,8 +166,8 @@ def main():
     pygame.display.set_caption("Tanks")
 
     # initialize tank
-    red_tank = Tank(50, 100, DISPLAYSURF, 'red')
-    blue_tank = Tank(450, 100, DISPLAYSURF, 'blue')
+    red_tank = Tank(50, 100, DISPLAYSURF, 'red', game_map.TILESIZE)
+    blue_tank = Tank(450, 100, DISPLAYSURF, 'blue', game_map.TILESIZE)
 
     #Loop until the user clicks the close button.
     done = False
@@ -154,6 +182,20 @@ def main():
         for event in pygame.event.get():  # User did something
             if event.type == pygame.QUIT:  # If user clicked close
                 done = True  # Flag that we are done so we exit this loop
+            elif event.type == pygame.MOUSEMOTION:
+                mousex, mousey = event.pos
+                tileX = int(mousex / game_map.TILESIZE)
+                tileY = int(mousey / game_map.TILESIZE)
+                print 'Mouse X and Y: %s, %s' % event.pos
+                print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mousex, mousey = event.pos
+                game_map.add_wall(mousex, mousey)
+                print 'press left mouse button'
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                mousex, mousey = event.pos
+                game_map.remove_wall(mousex, mousey)
+                print 'pressed right mouse button'
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
@@ -181,7 +223,8 @@ def main():
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
-        red_tank.check_collision(game_map)
+        red_tank.check_collision_red(game_map, blue_tank)
+        blue_tank.check_collision_blue(game_map, red_tank)
 
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
