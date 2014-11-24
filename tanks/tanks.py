@@ -22,10 +22,10 @@ class Tank():
         self.tank_x = tank_x
         self.tank_y = tank_y
         self.DISPLAYSURF = DISPLAYSURF
-        self.tank_direction = 4
+        self.tank_direction = 0
         self.angle_deg = 180
         self.angle_rad_blue = math.pi
-        self.angle_rad = math.pi/2
+        self.angle_rad = 0
         self.speed = 2
         if color == 'red':
             self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
@@ -43,28 +43,32 @@ class Tank():
             self.spritesheet.convert_alpha()
 
     def draw_red(self):
-        self.DISPLAYSURF.blit(self.tanks[self.tank_direction % 16], (self.tank_x, self.tank_y))
+        self.DISPLAYSURF.blit(self.tanks[self.tank_direction % 16],
+                              (self.tank_x - self.tanks[self.tank_direction % 16].get_width() / 2,
+                               self.tank_y - self.tanks[self.tank_direction % 16].get_height() / 2))
 
     def draw_blue(self):
-        self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, self.angle_deg), (self.tank_x, self.tank_y))
+        self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, self.angle_deg),
+                              (self.tank_x - self.spritesheet.get_width() / 2, self.tank_y -
+                               self.spritesheet.get_height() / 2))
 
     def check_collision(self, game_map):
-        self.tileX = self.tank_x / game_map.MAPWIDTH
-        self.tileY = self.tank_y / game_map.MAPHEIGHT
+        self.tileX = int(self.tank_x / game_map.TILESIZE)
+        self.tileY = int(self.tank_y / game_map.TILESIZE)
 
     def move(self, move_direction, color):
         if color == 'red':
             if move_direction == 'left':
                 self.tank_direction -= 1
-                self.angle_rad += math.pi/8
+                self.angle_rad -= math.pi/8
                 self.draw_red()
             if move_direction == 'right':
                 self.tank_direction += 1
-                self.angle_rad -= math.pi/8
+                self.angle_rad += math.pi/8
                 self.draw_red()
             if move_direction == 'forward':
-                self.tank_y += self.speed * math.cos(self.angle_rad)
-                self.tank_x += self.speed * math.sin(self.angle_rad)
+                self.tank_x += self.speed * math.cos(self.angle_rad)
+                self.tank_y += self.speed * math.sin(self.angle_rad)
                 print 'red tank_x: %s, red tank_y: %s, tilex: %s, tiley: %s' % (self.tank_x, self.tank_y, self.tileX, self.tileY)
                 print 'angle_rad: %s' % self.angle_rad
         if color == 'blue':
@@ -77,8 +81,8 @@ class Tank():
                 self.angle_rad_blue = degree_to_radian(self.angle_deg)
                 self.draw_blue()
             if move_direction == 'forward':
-                self.tank_y += self.speed * math.cos(self.angle_rad_blue)
-                self.tank_x += self.speed * math.sin(self.angle_rad_blue)
+                self.tank_x += self.speed * math.cos(self.angle_rad_blue)
+                self.tank_y -= self.speed * math.sin(self.angle_rad_blue)
                 print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad_blue)
 
 
