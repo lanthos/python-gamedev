@@ -28,7 +28,7 @@ class Tank():
         self.angle_deg = 180
         self.angle_rad_blue = math.pi
         self.angle_rad = 0
-        self.speed = 1
+        self.speed = 2
         if color == 'red':
             self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
             self.tanks = []
@@ -55,21 +55,21 @@ class Tank():
                               (self.tank_x - self.rotated_image.get_width() / 2, self.tank_y -
                                self.rotated_image.get_height() / 2))
 
-    def check_collision_red(self, game_map, tank):
-        self.tileX = int(self.tank_x / game_map.TILESIZE)
-        self.tileY = int(self.tank_y / game_map.TILESIZE)
-        if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
-                and tank.tileY == self.tileY:
-            self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad) * -1
-            self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad) * -1
-
-    def check_collision_blue(self, game_map, tank):
-        self.tileX = int(self.tank_x / game_map.TILESIZE)
-        self.tileY = int(self.tank_y / game_map.TILESIZE)
-        if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
-                and tank.tileY == self.tileY:
-            self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad_blue) * -1
-            self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad_blue) * 1
+    def check_collision(self, game_map, tank, color):
+        if color == "red":
+            self.tileX = int(self.tank_x / game_map.TILESIZE)
+            self.tileY = int(self.tank_y / game_map.TILESIZE)
+            if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
+                    and tank.tileY == self.tileY:
+                self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad) * -1
+                self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad) * -1
+        elif color == "blue":
+            self.tileX = int(self.tank_x / game_map.TILESIZE)
+            self.tileY = int(self.tank_y / game_map.TILESIZE)
+            if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
+                    and tank.tileY == self.tileY:
+                self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad_blue) * -1
+                self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad_blue) * 1
 
     def move(self, move_direction, color):
         if color == 'red':
@@ -100,6 +100,17 @@ class Tank():
                 self.tank_y -= self.speed * math.sin(self.angle_rad_blue)
                 print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad_blue)
 
+    def shoot(self):
+        return
+
+
+class Bullet():
+
+    def __init__(self):
+        self.bulletX = -100
+        self.bulletY = -100
+        self.speed = 4
+        self.bullet = pygame.Rect(self.bulletX, self.bulletY, 6, 6)
 
 def degree_to_radian(degree):
     return degree * math.pi/180
@@ -219,12 +230,11 @@ def main():
         if keys[pygame.K_RIGHT]:
             blue_tank.move('right', 'blue')
 
-
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
-        red_tank.check_collision_red(game_map, blue_tank)
-        blue_tank.check_collision_blue(game_map, red_tank)
+        red_tank.check_collision(game_map, blue_tank, "red")
+        blue_tank.check_collision(game_map, red_tank, "blue")
 
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
