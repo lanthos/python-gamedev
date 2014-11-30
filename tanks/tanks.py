@@ -12,8 +12,8 @@ import math
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
+RED = (187, 8, 0)
+BLUE = (5, 61, 244)
 
 
 class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
@@ -103,9 +103,9 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
 
     def shoot(self, bullet):
         if bullet.time_alive <= 0:
-            bullet.rect_x = self.tank_x
-            bullet.rect_y = self.tank_y
-            bullet.time_alive = 4
+            bullet.rect.x = self.tank_x
+            bullet.rect.y = self.tank_y
+            bullet.time_alive = 30
             if bullet.color == 'red':
                 bullet.angle_rad = self.angle_rad
             elif bullet.color == 'blue':
@@ -114,42 +114,54 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
 
 class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self, bullet_color, tank_color, DISPLAYSURF):
+    def __init__(self, bullet_color, tank_color, DISPLAYSURF, game_map, enemy_tank):
         super(Bullet, self).__init__()
-        # self.image = pygame.Surface([10, 10])
-        # self.rect = self.image.get_rect()
-        self.rect_x = -100
-        self.rect_y = -100
-        self.speed = 4
+        self.image = pygame.Surface([2, 2])
+        self.image.fill(bullet_color)
+        self.rect = self.image.get_rect()
+        self.game_map = game_map
+        self.rect.x = -100
+        self.rect.y = -100
+        self.tileX = int(self.rect.x / self.game_map.TILESIZE)
+        self.tileY = int(self.rect.y / self.game_map.TILESIZE)
+        self.speed = 6
         self.time_alive = 0
         self.angle = math.pi
         self.color = tank_color
         self.bullet_color = bullet_color
         self.DISPLAYSURF = DISPLAYSURF
+        self.enemy_tank = enemy_tank
 
     def update(self):
         if self.time_alive > 0:
             if self.color == 'red':
-                self.rect_x += self.speed * math.cos(self.angle_rad)
-                self.rect_y += self.speed * math.sin(self.angle_rad)
+                self.rect.x += self.speed * math.cos(self.angle_rad)
+                self.rect.y += self.speed * math.sin(self.angle_rad)
                 self.time_alive -= 1
-                pygame.draw.rect(self.DISPLAYSURF, (255, 255, 255), (self.rect_x, self.rect_y, 25, 25))
-                print 'bullet X and Y: %s, %s' % (self.rect_x, self.rect_y)
+                print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
                 if self.time_alive <= 0:
-                    self.rect_x = -100
-                    self.rect_y = -100
+                    self.rect.x = -100
+                    self.rect.y = -100
                     print 'bullets reset'
             if self.color == 'blue':
-                self.rect_x += self.speed * math.cos(self.angle_rad_blue)
-                self.rect_y -= self.speed * math.sin(self.angle_rad_blue)
+                self.rect.x += self.speed * math.cos(self.angle_rad_blue)
+                self.rect.y -= self.speed * math.sin(self.angle_rad_blue)
                 self.time_alive -= 1
-                pygame.draw.rect(self.DISPLAYSURF, self.bullet_color, (self.rect_x, self.rect_y, 10, 10))
-                print 'bullet X and Y: %s, %s' % (self.rect_x, self.rect_y)
+                print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
                 if self.time_alive <= 0:
-                    self.rect_x = -100
-                    self.rect_y = -100
+                    self.rect.x = -100
+                    self.rect.y = -100
                     print 'bullets reset'
+        self.tileX = int(self.rect.x / self.game_map.TILESIZE)
+        self.tileY = int(self.rect.y / self.game_map.TILESIZE)
+        if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall or self.enemy_tank.tileX == \
+                self.tileX and self.enemy_tank.tileY == self.tileY:
+            self.rect.x = -100
+            self.rect.y = -100
+            self.time_alive = 0
 
+    def draw(self):
+        self.DISPLAYSURF.blit(self.image, (self.rect.x, self.rect.y))
 
 
 def degree_to_radian(degree):
@@ -205,7 +217,15 @@ class Map():
 
 def main():
     """ Main function for the game. """
+    pygame.mixer.pre_init(44100, -16, 2, 4096)
     pygame.init()
+
+    # Initialize sounds
+    tank_idle = pygame.mixer.Sound("tank_idle.wav")
+    red_tank_move = pygame.mixer.Sound("tank_moving.wav")
+    blue_tank_move = pygame.mixer.Sound("tank_moving.wav")
+    tank_shot = pygame.mixer.Sound("tank_shot.wav")
+    tank_idle.play(-1)
 
     # initialize the map
     game_map = Map()
@@ -218,12 +238,14 @@ def main():
 
     # initialize tanks and bullets
     red_tank = Tank(50, 100, DISPLAYSURF, 'red', game_map.TILESIZE)
-    red_bullet = Bullet(RED, 'red', DISPLAYSURF)
     blue_tank = Tank(450, 100, DISPLAYSURF, 'blue', game_map.TILESIZE)
-    blue_bullet = Bullet(BLUE, 'blue', DISPLAYSURF)
+    blue_bullet = Bullet(BLUE, 'blue', DISPLAYSURF, game_map, red_tank)
+    red_bullet = Bullet(RED, 'red', DISPLAYSURF, game_map, blue_tank)
 
     # add bullets to sprite group so we can use the draw()
-    all_bullets = pygame.sprite.Group()
+    # all_bullets = pygame.sprite.Group()
+    # all_bullets.add(red_bullet)
+    # all_bullets.add(blue_bullet)
 
     #Loop until the user clicks the close button.
     done = False
@@ -257,12 +279,22 @@ def main():
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_w:
+                    red_tank_move.play(-1)
                     print 'W pressed down'
+                if event.key == pygame.K_UP:
+                    blue_tank_move.play(-1)
                 if event.key == pygame.K_SPACE:
                     red_tank.shoot(red_bullet)
+                    tank_shot.play()
+                if event.key == pygame.K_RCTRL:
+                    blue_tank.shoot(blue_bullet)
+                    tank_shot.play()
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
+                    red_tank_move.stop()
                     print 'W let up'
+                if event.key == pygame.K_UP:
+                    blue_tank_move.stop()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             red_tank.move('left', 'red')
@@ -291,9 +323,12 @@ def main():
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
         game_map.draw(DISPLAYSURF)
 
+        red_bullet.draw()
+        blue_bullet.draw()
         red_tank.draw_red()
         blue_tank.draw_blue()
-        all_bullets.draw(DISPLAYSURF)
+        # all_bullets.draw(DISPLAYSURF)
+
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
 
         # Go ahead and update the screen with what we've drawn.
