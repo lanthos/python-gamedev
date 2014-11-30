@@ -131,6 +131,7 @@ class Bullet(pygame.sprite.Sprite):
         self.bullet_color = bullet_color
         self.DISPLAYSURF = DISPLAYSURF
         self.enemy_tank = enemy_tank
+        self.tank_hit = pygame.mixer.Sound("tank_hit.wav")
 
     def update(self):
         if self.time_alive > 0:
@@ -159,6 +160,8 @@ class Bullet(pygame.sprite.Sprite):
             self.rect.x = -100
             self.rect.y = -100
             self.time_alive = 0
+            if self.enemy_tank.tileX == self.tileX and self.enemy_tank.tileY == self.tileY:
+                self.tank_hit.play()
 
     def draw(self):
         self.DISPLAYSURF.blit(self.image, (self.rect.x, self.rect.y))
