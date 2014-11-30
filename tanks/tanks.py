@@ -16,20 +16,19 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
 
-class Tank():
+class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
 
     def __init__(self, tank_x, tank_y, DISPLAYSURF, color, tilesize):
+        # super(Tank, self).__init__()
         self.tank_x = tank_x
         self.tank_y = tank_y
         self.tileX = self.tank_x / tilesize
         self.tileY = self.tank_y / tilesize
         self.DISPLAYSURF = DISPLAYSURF
         self.tank_direction = 0
-        self.angle_deg = 180
-        self.angle_rad_blue = math.pi
-        self.angle_rad = 0
         self.speed = 2
         if color == 'red':
+            self.angle_rad = 0
             self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
             self.tanks = []
             for nbr in range(8):
@@ -40,6 +39,8 @@ class Tank():
                 self.tanks[nbr].set_colorkey(WHITE)
                 self.tanks[nbr] = self.tanks[nbr].convert_alpha()
         if color == 'blue':
+            self.angle_deg = 180
+            self.angle_rad_blue = math.pi
             self.spritesheet = pygame.image.load('blue_tank.bmp').convert()
             self.spritesheet.set_colorkey(WHITE)
             self.spritesheet.convert_alpha()
@@ -56,14 +57,14 @@ class Tank():
                                self.rotated_image.get_height() / 2))
 
     def check_collision(self, game_map, tank, color):
-        if color == "red":
+        if color == 'red':
             self.tileX = int(self.tank_x / game_map.TILESIZE)
             self.tileY = int(self.tank_y / game_map.TILESIZE)
             if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
                     and tank.tileY == self.tileY:
                 self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad) * -1
                 self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad) * -1
-        elif color == "blue":
+        elif color == 'blue':
             self.tileX = int(self.tank_x / game_map.TILESIZE)
             self.tileY = int(self.tank_y / game_map.TILESIZE)
             if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
@@ -100,17 +101,56 @@ class Tank():
                 self.tank_y -= self.speed * math.sin(self.angle_rad_blue)
                 print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad_blue)
 
-    def shoot(self):
-        return
+    def shoot(self, bullet):
+        if bullet.time_alive <= 0:
+            bullet.rect_x = self.tank_x
+            bullet.rect_y = self.tank_y
+            bullet.time_alive = 4
+            if bullet.color == 'red':
+                bullet.angle_rad = self.angle_rad
+            elif bullet.color == 'blue':
+                bullet.angle_rad_blue = self.angle_rad_blue
 
 
-class Bullet():
+class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self):
-        self.bulletX = -100
-        self.bulletY = -100
+    def __init__(self, bullet_color, tank_color, DISPLAYSURF):
+        super(Bullet, self).__init__()
+        # self.image = pygame.Surface([10, 10])
+        # self.rect = self.image.get_rect()
+        self.rect_x = -100
+        self.rect_y = -100
         self.speed = 4
-        self.bullet = pygame.Rect(self.bulletX, self.bulletY, 6, 6)
+        self.time_alive = 0
+        self.angle = math.pi
+        self.color = tank_color
+        self.bullet_color = bullet_color
+        self.DISPLAYSURF = DISPLAYSURF
+
+    def update(self):
+        if self.time_alive > 0:
+            if self.color == 'red':
+                self.rect_x += self.speed * math.cos(self.angle_rad)
+                self.rect_y += self.speed * math.sin(self.angle_rad)
+                self.time_alive -= 1
+                pygame.draw.rect(self.DISPLAYSURF, (255, 255, 255), (self.rect_x, self.rect_y, 25, 25))
+                print 'bullet X and Y: %s, %s' % (self.rect_x, self.rect_y)
+                if self.time_alive <= 0:
+                    self.rect_x = -100
+                    self.rect_y = -100
+                    print 'bullets reset'
+            if self.color == 'blue':
+                self.rect_x += self.speed * math.cos(self.angle_rad_blue)
+                self.rect_y -= self.speed * math.sin(self.angle_rad_blue)
+                self.time_alive -= 1
+                pygame.draw.rect(self.DISPLAYSURF, self.bullet_color, (self.rect_x, self.rect_y, 10, 10))
+                print 'bullet X and Y: %s, %s' % (self.rect_x, self.rect_y)
+                if self.time_alive <= 0:
+                    self.rect_x = -100
+                    self.rect_y = -100
+                    print 'bullets reset'
+
+
 
 def degree_to_radian(degree):
     return degree * math.pi/180
@@ -176,9 +216,14 @@ def main():
     DISPLAYSURF = pygame.display.set_mode((game_map.MAPWIDTH*game_map.TILESIZE, game_map.MAPHEIGHT*game_map.TILESIZE))
     pygame.display.set_caption("Tanks")
 
-    # initialize tank
+    # initialize tanks and bullets
     red_tank = Tank(50, 100, DISPLAYSURF, 'red', game_map.TILESIZE)
+    red_bullet = Bullet(RED, 'red', DISPLAYSURF)
     blue_tank = Tank(450, 100, DISPLAYSURF, 'blue', game_map.TILESIZE)
+    blue_bullet = Bullet(BLUE, 'blue', DISPLAYSURF)
+
+    # add bullets to sprite group so we can use the draw()
+    all_bullets = pygame.sprite.Group()
 
     #Loop until the user clicks the close button.
     done = False
@@ -213,6 +258,8 @@ def main():
                     sys.exit()
                 if event.key == pygame.K_w:
                     print 'W pressed down'
+                if event.key == pygame.K_SPACE:
+                    red_tank.shoot(red_bullet)
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
                     print 'W let up'
@@ -234,7 +281,10 @@ def main():
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
         red_tank.check_collision(game_map, blue_tank, "red")
+        red_bullet.update()
         blue_tank.check_collision(game_map, red_tank, "blue")
+        blue_bullet.update()
+
 
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
@@ -243,6 +293,7 @@ def main():
 
         red_tank.draw_red()
         blue_tank.draw_blue()
+        all_bullets.draw(DISPLAYSURF)
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
 
         # Go ahead and update the screen with what we've drawn.
