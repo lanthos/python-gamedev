@@ -27,6 +27,7 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
         self.DISPLAYSURF = DISPLAYSURF
         self.tank_direction = 0
         self.speed = 2
+        self.hit = False
         if color == 'red':
             self.angle_rad = 0
             self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
@@ -162,6 +163,7 @@ class Bullet(pygame.sprite.Sprite):
             self.time_alive = 0
             if self.enemy_tank.tileX == self.tileX and self.enemy_tank.tileY == self.tileY:
                 self.tank_hit.play()
+                self.enemy_tank.hit = True
 
     def draw(self):
         self.DISPLAYSURF.blit(self.image, (self.rect.x, self.rect.y))
@@ -175,23 +177,29 @@ class Map():
 
     def __init__(self):
         # Map definitions and dimensions.
-        self.wall = 1
-        self.open = 0
+        self.wall = '1'
+        self.open = '0'
         self.TILESIZE = 20
         self.MAPWIDTH = 35
         self.MAPHEIGHT = 30
 
         # Generate blank map
-        self.tilemap = [[self.open for w in range(self.MAPWIDTH)] for h in range(self.MAPHEIGHT)]
+        # self.tilemap = [[self.open for w in range(self.MAPWIDTH)] for h in range(self.MAPHEIGHT)]
 
         # Add borders
-        for i in range(self.MAPHEIGHT):
-            self.tilemap[i][0] = self.wall
-            self.tilemap[i][self.MAPWIDTH - 1] = self.wall
-            if i == 0 or i == self.MAPHEIGHT - 1:
-                for w in range(self.MAPWIDTH):
-                    self.tilemap[i][w] = self.wall
+        # for i in range(self.MAPHEIGHT):
+        #     self.tilemap[i][0] = self.wall
+        #     self.tilemap[i][self.MAPWIDTH - 1] = self.wall
+        #     if i == '0' or i == self.MAPHEIGHT - 1:
+        #         for w in range(self.MAPWIDTH):
+        #             self.tilemap[i][w] = self.wall
 
+        # Import map from file
+
+        self.tilemap = []
+        with open('basic_map.txt') as f:
+            for i in f:
+                self.tilemap.append(i.strip().replace(',', '').split())
 
         self.colors = {
             self.wall: WHITE,
@@ -214,7 +222,7 @@ class Map():
     def remove_wall(self, mousex, mousey):
         tileX = int(mousex / self.TILESIZE)
         tileY = int(mousey / self.TILESIZE)
-        self.tilemap[tileY][tileX] = 0
+        self.tilemap[tileY][tileX] = self.open
         print 'added tile to X: %s and Y: %s' % (tileX, tileY)
         print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
 
@@ -240,8 +248,8 @@ def main():
     pygame.display.set_caption("Tanks")
 
     # initialize tanks and bullets
-    red_tank = Tank(50, 100, DISPLAYSURF, 'red', game_map.TILESIZE)
-    blue_tank = Tank(450, 100, DISPLAYSURF, 'blue', game_map.TILESIZE)
+    red_tank = Tank(150, 200, DISPLAYSURF, 'red', game_map.TILESIZE)
+    blue_tank = Tank(550, 200, DISPLAYSURF, 'blue', game_map.TILESIZE)
     blue_bullet = Bullet(BLUE, 'blue', DISPLAYSURF, game_map, red_tank)
     red_bullet = Bullet(RED, 'red', DISPLAYSURF, game_map, blue_tank)
 
