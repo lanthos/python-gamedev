@@ -3,9 +3,10 @@
 
 """
 
-import pygame
 import sys
-import math
+from tank import *
+from bullets import *
+from map import *
 
 # Globals constants defined here.
 # Colors
@@ -16,215 +17,24 @@ RED = (187, 8, 0)
 BLUE = (5, 61, 244)
 
 
-class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
+def display_score(score_font, level_font, DISPLAYSURF, p1_score, p2_score, game_map):
+    player1 = score_font.render('%s' % p1_score, True, WHITE)
+    player1_rect = player1.get_rect()
+    player1_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 4, 25)
+    player2 = score_font.render('%s' % p2_score, True, WHITE)
+    player2_rect = player2.get_rect()
+    player2_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) * .75, 25)
+    level = level_font.render('%s' % game_map.level_number, True, WHITE)
+    level_rect = level.get_rect()
+    level_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 2 + 40, 25)
+    level_text = level_font.render('Map', True, WHITE)
+    level_text_rect = level_text.get_rect()
+    level_text_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 2 - 60, 25)
+    DISPLAYSURF.blit(player1, player1_rect)
+    DISPLAYSURF.blit(player2, player2_rect)
+    DISPLAYSURF.blit(level, level_rect)
+    DISPLAYSURF.blit(level_text, level_text_rect)
 
-    def __init__(self, tank_x, tank_y, DISPLAYSURF, color, tilesize):
-        # super(Tank, self).__init__()
-        self.tank_x = tank_x
-        self.tank_y = tank_y
-        self.tileX = self.tank_x / tilesize
-        self.tileY = self.tank_y / tilesize
-        self.DISPLAYSURF = DISPLAYSURF
-        self.tank_direction = 0
-        self.speed = 2
-        self.hit = False
-        if color == 'red':
-            self.angle_rad = 0
-            self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
-            self.tanks = []
-            for nbr in range(8):
-                self.tanks.append(self.spritesheet.subsurface((20*nbr), 0, 20, 20))
-            for nbr in range(8):
-                self.tanks.append(self.spritesheet.subsurface((20*nbr), 20, 20, 20))
-            for nbr in range(len(self.tanks)):
-                self.tanks[nbr].set_colorkey(WHITE)
-                self.tanks[nbr] = self.tanks[nbr].convert_alpha()
-        if color == 'blue':
-            self.angle_deg = 180
-            self.angle_rad_blue = math.pi
-            self.spritesheet = pygame.image.load('blue_tank.bmp').convert()
-            self.spritesheet.set_colorkey(WHITE)
-            self.spritesheet.convert_alpha()
-
-    def draw_red(self):
-        self.DISPLAYSURF.blit(self.tanks[self.tank_direction % 16],
-                              (self.tank_x - self.tanks[self.tank_direction % 16].get_width() / 2,
-                               self.tank_y - self.tanks[self.tank_direction % 16].get_height() / 2))
-
-    def draw_blue(self):
-        self.rotated_image = pygame.transform.rotate(self.spritesheet, self.angle_deg)
-        self.DISPLAYSURF.blit(pygame.transform.rotate(self.spritesheet, self.angle_deg),
-                              (self.tank_x - self.rotated_image.get_width() / 2, self.tank_y -
-                               self.rotated_image.get_height() / 2))
-
-    def check_collision(self, game_map, tank, color):
-        if color == 'red':
-            self.tileX = int(self.tank_x / game_map.TILESIZE)
-            self.tileY = int(self.tank_y / game_map.TILESIZE)
-            if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
-                    and tank.tileY == self.tileY:
-                self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad) * -1
-                self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad) * -1
-        elif color == 'blue':
-            self.tileX = int(self.tank_x / game_map.TILESIZE)
-            self.tileY = int(self.tank_y / game_map.TILESIZE)
-            if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
-                    and tank.tileY == self.tileY:
-                self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad_blue) * -1
-                self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad_blue) * 1
-
-    def move(self, move_direction, color):
-        if color == 'red':
-            if move_direction == 'left':
-                self.tank_direction -= 1
-                self.angle_rad -= math.pi/8
-                self.draw_red()
-            if move_direction == 'right':
-                self.tank_direction += 1
-                self.angle_rad += math.pi/8
-                self.draw_red()
-            if move_direction == 'forward':
-                self.tank_x += self.speed * math.cos(self.angle_rad)
-                self.tank_y += self.speed * math.sin(self.angle_rad)
-                print 'red tank_x: %s, red tank_y: %s, tilex: %s, tiley: %s' % (self.tank_x, self.tank_y, self.tileX, self.tileY)
-                print 'angle_rad: %s' % self.angle_rad
-        if color == 'blue':
-            if move_direction == 'left':
-                self.angle_deg += 22.5
-                self.angle_rad_blue = degree_to_radian(self.angle_deg)
-                self.draw_blue()
-            if move_direction == 'right':
-                self.angle_deg -= 22.5
-                self.angle_rad_blue = degree_to_radian(self.angle_deg)
-                self.draw_blue()
-            if move_direction == 'forward':
-                self.tank_x += self.speed * math.cos(self.angle_rad_blue)
-                self.tank_y -= self.speed * math.sin(self.angle_rad_blue)
-                print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad_blue)
-
-    def shoot(self, bullet):
-        if bullet.time_alive <= 0:
-            bullet.rect.x = self.tank_x
-            bullet.rect.y = self.tank_y
-            bullet.time_alive = 30
-            if bullet.color == 'red':
-                bullet.angle_rad = self.angle_rad
-            elif bullet.color == 'blue':
-                bullet.angle_rad_blue = self.angle_rad_blue
-
-
-class Bullet(pygame.sprite.Sprite):
-
-    def __init__(self, bullet_color, tank_color, DISPLAYSURF, game_map, enemy_tank):
-        super(Bullet, self).__init__()
-        self.image = pygame.Surface([2, 2])
-        self.image.fill(bullet_color)
-        self.rect = self.image.get_rect()
-        self.game_map = game_map
-        self.rect.x = -100
-        self.rect.y = -100
-        self.tileX = int(self.rect.x / self.game_map.TILESIZE)
-        self.tileY = int(self.rect.y / self.game_map.TILESIZE)
-        self.speed = 6
-        self.time_alive = 0
-        self.angle = math.pi
-        self.color = tank_color
-        self.bullet_color = bullet_color
-        self.DISPLAYSURF = DISPLAYSURF
-        self.enemy_tank = enemy_tank
-        self.tank_hit = pygame.mixer.Sound("tank_hit.wav")
-
-    def update(self):
-        if self.time_alive > 0:
-            if self.color == 'red':
-                self.rect.x += self.speed * math.cos(self.angle_rad)
-                self.rect.y += self.speed * math.sin(self.angle_rad)
-                self.time_alive -= 1
-                print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
-                if self.time_alive <= 0:
-                    self.rect.x = -100
-                    self.rect.y = -100
-                    print 'bullets reset'
-            if self.color == 'blue':
-                self.rect.x += self.speed * math.cos(self.angle_rad_blue)
-                self.rect.y -= self.speed * math.sin(self.angle_rad_blue)
-                self.time_alive -= 1
-                print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
-                if self.time_alive <= 0:
-                    self.rect.x = -100
-                    self.rect.y = -100
-                    print 'bullets reset'
-        self.tileX = int(self.rect.x / self.game_map.TILESIZE)
-        self.tileY = int(self.rect.y / self.game_map.TILESIZE)
-        if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall or self.enemy_tank.tileX == \
-                self.tileX and self.enemy_tank.tileY == self.tileY:
-            self.rect.x = -100
-            self.rect.y = -100
-            self.time_alive = 0
-            if self.enemy_tank.tileX == self.tileX and self.enemy_tank.tileY == self.tileY:
-                self.tank_hit.play()
-                self.enemy_tank.hit = True
-
-    def draw(self):
-        self.DISPLAYSURF.blit(self.image, (self.rect.x, self.rect.y))
-
-
-def degree_to_radian(degree):
-    return degree * math.pi/180
-
-
-class Map():
-
-    def __init__(self):
-        # Map definitions and dimensions.
-        self.wall = '1'
-        self.open = '0'
-        self.TILESIZE = 20
-        self.MAPWIDTH = 35
-        self.MAPHEIGHT = 30
-
-        # Generate blank map
-        # self.tilemap = [[self.open for w in range(self.MAPWIDTH)] for h in range(self.MAPHEIGHT)]
-
-        # Add borders
-        # for i in range(self.MAPHEIGHT):
-        #     self.tilemap[i][0] = self.wall
-        #     self.tilemap[i][self.MAPWIDTH - 1] = self.wall
-        #     if i == '0' or i == self.MAPHEIGHT - 1:
-        #         for w in range(self.MAPWIDTH):
-        #             self.tilemap[i][w] = self.wall
-
-        # Import map from file
-
-        self.tilemap = []
-        with open('basic_map.txt') as f:
-            for i in f:
-                self.tilemap.append(i.strip().replace(',', '').split())
-
-        self.colors = {
-            self.wall: WHITE,
-            self.open: BLACK
-        }
-
-    def draw(self, DISPLAYSURF):
-        for row in range(self.MAPHEIGHT):
-                for column in range(self.MAPWIDTH):
-                    pygame.draw.rect(DISPLAYSURF, self.colors[self.tilemap[row][column]],
-                                     (column*self.TILESIZE, row*self.TILESIZE, self.TILESIZE, self.TILESIZE))
-
-    def add_wall(self, mousex, mousey):
-        tileX = int(mousex / self.TILESIZE)
-        tileY = int(mousey / self.TILESIZE)
-        self.tilemap[tileY][tileX] = self.wall
-        print 'added tile to X: %s and Y: %s' % (tileX, tileY)
-        print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
-
-    def remove_wall(self, mousex, mousey):
-        tileX = int(mousex / self.TILESIZE)
-        tileY = int(mousey / self.TILESIZE)
-        self.tilemap[tileY][tileX] = self.open
-        print 'added tile to X: %s and Y: %s' % (tileX, tileY)
-        print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
 
 def main():
     """ Main function for the game. """
@@ -235,7 +45,6 @@ def main():
     tank_idle = pygame.mixer.Sound("tank_idle.wav")
     red_tank_move = pygame.mixer.Sound("tank_moving.wav")
     blue_tank_move = pygame.mixer.Sound("tank_moving.wav")
-    tank_shot = pygame.mixer.Sound("tank_shot.wav")
     tank_idle.play(-1)
 
     # initialize the map
@@ -247,23 +56,22 @@ def main():
     DISPLAYSURF = pygame.display.set_mode((game_map.MAPWIDTH*game_map.TILESIZE, game_map.MAPHEIGHT*game_map.TILESIZE))
     pygame.display.set_caption("Tanks")
 
+    # initialize fonts
+    BASICFONTSIZE = 70
+    score_font = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
+    level_font = pygame.font.Font('visitor1.ttf', 50)
+
     # initialize tanks and bullets
     red_tank = Tank(150, 200, DISPLAYSURF, 'red', game_map.TILESIZE)
     blue_tank = Tank(550, 200, DISPLAYSURF, 'blue', game_map.TILESIZE)
-    blue_bullet = Bullet(BLUE, 'blue', DISPLAYSURF, game_map, red_tank)
-    red_bullet = Bullet(RED, 'red', DISPLAYSURF, game_map, blue_tank)
+    blue_bullet = Bullet(BLUE, 'blue', DISPLAYSURF, game_map, red_tank, blue_tank)
+    red_bullet = Bullet(RED, 'red', DISPLAYSURF, game_map, blue_tank, red_tank)
 
-    # add bullets to sprite group so we can use the draw()
-    # all_bullets = pygame.sprite.Group()
-    # all_bullets.add(red_bullet)
-    # all_bullets.add(blue_bullet)
-
-    #Loop until the user clicks the close button.
+    # Loop until the user clicks the close button.
     done = False
 
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
-
 
     # -------- Main Program Loop -----------
     while not done:
@@ -296,10 +104,18 @@ def main():
                     blue_tank_move.play(-1)
                 if event.key == pygame.K_SPACE:
                     red_tank.shoot(red_bullet)
-                    tank_shot.play()
                 if event.key == pygame.K_RCTRL:
                     blue_tank.shoot(blue_bullet)
-                    tank_shot.play()
+                if event.key == pygame.K_n:
+                    game_map.save_map(game_map.level_number)
+                if event.key == pygame.K_m:
+                    game_map.load_map(game_map.level_number)
+                if event.key == pygame.K_COMMA:
+                    game_map.level_number -= 1
+                    if game_map.level_number <= 0:
+                        game_map.level_number = 1
+                if event.key == pygame.K_PERIOD:
+                    game_map.level_number += 1
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
                     red_tank_move.stop()
@@ -328,7 +144,6 @@ def main():
         blue_tank.check_collision(game_map, red_tank, "blue")
         blue_bullet.update()
 
-
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
@@ -338,7 +153,7 @@ def main():
         blue_bullet.draw()
         red_tank.draw_red()
         blue_tank.draw_blue()
-        # all_bullets.draw(DISPLAYSURF)
+        display_score(score_font, level_font, DISPLAYSURF, red_tank.score, blue_tank.score, game_map)
 
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
 
