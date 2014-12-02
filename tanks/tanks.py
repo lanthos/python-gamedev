@@ -104,7 +104,7 @@ def main():
                     blue_tank_move.play(-1)
                 if event.key == pygame.K_SPACE:
                     red_tank.shoot(red_bullet)
-                if event.key == pygame.K_RCTRL:
+                if event.key == pygame.K_RCTRL or event.key == pygame.K_RSHIFT:
                     blue_tank.shoot(blue_bullet)
                 if event.key == pygame.K_n:
                     game_map.save_map(game_map.level_number)
@@ -139,9 +139,9 @@ def main():
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
-        red_tank.check_collision(game_map, blue_tank, "red")
+        red_tank.update(game_map, blue_tank, "red")
         red_bullet.update()
-        blue_tank.check_collision(game_map, red_tank, "blue")
+        blue_tank.update(game_map, red_tank, "blue")
         blue_bullet.update()
 
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT

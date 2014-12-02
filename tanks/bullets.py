@@ -31,17 +31,18 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         if self.time_alive > 0:
             if self.color == 'red':
-                self.rect.x += self.speed * math.cos(self.angle_rad)
-                self.rect.y += self.speed * math.sin(self.angle_rad)
+                self.rect.x += self.speed * round(math.cos(self.angle_rad), 3)
+                self.rect.y += self.speed * round(math.sin(self.angle_rad), 3)
                 self.time_alive -= 1
-                print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
+                print 'bullet X and Y and angle: %s, %s, %s' % (self.rect.x, self.rect.y, self.angle_rad)
+                print 'cos and sin: %s, %s' % (round(math.cos(self.angle_rad), 3), round(math.sin(self.angle_rad), 3))
                 if self.time_alive <= 0:
                     self.rect.x = -100
                     self.rect.y = -100
                     print 'bullets reset'
             if self.color == 'blue':
-                self.rect.x += self.speed * math.cos(self.angle_rad_blue)
-                self.rect.y -= self.speed * math.sin(self.angle_rad_blue)
+                self.rect.x += self.speed * round(math.cos(self.angle_rad_blue), 3)
+                self.rect.y -= self.speed * round(math.sin(self.angle_rad_blue), 3)
                 self.time_alive -= 1
                 print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
                 if self.time_alive <= 0:
@@ -57,7 +58,7 @@ class Bullet(pygame.sprite.Sprite):
             self.time_alive = 0
             if self.enemy_tank.tileX == self.tileX and self.enemy_tank.tileY == self.tileY:
                 self.tank_hit.play()
-                self.enemy_tank.hit = True
+                self.enemy_tank.hit_counter = 30
                 self.my_tank.score += 1
 
     def draw(self):

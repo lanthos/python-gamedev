@@ -25,8 +25,8 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
         self.DISPLAYSURF = DISPLAYSURF
         self.tank_direction = 0
         self.speed = 2
-        self.hit = False
         self.score = 0
+        self.hit_counter = 0
         self.tank_shot = pygame.mixer.Sound("tank_shot.wav")
         if color == 'red':
             self.angle_rad = 0
@@ -57,7 +57,7 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                               (self.tank_x - self.rotated_image.get_width() / 2, self.tank_y -
                                self.rotated_image.get_height() / 2))
 
-    def check_collision(self, game_map, tank, color):
+    def update(self, game_map, tank, color):
         if color == 'red':
             self.tileX = int(self.tank_x / game_map.TILESIZE)
             self.tileY = int(self.tank_y / game_map.TILESIZE)
@@ -65,6 +65,7 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                     and tank.tileY == self.tileY:
                 self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad) * -1
                 self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad) * -1
+            self.been_shot('red')
         elif color == 'blue':
             self.tileX = int(self.tank_x / game_map.TILESIZE)
             self.tileY = int(self.tank_y / game_map.TILESIZE)
@@ -72,6 +73,7 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                     and tank.tileY == self.tileY:
                 self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad_blue) * -1
                 self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad_blue) * 1
+            self.been_shot('blue')
 
     def move(self, move_direction, color):
         if color == 'red':
@@ -84,8 +86,8 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                 self.angle_rad += math.pi/8
                 self.draw_red()
             if move_direction == 'forward':
-                self.tank_x += self.speed * math.cos(self.angle_rad)
-                self.tank_y += self.speed * math.sin(self.angle_rad)
+                self.tank_x += self.speed * round(math.cos(self.angle_rad), 3)
+                self.tank_y += self.speed * round(math.sin(self.angle_rad), 3)
                 print 'red tank_x: %s, red tank_y: %s, tilex: %s, tiley: %s' % (self.tank_x, self.tank_y, self.tileX, self.tileY)
                 print 'angle_rad: %s' % self.angle_rad
         if color == 'blue':
@@ -113,6 +115,19 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
             elif bullet.color == 'blue':
                 bullet.angle_rad_blue = self.angle_rad_blue
 
+    def been_shot(self, color):
+        if color == 'red':
+            if self.hit_counter > 0:
+                self.tank_direction -= 1
+                self.angle_rad -= math.pi/8
+                self.draw_red()
+                self.hit_counter -= 1
+        if color == 'blue':
+            if self.hit_counter > 0:
+                self.angle_deg += 22.5
+                self.angle_rad_blue = degree_to_radian(self.angle_deg)
+                self.draw_blue()
+                self.hit_counter -= 1
 
 def degree_to_radian(degree):
     return degree * math.pi/180
