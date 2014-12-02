@@ -26,16 +26,18 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
         self.tank_direction = 0
         self.speed = 2
         self.score = 0
+        self.color = color
         self.hit_counter = 0
+        self.hit = False
         self.tank_shot = pygame.mixer.Sound("tank_shot.wav")
         if color == 'red':
             self.angle_rad = 0
             self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
             self.tanks = []
             for nbr in range(8):
-                self.tanks.append(self.spritesheet.subsurface((20*nbr), 0, 20, 20))
+                self.tanks.append(self.spritesheet.subsurface((40*nbr), 0, 40, 40))
             for nbr in range(8):
-                self.tanks.append(self.spritesheet.subsurface((20*nbr), 20, 20, 20))
+                self.tanks.append(self.spritesheet.subsurface((40*nbr), 40, 40, 40))
             for nbr in range(len(self.tanks)):
                 self.tanks[nbr].set_colorkey(WHITE)
                 self.tanks[nbr] = self.tanks[nbr].convert_alpha()
@@ -74,6 +76,8 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                 self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad_blue) * -1
                 self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad_blue) * 1
             self.been_shot('blue')
+        if self.hit_counter <= 0:
+            self.hit = False
 
     def move(self, move_direction, color):
         if color == 'red':

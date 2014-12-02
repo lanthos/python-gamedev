@@ -98,14 +98,18 @@ def main():
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_w:
-                    red_tank_move.play(-1)
+                    if not blue_tank.hit:
+                        red_tank_move.play(-1)
                     print 'W pressed down'
                 if event.key == pygame.K_UP:
-                    blue_tank_move.play(-1)
+                    if not red_tank.hit:
+                        blue_tank_move.play(-1)
                 if event.key == pygame.K_SPACE:
-                    red_tank.shoot(red_bullet)
+                    if not blue_tank.hit:
+                        red_tank.shoot(red_bullet)
                 if event.key == pygame.K_RCTRL or event.key == pygame.K_RSHIFT:
-                    blue_tank.shoot(blue_bullet)
+                    if not red_tank.hit:
+                        blue_tank.shoot(blue_bullet)
                 if event.key == pygame.K_n:
                     game_map.save_map(game_map.level_number)
                 if event.key == pygame.K_m:
@@ -124,17 +128,23 @@ def main():
                     blue_tank_move.stop()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
-            red_tank.move('left', 'red')
+            if not blue_tank.hit:
+                red_tank.move('left', 'red')
         if keys[pygame.K_w]:
-            red_tank.move('forward', 'red')
+            if not blue_tank.hit:
+                red_tank.move('forward', 'red')
         if keys[pygame.K_d]:
-            red_tank.move('right', 'red')
+            if not blue_tank.hit:
+                red_tank.move('right', 'red')
         if keys[pygame.K_LEFT]:
-            blue_tank.move('left', 'blue')
+            if not red_tank.hit:
+                blue_tank.move('left', 'blue')
         if keys[pygame.K_UP]:
-            blue_tank.move('forward', 'blue')
+            if not red_tank.hit:
+                blue_tank.move('forward', 'blue')
         if keys[pygame.K_RIGHT]:
-            blue_tank.move('right', 'blue')
+            if not red_tank.hit:
+                blue_tank.move('right', 'blue')
 
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
