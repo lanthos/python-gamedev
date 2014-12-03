@@ -59,6 +59,7 @@ class Bullet(pygame.sprite.Sprite):
                 self.tank_hit.play()
                 self.enemy_tank.hit_counter = 30
                 self.enemy_tank.hit = True
+                self.enemy_tank.hit_move = True
                 self.my_tank.score += 1
 
     def draw(self):

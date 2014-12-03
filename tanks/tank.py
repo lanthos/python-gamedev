@@ -29,6 +29,7 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
         self.color = color
         self.hit_counter = 0
         self.hit = False
+        self.hit_move = False
         self.tank_shot = pygame.mixer.Sound("tank_shot.wav")
         if color == 'red':
             self.angle_rad = 0
@@ -65,16 +66,16 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
             self.tileY = int(self.tank_y / game_map.TILESIZE)
             if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
                     and tank.tileY == self.tileY:
-                self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad) * -1
-                self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad) * -1
+                self.tank_x -= (self.speed - 20) * round(math.cos(self.angle_rad), 3) * -1
+                self.tank_y -= (self.speed - 20) * round(math.sin(self.angle_rad), 3) * -1
             self.been_shot('red')
         elif color == 'blue':
             self.tileX = int(self.tank_x / game_map.TILESIZE)
             self.tileY = int(self.tank_y / game_map.TILESIZE)
             if game_map.tilemap[self.tileY][self.tileX] == game_map.wall or tank.tileX == self.tileX \
                     and tank.tileY == self.tileY:
-                self.tank_x -= (self.speed - 20) * math.cos(self.angle_rad_blue) * -1
-                self.tank_y -= (self.speed - 20) * math.sin(self.angle_rad_blue) * 1
+                self.tank_x -= (self.speed - 20) * round(math.cos(self.angle_rad_blue), 3) * -1
+                self.tank_y -= (self.speed - 20) * round(math.sin(self.angle_rad_blue), 3) * 1
             self.been_shot('blue')
         if self.hit_counter <= 0:
             self.hit = False
@@ -104,8 +105,8 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                 self.angle_rad_blue = degree_to_radian(self.angle_deg)
                 self.draw_blue()
             if move_direction == 'forward':
-                self.tank_x += self.speed * math.cos(self.angle_rad_blue)
-                self.tank_y -= self.speed * math.sin(self.angle_rad_blue)
+                self.tank_x += self.speed * round(math.cos(self.angle_rad_blue), 3)
+                self.tank_y -= self.speed * round(math.sin(self.angle_rad_blue), 3)
                 print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad_blue)
 
     def shoot(self, bullet):
@@ -122,12 +123,36 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
     def been_shot(self, color):
         if color == 'red':
             if self.hit_counter > 0:
+                if self.hit_move:
+                    self.tank_x -= 50 * round(math.cos(self.angle_rad), 3)
+                    if self.tank_x < 20:
+                        self.tank_x = 660 - self.tank_x
+                    if self.tank_x > 680:
+                        self.tank_x = 20 + (self.tank_x - 680)
+                    self.tank_y -= 50 * round(math.sin(self.angle_rad), 3)
+                    if self.tank_y < 100:
+                        self.tank_y = 580 - self.tank_y
+                    if self.tank_y > 580:
+                        self.tank_y = 100 + (self.tank_y - 580)
+                    self.hit_move = False
                 self.tank_direction -= 1
                 self.angle_rad -= math.pi/8
                 self.draw_red()
                 self.hit_counter -= 1
         if color == 'blue':
             if self.hit_counter > 0:
+                if self.hit_move:
+                    self.tank_x -= 50 * round(math.cos(self.angle_rad_blue), 3)
+                    if self.tank_x < 20:
+                        self.tank_x = 660 - self.tank_x
+                    if self.tank_x > 680:
+                        self.tank_x = 20 + (self.tank_x - 680)
+                    self.tank_y -= 50 * round(math.sin(self.angle_rad_blue), 3)
+                    if self.tank_y < 100:
+                        self.tank_y = 580 - self.tank_y
+                    if self.tank_y > 580:
+                        self.tank_y = 100 + (self.tank_y - 580)
+                    self.hit_move = False
                 self.angle_deg += 22.5
                 self.angle_rad_blue = degree_to_radian(self.angle_deg)
                 self.draw_blue()

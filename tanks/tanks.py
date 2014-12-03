@@ -36,6 +36,63 @@ def display_score(score_font, level_font, DISPLAYSURF, p1_score, p2_score, game_
     DISPLAYSURF.blit(level_text, level_text_rect)
 
 
+def check_time(time, p1_score, p2_score, score_font, DISPLAYSURF, game_map, tank_idle):
+    if time > 60000:
+        if p1_score > p2_score:
+            game_over = score_font.render('Game over!  Red wins!', True,  WHITE)
+            game_over_rect = game_over.get_rect()
+            game_over_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 4,
+                                      (game_map.MAPHEIGHT * game_map.TILESIZE) / 2)
+            DISPLAYSURF.blit(game_over, game_over_rect)
+            tank_idle.stop()
+            pygame.display.flip()
+            over = True
+            while over:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_q:
+                            pygame.quit()
+                            sys.exit()
+        elif p1_score < p2_score:
+            game_over = score_font.render('Game over!  Blue wins!', True,  WHITE)
+            game_over_rect = game_over.get_rect()
+            game_over_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 4,
+                                      (game_map.MAPHEIGHT * game_map.TILESIZE) / 2)
+            DISPLAYSURF.blit(game_over, game_over_rect)
+            tank_idle.stop()
+            pygame.display.flip()
+            over = True
+            while over:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_q:
+                            pygame.quit()
+                            sys.exit()
+        else:
+            game_over = score_font.render("Game over!  It's a tie!", True,  WHITE)
+            game_over_rect = game_over.get_rect()
+            game_over_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 4,
+                                      (game_map.MAPHEIGHT * game_map.TILESIZE) / 2)
+            DISPLAYSURF.blit(game_over, game_over_rect)
+            tank_idle.stop()
+            pygame.display.flip()
+            over = True
+            while over:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_q:
+                            pygame.quit()
+                            sys.exit()
+
 def main():
     """ Main function for the game. """
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -60,6 +117,7 @@ def main():
     BASICFONTSIZE = 70
     score_font = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
     level_font = pygame.font.Font('visitor1.ttf', 50)
+    game_over_font = pygame.font.Font('visitor1.ttf', 25)
 
     # initialize tanks and bullets
     red_tank = Tank(150, 200, DISPLAYSURF, 'red', game_map.TILESIZE)
@@ -98,17 +156,17 @@ def main():
                     pygame.quit()
                     sys.exit()
                 if event.key == pygame.K_w:
-                    if not blue_tank.hit:
+                    if not blue_tank.hit and not red_tank.hit:
                         red_tank_move.play(-1)
                     print 'W pressed down'
                 if event.key == pygame.K_UP:
-                    if not red_tank.hit:
+                    if not blue_tank.hit and not red_tank.hit:
                         blue_tank_move.play(-1)
                 if event.key == pygame.K_SPACE:
-                    if not blue_tank.hit:
+                    if not blue_tank.hit and not red_tank.hit:
                         red_tank.shoot(red_bullet)
                 if event.key == pygame.K_RCTRL or event.key == pygame.K_RSHIFT:
-                    if not red_tank.hit:
+                    if not blue_tank.hit and not red_tank.hit:
                         blue_tank.shoot(blue_bullet)
                 if event.key == pygame.K_n:
                     game_map.save_map(game_map.level_number)
@@ -128,22 +186,22 @@ def main():
                     blue_tank_move.stop()
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
-            if not blue_tank.hit:
+            if not blue_tank.hit and not red_tank.hit:
                 red_tank.move('left', 'red')
         if keys[pygame.K_w]:
-            if not blue_tank.hit:
+            if not blue_tank.hit and not red_tank.hit:
                 red_tank.move('forward', 'red')
         if keys[pygame.K_d]:
-            if not blue_tank.hit:
+            if not blue_tank.hit and not red_tank.hit:
                 red_tank.move('right', 'red')
         if keys[pygame.K_LEFT]:
-            if not red_tank.hit:
+            if not blue_tank.hit and not red_tank.hit:
                 blue_tank.move('left', 'blue')
         if keys[pygame.K_UP]:
-            if not red_tank.hit:
+            if not blue_tank.hit and not red_tank.hit:
                 blue_tank.move('forward', 'blue')
         if keys[pygame.K_RIGHT]:
-            if not red_tank.hit:
+            if not blue_tank.hit and not red_tank.hit:
                 blue_tank.move('right', 'blue')
 
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
@@ -153,6 +211,7 @@ def main():
         red_bullet.update()
         blue_tank.update(game_map, red_tank, "blue")
         blue_bullet.update()
+
 
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
@@ -164,6 +223,8 @@ def main():
         red_tank.draw_red()
         blue_tank.draw_blue()
         display_score(score_font, level_font, DISPLAYSURF, red_tank.score, blue_tank.score, game_map)
+        check_time(pygame.time.get_ticks(), red_tank.score, blue_tank.score, game_over_font, DISPLAYSURF, game_map,
+                   tank_idle)
 
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
 
