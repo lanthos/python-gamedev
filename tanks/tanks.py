@@ -106,6 +106,7 @@ def main():
 
     # initialize the map
     game_map = Map()
+    map_editor = False
 
     # Set the width and height of the screen [width,height]
     # size = [700, 500]
@@ -143,14 +144,6 @@ def main():
                 tileY = int(mousey / game_map.TILESIZE)
                 print 'Mouse X and Y: %s, %s' % event.pos
                 print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mousex, mousey = event.pos
-                game_map.add_wall(mousex, mousey)
-                print 'press left mouse button'
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-                mousex, mousey = event.pos
-                game_map.remove_wall(mousex, mousey)
-                print 'pressed right mouse button'
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
@@ -168,6 +161,9 @@ def main():
                 if event.key == pygame.K_RCTRL or event.key == pygame.K_RSHIFT:
                     if not blue_tank.hit and not red_tank.hit:
                         blue_tank.shoot(blue_bullet)
+                # Map editor commands here
+                if event.key == pygame.K_QUESTION:
+                    map_editor = True
                 if event.key == pygame.K_n:
                     game_map.save_map(game_map.level_number)
                 if event.key == pygame.K_m:
@@ -184,6 +180,13 @@ def main():
                     print 'W let up'
                 if event.key == pygame.K_UP:
                     blue_tank_move.stop()
+        mouse_keys = pygame.mouse.get_pressed()
+        if mouse_keys[0]:
+            mousex, mousey = event.pos
+            game_map.add_wall(mousex, mousey)
+        if mouse_keys[2]:
+            mousex, mousey = event.pos
+            game_map.remove_wall(mousex, mousey)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             if not blue_tank.hit and not red_tank.hit:
