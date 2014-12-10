@@ -16,13 +16,13 @@ BLUE = (5, 61, 244)
 
 class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
 
-    def __init__(self, tank_x, tank_y, DISPLAYSURF, color, tilesize):
+    def __init__(self, tank_x, tank_y, color):
         # super(Tank, self).__init__()
         self.tank_x = tank_x
         self.tank_y = tank_y
-        self.tileX = self.tank_x / tilesize
-        self.tileY = self.tank_y / tilesize
-        self.DISPLAYSURF = DISPLAYSURF
+        self.tileX = None
+        self.tileY = None
+        self.DISPLAYSURF = None
         self.tank_direction = 0
         self.speed = 2
         self.score = 0
@@ -31,6 +31,8 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
         self.hit = False
         self.hit_move = False
         self.tank_shot = pygame.mixer.Sound("tank_shot.wav")
+
+    def hack(self, color):
         if color == 'red':
             self.angle_rad = 0
             self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
