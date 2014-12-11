@@ -27,13 +27,19 @@ class Map():
         self.MAPHEIGHT = 30
         self.level_number = 1
         self.map_levels = {}
+        self.shot_types = [
+            'Normal',
+            'Homing',
+            'Bounce'
+        ]
+        self.shot_type = 0
 
         # Import map from file
 
         self.tilemap = []
         filename = 'tanks_map%s.txt' % self.level_number
         with open(filename, 'rb') as f:
-            self.tilemap = pickle.load(f)
+            self.tilemap, self.shot_type = pickle.load(f)
             # p_map = pickle.load(f)
             red_tank.tank_x, red_tank.tank_y, red_tank.angle_rad, red_tank.tank_direction = pickle.load(f)
             blue_tank.tank_x, blue_tank.tank_y, blue_tank.angle_deg, blue_tank.angle_rad_blue = pickle.load(f)
@@ -56,7 +62,7 @@ class Map():
         filename = 'tanks_map%s.txt' % self.level_number
         self.map_levels[filename] = self.level_number
         with open(filename, 'wb') as f:
-            pickle.dump(self.tilemap, f)
+            pickle.dump((self.tilemap, self.shot_type), f)
             pickle.dump((red_tank.tank_x, red_tank.tank_y, red_tank.angle_rad, red_tank.tank_direction), f)
             pickle.dump((blue_tank.tank_x, blue_tank.tank_y, blue_tank.angle_deg, blue_tank.angle_rad_blue), f)
         with open('map_levels', 'wb') as ml:
@@ -67,7 +73,7 @@ class Map():
             level_number = self.level_number
         filename = 'tanks_map%s.txt' % level_number
         with open(filename, 'rb') as f:
-            self.tilemap = pickle.load(f)
+            self.tilemap, self.shot_type = pickle.load(f)
             red_tank.tank_x, red_tank.tank_y, red_tank.angle_rad, red_tank.tank_direction = pickle.load(f)
             blue_tank.tank_x, blue_tank.tank_y, blue_tank.angle_deg, blue_tank.angle_rad_blue = pickle.load(f)
         with open('map_levels', 'rb') as ml:
@@ -113,6 +119,14 @@ class Map():
                         self.level_number += 1
                     if event.key == pygame.K_p:
                         map_editor = False
+                    if event.key == pygame.K_h:
+                        self.shot_type -= 1
+                        if self.shot_type < 0:
+                            self.shot_type = 0
+                    if event.key == pygame.K_j:
+                        self.shot_type += 1
+                        if self.shot_type > 3:
+                            self.shot_type = 3
             mouse_keys = pygame.mouse.get_pressed()
             if mouse_keys[0]:
                 mousex, mousey = event.pos
@@ -140,16 +154,21 @@ class Map():
                 if not blue_tank.hit and not red_tank.hit:
                     blue_tank.move('right', 'blue')
             level_font = pygame.font.Font('visitor1.ttf', 50)
+            shot_font = pygame.font.Font('visitor1.ttf', 20)
             level = level_font.render('%s' % self.level_number, True, WHITE)
             level_rect = level.get_rect()
             level_rect.topleft = ((self.MAPWIDTH * self.TILESIZE) / 2 + 40, 25)
             level_text = level_font.render('Map', True, WHITE)
             level_text_rect = level_text.get_rect()
             level_text_rect.topleft = ((self.MAPWIDTH * self.TILESIZE) / 2 - 60, 25)
+            display_shot = shot_font.render('Shot Type: {0}'.format(self.shot_types[self.shot_type]), True, WHITE)
+            display_shot_rect = display_shot.get_rect()
+            display_shot_rect.topleft = ((self.MAPWIDTH * self.TILESIZE) / 6, 10)
 
             self.draw(DISPLAYSURF)
             DISPLAYSURF.blit(level, level_rect)
             DISPLAYSURF.blit(level_text, level_text_rect)
+            DISPLAYSURF.blit(display_shot, display_shot_rect)
             red_tank.draw_red()
             blue_tank.draw_blue()
             pygame.display.flip()

@@ -147,7 +147,11 @@ def main():
     pygame.display.set_caption("Tanks")
 
     red_tank.DISPLAYSURF = DISPLAYSURF
+    red_tank.game_map = game_map
+    red_tank.enemy_tank = blue_tank
     blue_tank.DISPLAYSURF = DISPLAYSURF
+    blue_tank.game_map = game_map
+    blue_tank.enemy_tank = red_tank
     red_tank.hack('red')
     blue_tank.hack('blue')
     blue_bullet = Bullet(BLUE, 'blue', DISPLAYSURF, game_map, red_tank, blue_tank)
@@ -239,12 +243,10 @@ def main():
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
-        red_tank.update(game_map, blue_tank, "red")
+        red_tank.update("red")
         red_bullet.update()
-        blue_tank.update(game_map, red_tank, "blue")
+        blue_tank.update("blue")
         blue_bullet.update()
-        for k, v in game_map.map_levels.items():
-            print k, v
         if map_editor:
             map_editor, length = game_map.editor(map_editor, red_tank, blue_tank, length, DISPLAYSURF)
 
