@@ -18,6 +18,8 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y = -100
         self.tileX = int(self.rect.x / self.game_map.TILESIZE)
         self.tileY = int(self.rect.y / self.game_map.TILESIZE)
+        self.previous_tileX = self.tileX
+        self.previous_tileY = self.tileY
         self.speed = 6
         self.time_alive = 0
         self.color = tank_color
@@ -30,16 +32,26 @@ class Bullet(pygame.sprite.Sprite):
         self.tank_hit = pygame.mixer.Sound("tank_hit.wav")
 
     def check_wall(self):
-        for i in range(0, 11):
-            self.tileX = int((self.rect.x + i) / self.game_map.TILESIZE)
-            self.tileY = int((self.rect.y + i) / self.game_map.TILESIZE)
-            if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
-                return True
-        for i in range(0, 11):
-            self.tileX = int((self.rect.x - i) / self.game_map.TILESIZE)
-            self.tileY = int((self.rect.y - i) / self.game_map.TILESIZE)
-            if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
-                return True
+        for i in range(0, 5):
+            self.tileX = int(round((self.rect.x + i) / self.game_map.TILESIZE))
+            self.tileY = int(round((self.rect.y + i) / self.game_map.TILESIZE))
+            try:
+                if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
+                    return True
+            except IndexError:
+                self.rect.x = -100
+                self.rect.y = -100
+                self.time_alive = 0
+        for i in range(0, 5):
+            self.tileX = int(round((self.rect.x - i) / self.game_map.TILESIZE))
+            self.tileY = int(round((self.rect.y - i) / self.game_map.TILESIZE))
+            try:
+                if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
+                    return True
+            except IndexError:
+                self.rect.x = -100
+                self.rect.y = -100
+                self.time_alive = 0
 
     def update(self):
         if self.time_alive > 0:
@@ -60,12 +72,13 @@ class Bullet(pygame.sprite.Sprite):
                     else:
                         self.rect.y += self.speed * round(math.sin(self.angle_rad), 3)
                 self.time_alive -= 1
-                print 'bullet X and Y and angle: %s, %s, %s' % (self.rect.x, self.rect.y, self.angle_rad)
-                print 'cos and sin: %s, %s' % (round(math.cos(self.my_tank.angle_rad), 3), round(math.sin(self.my_tank.angle_rad), 3))
+                #print 'bullet X and Y and angle: %s, %s, %s' % (self.rect.x, self.rect.y, self.angle_rad)
+                #print 'cos and sin: %s, %s' % (round(math.cos(self.my_tank.angle_rad), 3), round(math.sin(self.my_tank.angle_rad), 3))
+                print 'current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, self.previous_tileX, self.previous_tileY)
                 if self.time_alive <= 0:
                     self.rect.x = -100
                     self.rect.y = -100
-                    print 'bullets reset'
+                    #print 'bullets reset'
             if self.color == 'blue':
                 if self.bounce_x:
                     self.rect.x += (self.speed * -1) * round(math.cos(self.my_tank.angle_rad_blue), 3)
@@ -81,15 +94,30 @@ class Bullet(pygame.sprite.Sprite):
                     self.rect.x = -100
                     self.rect.y = -100
                     print 'bullets reset'
-        self.tileX = int(self.rect.x / self.game_map.TILESIZE)
-        self.tileY = int(self.rect.y / self.game_map.TILESIZE)
+        tempx = int(round(self.rect.x / self.game_map.TILESIZE))
+        if tempx != self.previous_tileX:
+            self.previous_tileX = self.tileX
+            self.tileX = tempx
+        tempy = int(round(self.rect.y / self.game_map.TILESIZE))
+        if tempy != self.previous_tileY:
+            self.previous_tileY = self.tileY
+            self.tileY = tempy
         if self.game_map.shot_type == 2:
             # if self.rect.x >= 676 or self.rect.x <= 23 and self.time_alive > 0:
             if self.check_wall() and self.time_alive > 0:
-                self.bounce_x = True
+                if self.previous_tileY == self.tileY:
+                    if self.bounce_x:
+                        self.bounce_x = False
+                    else:
+                        self.bounce_x = True
+                    print 'bounced x'
             # if self.rect.y <= 102 or self.rect.y >= 575 and self.time_alive > 0:
-
-                self.bounce_y = True
+                elif self.previous_tileX == self.tileX:
+                    if self.bounce_y:
+                        self.bounce_y = False
+                    else:
+                        self.bounce_y = True
+                    print 'bounced y'
             if self.time_alive <= 0:
                 self.bounce_y = False
                 self.bounce_x = False
