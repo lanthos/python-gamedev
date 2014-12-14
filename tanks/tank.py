@@ -82,6 +82,17 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
         if self.hit_counter <= 0:
             self.hit = False
 
+    def check_wall(self):
+        for i in range(0, 11):
+            self.tileX = int((self.tank_x + i) / self.game_map.TILESIZE)
+            self.tileY = int((self.tank_y + i) / self.game_map.TILESIZE)
+            if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
+                return True
+        for i in range(0, 11):
+            self.tileX = int((self.tank_x - i) / self.game_map.TILESIZE)
+            self.tileY = int((self.tank_y - i) / self.game_map.TILESIZE)
+            if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
+                return True
     def move(self, move_direction, color):
         if color == 'red':
             if move_direction == 'left':
@@ -97,8 +108,7 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                 self.tank_y += self.speed * round(math.sin(self.angle_rad), 3)
                 self.tileX = int(self.tank_x / self.game_map.TILESIZE)
                 self.tileY = int(self.tank_y / self.game_map.TILESIZE)
-                if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall \
-                        or self.enemy_tank.tileX == self.tileX and self.enemy_tank.tileY == self.tileY:
+                if self.check_wall():   # or self.enemy_tank.tileX == self.tileX and self.enemy_tank.tileY == self.tileY:
                     self.tank_x -= (self.speed - 20) * round(math.cos(self.angle_rad), 3) * -1
                     self.tank_y -= (self.speed - 20) * round(math.sin(self.angle_rad), 3) * -1
                 print 'red tank_x: %s, red tank_y: %s, tilex: %s, tiley: %s' % (self.tank_x, self.tank_y, self.tileX, self.tileY)

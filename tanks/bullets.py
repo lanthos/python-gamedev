@@ -29,6 +29,18 @@ class Bullet(pygame.sprite.Sprite):
         self.bounce_y = False
         self.tank_hit = pygame.mixer.Sound("tank_hit.wav")
 
+    def check_wall(self):
+        for i in range(0, 11):
+            self.tileX = int((self.rect.x + i) / self.game_map.TILESIZE)
+            self.tileY = int((self.rect.y + i) / self.game_map.TILESIZE)
+            if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
+                return True
+        for i in range(0, 11):
+            self.tileX = int((self.rect.x - i) / self.game_map.TILESIZE)
+            self.tileY = int((self.rect.y - i) / self.game_map.TILESIZE)
+            if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
+                return True
+
     def update(self):
         if self.time_alive > 0:
             if self.color == 'red':
@@ -71,16 +83,18 @@ class Bullet(pygame.sprite.Sprite):
                     print 'bullets reset'
         self.tileX = int(self.rect.x / self.game_map.TILESIZE)
         self.tileY = int(self.rect.y / self.game_map.TILESIZE)
-        if self.game_map.shot_type == 3:
-            if self.rect.x >= 676 or self.rect.x <= 23 and self.time_alive > 0:
+        if self.game_map.shot_type == 2:
+            # if self.rect.x >= 676 or self.rect.x <= 23 and self.time_alive > 0:
+            if self.check_wall() and self.time_alive > 0:
                 self.bounce_x = True
-            if self.rect.y <= 102 or self.rect.y >= 575 and self.time_alive > 0:
+            # if self.rect.y <= 102 or self.rect.y >= 575 and self.time_alive > 0:
+
                 self.bounce_y = True
             if self.time_alive <= 0:
                 self.bounce_y = False
                 self.bounce_x = False
         else:
-            if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
+            if self.check_wall():
                 self.rect.x = -100
                 self.rect.y = -100
                 self.time_alive = 0
