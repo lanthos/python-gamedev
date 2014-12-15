@@ -20,8 +20,8 @@ class Bullet(pygame.sprite.Sprite):
         self.tileY = int(self.rect.y / self.game_map.TILESIZE)
         self.previous_tileX = self.tileX
         self.previous_tileY = self.tileY
-        self.previous_x = self.rect.x
-        self.previous_y = self.rect.y
+        self.previous_x_vector = self.rect.x
+        self.previous_y_vector = self.rect.y
         self.speed = 6
         self.time_alive = 0
         self.color = tank_color
@@ -66,23 +66,23 @@ class Bullet(pygame.sprite.Sprite):
                     self.rect.y += self.speed * round(math.sin(self.my_tank.angle_rad), 3)
                 elif self.game_map.shot_type == 2:
                     if self.bounce_x:
-                        self.rect.x -= self.previous_x
+                        self.rect.x -= self.previous_x_vector
                         if self.check_wall():
-                            self.rect.x -= self.previous_x
-                        self.previous_x = (self.speed * -1) * round(math.cos(self.angle_rad), 3)
-                        self.rect.x += self.previous_x
+                            self.rect.x -= self.previous_x_vector
+                        self.previous_x_vector = (self.speed * -1) * round(math.cos(self.angle_rad), 3)
+                        self.rect.x += self.previous_x_vector
                     else:
-                        self.previous_x = self.speed * round(math.cos(self.angle_rad), 3)
-                        self.rect.x += self.previous_x
+                        self.previous_x_vector = self.speed * round(math.cos(self.angle_rad), 3)
+                        self.rect.x += self.previous_x_vector
                     if self.bounce_y:
-                        self.rect.y -= self.previous_y
+                        self.rect.y -= self.previous_y_vector
                         if self.check_wall():
-                            self.rect.y -= self.previous_y
-                        self.previous_y = (self.speed * -1) * round(math.sin(self.angle_rad), 3)
-                        self.rect.y += self.previous_y
+                            self.rect.y -= self.previous_y_vector
+                        self.previous_y_vector = (self.speed * -1) * round(math.sin(self.angle_rad), 3)
+                        self.rect.y += self.previous_y_vector
                     else:
-                        self.previous_y = self.speed * round(math.sin(self.angle_rad), 3)
-                        self.rect.y += self.previous_y
+                        self.previous_y_vector = self.speed * round(math.sin(self.angle_rad), 3)
+                        self.rect.y += self.previous_y_vector
                 self.time_alive -= 1
                 #print 'bullet X and Y and angle: %s, %s, %s' % (self.rect.x, self.rect.y, self.angle_rad)
                 #print 'cos and sin: %s, %s' % (round(math.cos(self.my_tank.angle_rad), 3), round(math.sin(self.my_tank.angle_rad), 3))
