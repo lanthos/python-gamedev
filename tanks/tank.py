@@ -23,6 +23,7 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
         self.tileX = None
         self.tileY = None
         self.DISPLAYSURF = None
+        self.enemy_tank = None
         self.tank_direction = 0
         self.speed = 2
         self.score = 0
@@ -108,11 +109,14 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                 self.tank_y += self.speed * round(math.sin(self.angle_rad), 3)
                 self.tileX = int(self.tank_x / self.game_map.TILESIZE)
                 self.tileY = int(self.tank_y / self.game_map.TILESIZE)
-                if self.check_wall():   # or self.enemy_tank.tileX == self.tileX and self.enemy_tank.tileY == self.tileY:
+                deltaX = self.tank_x - self.enemy_tank.tank_x
+                deltaY = self.tank_y - self.enemy_tank.tank_y
+                dist = math.sqrt(deltaX * deltaX + deltaY * deltaY)
+                if self.check_wall() or dist < 25:
                     self.tank_x -= (self.speed - 20) * round(math.cos(self.angle_rad), 3) * -1
                     self.tank_y -= (self.speed - 20) * round(math.sin(self.angle_rad), 3) * -1
-                print 'red tank_x: %s, red tank_y: %s, tilex: %s, tiley: %s' % (self.tank_x, self.tank_y, self.tileX, self.tileY)
-                print 'angle_rad: %s' % self.angle_rad
+                #print 'red tank_x: %s, red tank_y: %s, tilex: %s, tiley: %s' % (self.tank_x, self.tank_y, self.tileX, self.tileY)
+                #print 'angle_rad: %s' % self.angle_rad
         if color == 'blue':
             if move_direction == 'left':
                 self.angle_deg += 22.5
@@ -127,11 +131,13 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                 self.tank_y -= self.speed * round(math.sin(self.angle_rad_blue), 3)
                 self.tileX = int(self.tank_x / self.game_map.TILESIZE)
                 self.tileY = int(self.tank_y / self.game_map.TILESIZE)
-                if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall \
-                        or self.enemy_tank.tileX == self.tileX and self.enemy_tank.tileY == self.tileY:
+                deltaX = self.tank_x - self.enemy_tank.tank_x
+                deltaY = self.tank_y - self.enemy_tank.tank_y
+                dist = math.sqrt(deltaX * deltaX + deltaY * deltaY)
+                if self.check_wall() or dist < 25:
                     self.tank_x -= (self.speed - 20) * round(math.cos(self.angle_rad_blue), 3) * -1
                     self.tank_y -= (self.speed - 20) * round(math.sin(self.angle_rad_blue), 3) * 1
-                print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad_blue)
+                #print 'blue tank_x: %s, blue tank_y: %s, blue angle_rad: %s' % (self.tank_x, self.tank_y, self.angle_rad_blue)
 
     def shoot(self, bullet):
         if bullet.time_alive <= 0:
@@ -181,6 +187,7 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
                 self.angle_rad_blue = degree_to_radian(self.angle_deg)
                 self.draw_blue()
                 self.hit_counter -= 1
+
 
 def degree_to_radian(degree):
     return degree * math.pi/180

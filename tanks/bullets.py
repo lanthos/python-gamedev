@@ -20,6 +20,8 @@ class Bullet(pygame.sprite.Sprite):
         self.tileY = int(self.rect.y / self.game_map.TILESIZE)
         self.previous_tileX = self.tileX
         self.previous_tileY = self.tileY
+        self.previous_x = self.rect.x
+        self.previous_y = self.rect.y
         self.speed = 6
         self.time_alive = 0
         self.color = tank_color
@@ -64,17 +66,27 @@ class Bullet(pygame.sprite.Sprite):
                     self.rect.y += self.speed * round(math.sin(self.my_tank.angle_rad), 3)
                 elif self.game_map.shot_type == 2:
                     if self.bounce_x:
-                        self.rect.x += (self.speed * -1) * round(math.cos(self.angle_rad), 3)
+                        self.rect.x -= self.previous_x
+                        if self.check_wall():
+                            self.rect.x -= self.previous_x
+                        self.previous_x = (self.speed * -1) * round(math.cos(self.angle_rad), 3)
+                        self.rect.x += self.previous_x
                     else:
-                        self.rect.x += self.speed * round(math.cos(self.angle_rad), 3)
+                        self.previous_x = self.speed * round(math.cos(self.angle_rad), 3)
+                        self.rect.x += self.previous_x
                     if self.bounce_y:
-                        self.rect.y += (self.speed * -1) * round(math.sin(self.angle_rad), 3)
+                        self.rect.y -= self.previous_y
+                        if self.check_wall():
+                            self.rect.y -= self.previous_y
+                        self.previous_y = (self.speed * -1) * round(math.sin(self.angle_rad), 3)
+                        self.rect.y += self.previous_y
                     else:
-                        self.rect.y += self.speed * round(math.sin(self.angle_rad), 3)
+                        self.previous_y = self.speed * round(math.sin(self.angle_rad), 3)
+                        self.rect.y += self.previous_y
                 self.time_alive -= 1
                 #print 'bullet X and Y and angle: %s, %s, %s' % (self.rect.x, self.rect.y, self.angle_rad)
                 #print 'cos and sin: %s, %s' % (round(math.cos(self.my_tank.angle_rad), 3), round(math.sin(self.my_tank.angle_rad), 3))
-                print 'current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, self.previous_tileX, self.previous_tileY)
+                #print 'current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, self.previous_tileX, self.previous_tileY)
                 if self.time_alive <= 0:
                     self.rect.x = -100
                     self.rect.y = -100
@@ -89,11 +101,11 @@ class Bullet(pygame.sprite.Sprite):
                 else:
                     self.rect.y -= self.speed * round(math.sin(self.my_tank.angle_rad_blue), 3)
                 self.time_alive -= 1
-                print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
+                #print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
                 if self.time_alive <= 0:
                     self.rect.x = -100
                     self.rect.y = -100
-                    print 'bullets reset'
+                    #print 'bullets reset'
         tempx = int(round(self.rect.x / self.game_map.TILESIZE))
         if tempx != self.previous_tileX:
             self.previous_tileX = self.tileX
@@ -110,14 +122,14 @@ class Bullet(pygame.sprite.Sprite):
                         self.bounce_x = False
                     else:
                         self.bounce_x = True
-                    print 'bounced x'
+                    #print 'bounced x'
             # if self.rect.y <= 102 or self.rect.y >= 575 and self.time_alive > 0:
                 elif self.previous_tileX == self.tileX:
                     if self.bounce_y:
                         self.bounce_y = False
                     else:
                         self.bounce_y = True
-                    print 'bounced y'
+                    #print 'bounced y'
             if self.time_alive <= 0:
                 self.bounce_y = False
                 self.bounce_x = False
@@ -137,6 +149,10 @@ class Bullet(pygame.sprite.Sprite):
             self.enemy_tank.hit_move = True
             self.my_tank.score += 1
 
-
     def draw(self):
         self.DISPLAYSURF.blit(self.image, (self.rect.x, self.rect.y))
+
+    def reset(self):
+        self.rect.x = -100
+        self.rect.y = -100
+        self.time_alive = 0

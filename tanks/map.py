@@ -83,15 +83,15 @@ class Map():
         tileX = int(mousex / self.TILESIZE)
         tileY = int(mousey / self.TILESIZE)
         self.tilemap[tileY][tileX] = self.wall
-        print 'added tile to X: %s and Y: %s' % (tileX, tileY)
-        print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
+        #print 'added tile to X: %s and Y: %s' % (tileX, tileY)
+        #print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
 
     def remove_wall(self, mousex, mousey):
         tileX = int(mousex / self.TILESIZE)
         tileY = int(mousey / self.TILESIZE)
         self.tilemap[tileY][tileX] = self.open
-        print 'added tile to X: %s and Y: %s' % (tileX, tileY)
-        print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
+        #print 'added tile to X: %s and Y: %s' % (tileX, tileY)
+        #print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
 
     def editor(self, map_editor, red_tank, blue_tank, length, DISPLAYSURF):
         while map_editor:
@@ -100,8 +100,8 @@ class Map():
                     mousex, mousey = event.pos
                     tileX = int(mousex / self.TILESIZE)
                     tileY = int(mousey / self.TILESIZE)
-                    print 'Mouse X and Y: %s, %s' % event.pos
-                    print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
+                    #print 'Mouse X and Y: %s, %s' % event.pos
+                    #print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         pygame.quit()
