@@ -70,6 +70,7 @@ class Bullet(pygame.sprite.Sprite):
                         self.time_alive = 0
                 elif self.game_map.shot_type == self.shot_type_bounce:
                     if self.check_wall():
+                        print 'hit wall.  Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
                         # self.rect.x += self.x_velocity
                         # if self.check_wall():
                         #     for i in range(2):
@@ -88,24 +89,29 @@ class Bullet(pygame.sprite.Sprite):
                             adjacent_x = self.game_map.tilemap[previous_tile_y][self.tileX]
                             if adjacent_x != self.game_map.wall:
                                 self.y_velocity *= -1
+                                print 'Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
+                                print 'bounced on Y'
                                 both_tests_failed = False
                         if previous_tile_y != self.tileY:
                             adjacent_y = self.game_map.tilemap[self.tileY][previous_tile_x]
                             if adjacent_y != self.game_map.wall:
                                 self.x_velocity *= -1
+                                print 'Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
+                                print 'bounced on X and current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, previous_tile_x, previous_tile_y)
                                 both_tests_failed = False
                         if both_tests_failed:
                             self.x_velocity *= -1
                             self.y_velocity *= -1
                         self.rect.x += self.x_velocity
                         self.rect.y += self.y_velocity
+                        #print 'current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, previous_tile_x, previous_tile_y)
                     else:
                         self.rect.x += self.x_velocity
                         self.rect.y += self.y_velocity
                 self.time_alive -= 1
                 #print 'bullet X and Y and angle: %s, %s, %s' % (self.rect.x, self.rect.y, self.angle_rad)
                 #print 'cos and sin: %s, %s' % (round(math.cos(self.my_tank.angle_rad), 3), round(math.sin(self.my_tank.angle_rad), 3))
-                #print 'current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, self.previous_tileX, self.previous_tileY)
+
                 if self.time_alive <= 0:
                     self.rect.x = -100
                     self.rect.y = -100
