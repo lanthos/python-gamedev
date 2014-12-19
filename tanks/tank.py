@@ -147,6 +147,8 @@ class Tank():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
             self.tank_shot.play()
             if bullet.color == 'red':
                 bullet.angle_rad = self.angle_rad
+                bullet.x_velocity = bullet.speed * round(math.cos(bullet.angle_rad), 3)
+                bullet.y_velocity = bullet.speed * round(math.sin(bullet.angle_rad), 3)
             elif bullet.color == 'blue':
                 bullet.angle_rad_blue = self.angle_rad_blue
 

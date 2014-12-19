@@ -52,8 +52,8 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         if self.time_alive > 0:
             if self.color == 'red':
-                self.x_velocity = self.speed * round(math.cos(self.angle_rad), 3)
-                self.y_velocity = self.speed * round(math.sin(self.angle_rad), 3)
+                # self.x_velocity = self.speed * round(math.cos(self.angle_rad), 3)
+                # self.y_velocity = self.speed * round(math.sin(self.angle_rad), 3)
                 if self.game_map.shot_type == self.shot_type_normal:
                     self.rect.x += self.x_velocity
                     self.rect.y += self.y_velocity
@@ -70,14 +70,35 @@ class Bullet(pygame.sprite.Sprite):
                         self.time_alive = 0
                 elif self.game_map.shot_type == self.shot_type_bounce:
                     if self.check_wall():
+                        # self.rect.x += self.x_velocity
+                        # if self.check_wall():
+                        #     for i in range(2):
+                        #         self.rect.x -= self.x_velocity
+                        #     self.rect.y += self.y_velocity
+                        # self.rect.y += self.y_velocity
+                        # if self.check_wall():
+                        #     for i in range(2):
+                        #         self.rect.y -= self.y_velocity
+                        previous_x = self.rect.x - self.x_velocity
+                        previous_y = self.rect.y - self.y_velocity
+                        previous_tile_x = int(round(previous_x / self.game_map.TILESIZE))
+                        previous_tile_y = int(round(previous_y / self.game_map.TILESIZE))
+                        both_tests_failed = True
+                        if previous_tile_x != self.tileX:
+                            adjacent_x = self.game_map.tilemap[previous_tile_y][self.tileX]
+                            if adjacent_x != self.game_map.wall:
+                                self.y_velocity *= -1
+                                both_tests_failed = False
+                        if previous_tile_y != self.tileY:
+                            adjacent_y = self.game_map.tilemap[self.tileY][previous_tile_x]
+                            if adjacent_y != self.game_map.wall:
+                                self.x_velocity *= -1
+                                both_tests_failed = False
+                        if both_tests_failed:
+                            self.x_velocity *= -1
+                            self.y_velocity *= -1
                         self.rect.x += self.x_velocity
-                        if self.check_wall():
-                            for i in range(2):
-                                self.rect.x -= self.x_velocity
                         self.rect.y += self.y_velocity
-                        if self.check_wall():
-                            for i in range(2):
-                                self.rect.y -= self.y_velocity
                     else:
                         self.rect.x += self.x_velocity
                         self.rect.y += self.y_velocity
