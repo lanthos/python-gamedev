@@ -12,7 +12,7 @@ import turret
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-GREEN = (0, 255, 0)
+GREEN = (63, 177, 79)
 RED = (187, 8, 0)
 BLUE = (5, 61, 244)
 
@@ -20,16 +20,16 @@ BLUE = (5, 61, 244)
 def display_score(score_font, screen, p1_score, high_score):
     player = score_font.render('Score: %s' % p1_score, True, WHITE)
     player_rect = player.get_rect()
-    player_rect.topleft = (screen.get_width() / 4, screen.get_height() / .75)
+    player_rect.topleft = (screen.get_width() / 1.5, screen.get_height() - 80)
     high_score = score_font.render('High Score: %s' % high_score, True, WHITE)
     high_score_rect = high_score.get_rect()
-    high_score_rect.topleft = (screen.get_width() / .75, screen.get_height() / .75)
+    high_score_rect.topleft = (screen.get_width() / 10, screen.get_height() - 80)
     screen.blit(player, player_rect)
     screen.blit(high_score, high_score_rect)
 
 
 def draw_map(screen):
-    pygame.draw.line(screen, WHITE, (0, screen.get_height() / 1.1), (screen.get_width(), screen.get_height() / 1.1), 3)
+    pygame.draw.line(screen, GREEN, (0, screen.get_height() / 1.1), (screen.get_width(), screen.get_height() / 1.1), 10)
 
 
 def main():
@@ -40,21 +40,24 @@ def main():
     # Initialize sounds
 
     # Set the width and height of the screen [width,height]
-    screen_width, screen_height = [700, 600]
+    screen_width, screen_height = [1280, 1024]
     screen = pygame.display.set_mode([screen_width, screen_height])
     pygame.display.set_caption("Paraaaahhhh! Troopers")
 
     # initialize fonts
-    BASICFONTSIZE = 70
+    BASICFONTSIZE = 50
+    score_font = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
 
     # initialize turret and bullets
-    # player = turret.Turret()
+    player = turret.Turret(screen)
 
     # Loop until the user clicks the close button.
     done = False
 
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
+
+    high_score = 12341512
 
     # -------- Main Program Loop -----------
     while not done:
@@ -75,7 +78,9 @@ def main():
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
+        player.draw()
         draw_map(screen)
+        display_score(score_font, screen, player.score, high_score)
 
 
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT

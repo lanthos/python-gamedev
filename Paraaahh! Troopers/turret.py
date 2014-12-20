@@ -12,6 +12,7 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (187, 8, 0)
 BLUE = (5, 61, 244)
+GREY = (199, 199, 199)
 
 
 class Turret():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
@@ -25,12 +26,17 @@ class Turret():  # add pygame.sprite.Sprite if going to use sprites.  Maybe.
         self.hit_counter = 0
         self.hit = False
         self.hit_move = False
+        self.base = ((self.screen.get_width() / 2) - 75, self.screen.get_height() - 161, 144, 70)
+        self.turret = (self.screen.get_width() / 2, self.screen.get_height() - 155)
+        self.gun = (self.screen.get_width() / 2 - 5, self.screen.get_height() - 250, 10, 70)
 
     def draw(self):
-        self.screen.blit()
+        pygame.draw.rect(self.screen, RED, self.gun)
+        pygame.draw.circle(self.screen, BLUE, self.turret, 45)
+        pygame.draw.rect(self.screen, GREY, self.base)
 
     def update(self):
-        continue
+        return None
 
     def move(self, move_direction):
         if move_direction == 'left':

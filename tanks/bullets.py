@@ -86,18 +86,16 @@ class Bullet(pygame.sprite.Sprite):
                         previous_tile_y = int(round(previous_y / self.game_map.TILESIZE))
                         both_tests_failed = True
                         if previous_tile_x != self.tileX:
-                            adjacent_x = self.game_map.tilemap[previous_tile_y][self.tileX]
-                            if adjacent_x != self.game_map.wall:
-                                self.y_velocity *= -1
-                                print 'Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
-                                print 'bounced on Y'
-                                both_tests_failed = False
-                        if previous_tile_y != self.tileY:
-                            adjacent_y = self.game_map.tilemap[self.tileY][previous_tile_x]
-                            if adjacent_y != self.game_map.wall:
+                            if self.game_map.tilemap[previous_tile_y][self.tileX] != self.game_map.wall:
                                 self.x_velocity *= -1
                                 print 'Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
-                                print 'bounced on X and current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, previous_tile_x, previous_tile_y)
+                                print 'bounced on X'
+                                both_tests_failed = False
+                        if previous_tile_y != self.tileY:
+                            if self.game_map.tilemap[self.tileY][previous_tile_x] != self.game_map.wall:
+                                self.y_velocity *= -1
+                                print 'Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
+                                print 'bounced on Y and current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, previous_tile_x, previous_tile_y)
                                 both_tests_failed = False
                         if both_tests_failed:
                             self.x_velocity *= -1

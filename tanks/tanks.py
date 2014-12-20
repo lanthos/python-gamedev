@@ -194,8 +194,8 @@ def main():
                 mousex, mousey = event.pos
                 tileX = int(mousex / game_map.TILESIZE)
                 tileY = int(mousey / game_map.TILESIZE)
-                print 'Mouse X and Y: %s, %s' % event.pos
-                print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
+                #print 'Mouse X and Y: %s, %s' % event.pos
+                #print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
