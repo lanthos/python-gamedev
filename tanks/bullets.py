@@ -1,5 +1,8 @@
 '''
-Bullets class for tanks game.
+Bullets class for tanks game.  There are color differences in the bullets for the same reason as the tanks.  Please see
+tank comments for full reasoning behind that.
+
+Created by Jeremy Kenyon.  For questions contact lanthos@gmail.com.
 '''
 
 import pygame
@@ -18,14 +21,12 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y = -100
         self.tileX = int(self.rect.x / self.game_map.TILESIZE)
         self.tileY = int(self.rect.y / self.game_map.TILESIZE)
-        self.previous_tileX = self.tileX
-        self.previous_tileY = self.tileY
         self.previous_x_vector = self.rect.x
         self.previous_y_vector = self.rect.y
         self.x_velocity = 0
         self.y_velocity = 0
         self.shot_type_normal = 0
-        self.shot_type_homing = 1
+        self.shot_type_guided = 1
         self.shot_type_bounce = 2
         self.speed = 6
         self.time_alive = 0
@@ -34,13 +35,11 @@ class Bullet(pygame.sprite.Sprite):
         self.DISPLAYSURF = DISPLAYSURF
         self.enemy_tank = enemy_tank
         self.my_tank = my_tank
-        self.bounce_x = False
-        self.bounce_y = False
         self.tank_hit = pygame.mixer.Sound("tank_hit.wav")
 
     def check_wall(self):
-        self.tileX = int(round(self.rect.x / self.game_map.TILESIZE))
-        self.tileY = int(round(self.rect.y / self.game_map.TILESIZE))
+        self.tileX = int(self.rect.x / self.game_map.TILESIZE)
+        self.tileY = int(self.rect.y / self.game_map.TILESIZE)
         try:
             if self.game_map.tilemap[self.tileY][self.tileX] == self.game_map.wall:
                 return True
@@ -52,8 +51,8 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         if self.time_alive > 0:
             if self.color == 'red':
-                # self.x_velocity = self.speed * round(math.cos(self.angle_rad), 3)
-                # self.y_velocity = self.speed * round(math.sin(self.angle_rad), 3)
+                # angle and speed are passed into the bullets from the tank class when it takes a shot.  The only time
+                # here that the angle and speed are calculated is when using guided missiles.
                 if self.game_map.shot_type == self.shot_type_normal:
                     self.rect.x += self.x_velocity
                     self.rect.y += self.y_velocity
@@ -61,7 +60,7 @@ class Bullet(pygame.sprite.Sprite):
                         self.rect.x = -100
                         self.rect.y = -100
                         self.time_alive = 0
-                elif self.game_map.shot_type == self.shot_type_homing:
+                elif self.game_map.shot_type == self.shot_type_guided:
                     self.rect.x += self.speed * round(math.cos(self.my_tank.angle_rad), 3)
                     self.rect.y += self.speed * round(math.sin(self.my_tank.angle_rad), 3)
                     if self.check_wall():
@@ -69,67 +68,71 @@ class Bullet(pygame.sprite.Sprite):
                         self.rect.y = -100
                         self.time_alive = 0
                 elif self.game_map.shot_type == self.shot_type_bounce:
+                    previous_x = self.rect.x
+                    previous_y = self.rect.y
+                    self.rect.x += self.x_velocity
+                    self.rect.y += self.y_velocity
+                    previous_tile_x = int(previous_x / self.game_map.TILESIZE)
+                    previous_tile_y = int(previous_y / self.game_map.TILESIZE)
                     if self.check_wall():
-                        print 'hit wall.  Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
-                        # self.rect.x += self.x_velocity
-                        # if self.check_wall():
-                        #     for i in range(2):
-                        #         self.rect.x -= self.x_velocity
-                        #     self.rect.y += self.y_velocity
-                        # self.rect.y += self.y_velocity
-                        # if self.check_wall():
-                        #     for i in range(2):
-                        #         self.rect.y -= self.y_velocity
-                        previous_x = self.rect.x - self.x_velocity
-                        previous_y = self.rect.y - self.y_velocity
-                        previous_tile_x = int(round(previous_x / self.game_map.TILESIZE))
-                        previous_tile_y = int(round(previous_y / self.game_map.TILESIZE))
+                        # If the bouncing shot hits a wall it checks to see if you were coming horizontally or
+                        # vertically and determines the correct axis to bounce based upon that.  If you hit a corner
+                        # it will bounce both.
                         both_tests_failed = True
                         if previous_tile_x != self.tileX:
-                            if self.game_map.tilemap[previous_tile_y][self.tileX] != self.game_map.wall:
+                            if self.game_map.tilemap[self.tileY][previous_tile_x] != self.game_map.wall:
                                 self.x_velocity *= -1
-                                print 'Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
-                                print 'bounced on X'
                                 both_tests_failed = False
                         if previous_tile_y != self.tileY:
-                            if self.game_map.tilemap[self.tileY][previous_tile_x] != self.game_map.wall:
+                            if self.game_map.tilemap[previous_tile_y][self.tileX] != self.game_map.wall:
                                 self.y_velocity *= -1
-                                print 'Current x/y vel: {} {}'.format(self.x_velocity, self.y_velocity)
-                                print 'bounced on Y and current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, previous_tile_x, previous_tile_y)
                                 both_tests_failed = False
                         if both_tests_failed:
                             self.x_velocity *= -1
                             self.y_velocity *= -1
-                        self.rect.x += self.x_velocity
-                        self.rect.y += self.y_velocity
-                        #print 'current X, Y: {}, {} and previous X, Y: {}, {}'.format(self.tileX, self.tileY, previous_tile_x, previous_tile_y)
-                    else:
-                        self.rect.x += self.x_velocity
-                        self.rect.y += self.y_velocity
                 self.time_alive -= 1
-                #print 'bullet X and Y and angle: %s, %s, %s' % (self.rect.x, self.rect.y, self.angle_rad)
-                #print 'cos and sin: %s, %s' % (round(math.cos(self.my_tank.angle_rad), 3), round(math.sin(self.my_tank.angle_rad), 3))
-
                 if self.time_alive <= 0:
                     self.rect.x = -100
                     self.rect.y = -100
-                    #print 'bullets reset'
             if self.color == 'blue':
-                self.x_velocity = self.speed * round(math.cos(self.my_tank.angle_rad_blue), 3)
-                if self.bounce_x:
-                    self.rect.x += (self.speed * -1) * round(math.cos(self.my_tank.angle_rad_blue), 3)
-                else:
+                if self.game_map.shot_type == self.shot_type_normal:
+                    self.rect.x += self.x_velocity
+                    self.rect.y -= self.y_velocity
+                    if self.check_wall():
+                        self.rect.x = -100
+                        self.rect.y = -100
+                        self.time_alive = 0
+                elif self.game_map.shot_type == self.shot_type_guided:
                     self.rect.x += self.speed * round(math.cos(self.my_tank.angle_rad_blue), 3)
-                if self.bounce_y:
-                    self.rect.y -= (self.speed * -1) * round(math.sin(self.my_tank.angle_rad_blue), 3)
-                else:
                     self.rect.y -= self.speed * round(math.sin(self.my_tank.angle_rad_blue), 3)
+                    if self.check_wall():
+                        self.rect.x = -100
+                        self.rect.y = -100
+                        self.time_alive = 0
+                elif self.game_map.shot_type == self.shot_type_bounce:
+                    previous_x = self.rect.x
+                    previous_y = self.rect.y
+                    self.rect.x += self.x_velocity
+                    self.rect.y -= self.y_velocity
+                    previous_tile_x = int(previous_x / self.game_map.TILESIZE)
+                    previous_tile_y = int(previous_y / self.game_map.TILESIZE)
+                    if self.check_wall():
+                        both_tests_failed = True
+                        if previous_tile_x != self.tileX:
+                            if self.game_map.tilemap[self.tileY][previous_tile_x] != self.game_map.wall:
+                                self.x_velocity *= -1
+                                both_tests_failed = False
+                        if previous_tile_y != self.tileY:
+                            if self.game_map.tilemap[previous_tile_y][self.tileX] != self.game_map.wall:
+                                self.y_velocity *= -1
+                                both_tests_failed = False
+                        if both_tests_failed:
+                            self.x_velocity *= -1
+                            self.y_velocity *= -1
                 self.time_alive -= 1
-                #print 'bullet X and Y: %s, %s' % (self.rect.x, self.rect.y)
                 if self.time_alive <= 0:
                     self.rect.x = -100
                     self.rect.y = -100
-                    #print 'bullets reset'
         if self.enemy_tank.tank_x - 10 <= self.rect.x <= self.enemy_tank.tank_x + 10 \
                 and self.enemy_tank.tank_y - 12 <= self.rect.y <= self.enemy_tank.tank_y + 12:
             self.rect.x = -100

@@ -1,5 +1,8 @@
 '''
-Maps class for tanks game.
+Maps class for tanks game.  This is where the map editor magic works as well as saving and loading of maps and tank
+positions.
+
+Created by Jeremy Kenyon.  For questions contact lanthos@gmail.com.
 '''
 
 import pygame
@@ -22,6 +25,7 @@ class Map():
         # Map definitions and dimensions.
         self.wall = '1'
         self.open = '0'
+        self.info = '2'
         self.TILESIZE = 20
         self.MAPWIDTH = 35
         self.MAPHEIGHT = 30
@@ -29,27 +33,26 @@ class Map():
         self.map_levels = {}
         self.shot_types = [
             'Normal',
-            'Homing',
+            'Guided',
             'Bounce'
         ]
         self.shot_type = 0
 
-        # Import map from file
+        # Import map from pickled file
 
         self.tilemap = []
         filename = 'tanks_map%s.txt' % self.level_number
         with open(filename, 'rb') as f:
             self.tilemap, self.shot_type = pickle.load(f)
-            # p_map = pickle.load(f)
             red_tank.tank_x, red_tank.tank_y, red_tank.angle_rad, red_tank.tank_direction = pickle.load(f)
             blue_tank.tank_x, blue_tank.tank_y, blue_tank.angle_deg, blue_tank.angle_rad_blue = pickle.load(f)
-        # self.tilemap = p_map.tilemap
         with open('map_levels', 'rb') as ml:
             self.map_levels = pickle.load(ml)
 
         self.colors = {
             self.wall: WHITE,
-            self.open: BLACK
+            self.open: GREEN,
+            self.info: BLACK
         }
 
     def draw(self, DISPLAYSURF):
@@ -83,26 +86,32 @@ class Map():
         tileX = int(mousex / self.TILESIZE)
         tileY = int(mousey / self.TILESIZE)
         self.tilemap[tileY][tileX] = self.wall
-        #print 'added tile to X: %s and Y: %s' % (tileX, tileY)
-        #print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
 
     def remove_wall(self, mousex, mousey):
         tileX = int(mousex / self.TILESIZE)
         tileY = int(mousey / self.TILESIZE)
-        self.tilemap[tileY][tileX] = self.open
-        #print 'added tile to X: %s and Y: %s' % (tileX, tileY)
-        #print 'tilemap[tileY][tileX] is now: %s' % self.tilemap[tileY][tileX]
+        if self.tilemap[tileY][tileX] == self.info:
+            self.tilemap[tileY][tileX] = self.info
+        else:
+            self.tilemap[tileY][tileX] = self.open
+
+    def add_info(self, mousex, mousey):
+        tileX = int(mousex / self.TILESIZE)
+        tileY = int(mousey / self.TILESIZE)
+        self.tilemap[tileY][tileX] = self.info
 
     def editor(self, map_editor, red_tank, blue_tank, length, DISPLAYSURF):
+        clock = pygame.time.Clock()
         while map_editor:
-            for event in pygame.event.get():  # User did something
-                if event.type == pygame.MOUSEMOTION:
-                    mousex, mousey = event.pos
-                    tileX = int(mousex / self.TILESIZE)
-                    tileY = int(mousey / self.TILESIZE)
-                    #print 'Mouse X and Y: %s, %s' % event.pos
-                    #print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
-                elif event.type == pygame.KEYDOWN:
+            for event in pygame.event.get():
+                # Uncomment this if you need to determine where the mouse location is for troubleshooting things.
+                # if event.type == pygame.MOUSEMOTION:
+                #     mousex, mousey = event.pos
+                #     tileX = int(mousex / self.TILESIZE)
+                #     tileY = int(mousey / self.TILESIZE)
+                #     print 'Mouse X and Y: %s, %s' % event.pos
+                #     print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
+                if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         pygame.quit()
                         sys.exit()
@@ -153,6 +162,10 @@ class Map():
             if keys[pygame.K_RIGHT]:
                 if not blue_tank.hit and not red_tank.hit:
                     blue_tank.move('right', 'blue')
+            if mouse_keys[0] and keys[pygame.K_RSHIFT]:
+                mousex, mousey = event.pos
+                self.add_info(mousex, mousey)
+
             level_font = pygame.font.Font('visitor1.ttf', 50)
             shot_font = pygame.font.Font('visitor1.ttf', 20)
             level = level_font.render('%s' % self.level_number, True, WHITE)
@@ -172,4 +185,5 @@ class Map():
             red_tank.draw_red()
             blue_tank.draw_blue()
             pygame.display.flip()
+            clock.tick(20)
         return map_editor, (length + pygame.time.get_ticks())

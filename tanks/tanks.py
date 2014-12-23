@@ -1,6 +1,10 @@
 """
  Atari Tanks!  Weeeeeeeeeeeeeeeeeeeeeeeeeee
 
+ Recreated here using Python and Pygame by Jeremy Kenyon as a lesson in learning programing and game design.
+
+ Any questions please contact me at lanthos@gmail.com.
+
 """
 
 import sys
@@ -47,8 +51,11 @@ def display_score(score_font, level_font, DISPLAYSURF, p1_score, p2_score, game_
     DISPLAYSURF.blit(level_text, level_text_rect)
 
 
-def check_time(time, length, p1_score, p2_score, score_font, DISPLAYSURF, game_map, tank_idle):
+def check_time(time, length, p1_score, p2_score, score_font, DISPLAYSURF, game_map, tank_idle, red_tank_move,
+               blue_tank_move):
     if time > length:
+        pygame.draw.rect(DISPLAYSURF, BLACK, ((game_map.MAPWIDTH * game_map.TILESIZE) / 4.2,
+                                              (game_map.MAPHEIGHT * game_map.TILESIZE) / 2, 400, 125))
         if p1_score > p2_score:
             game_over = score_font.render('Game over!  Red wins!', True,  WHITE)
             game_over_rect = game_over.get_rect()
@@ -61,21 +68,6 @@ def check_time(time, length, p1_score, p2_score, score_font, DISPLAYSURF, game_m
                                    (game_map.MAPHEIGHT * game_map.TILESIZE) / 1.5)
             DISPLAYSURF.blit(replay_text, replay_rect)
             DISPLAYSURF.blit(game_over, game_over_rect)
-            tank_idle.stop()
-            pygame.display.flip()
-            over = True
-            while over:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_q:
-                            pygame.quit()
-                            sys.exit()
-                        if event.key == pygame.K_r:
-                            over = False
-            return True
         elif p1_score < p2_score:
             game_over = score_font.render('Game over!  Blue wins!', True,  WHITE)
             game_over_rect = game_over.get_rect()
@@ -87,21 +79,6 @@ def check_time(time, length, p1_score, p2_score, score_font, DISPLAYSURF, game_m
                                    (game_map.MAPHEIGHT * game_map.TILESIZE) / 1.5)
             DISPLAYSURF.blit(replay_text, replay_rect)
             DISPLAYSURF.blit(game_over, game_over_rect)
-            tank_idle.stop()
-            pygame.display.flip()
-            over = True
-            while over:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_q:
-                            pygame.quit()
-                            sys.exit()
-                        if event.key == pygame.K_r:
-                            over = False
-            return True
         else:
             game_over = score_font.render("Game over!  It's a tie!", True,  WHITE)
             game_over_rect = game_over.get_rect()
@@ -111,25 +88,26 @@ def check_time(time, length, p1_score, p2_score, score_font, DISPLAYSURF, game_m
             replay_rect = replay_text.get_rect()
             replay_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 4,
                                    (game_map.MAPHEIGHT * game_map.TILESIZE) / 1.5)
-            pygame.draw.rect(DISPLAYSURF, BLACK, ((game_map.MAPWIDTH * game_map.TILESIZE) / 4,
-                                                  (game_map.MAPHEIGHT * game_map.TILESIZE) / 2, 400, 125))
             DISPLAYSURF.blit(replay_text, replay_rect)
             DISPLAYSURF.blit(game_over, game_over_rect)
-            tank_idle.stop()
-            pygame.display.flip()
-            over = True
-            while over:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
+
+        tank_idle.stop()
+        red_tank_move.stop()
+        blue_tank_move.stop()
+        pygame.display.flip()
+        over = True
+        while over:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
                         pygame.quit()
                         sys.exit()
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_q:
-                            pygame.quit()
-                            sys.exit()
-                        if event.key == pygame.K_r:
-                            over = False
-            return True
+                    if event.key == pygame.K_r:
+                        over = False
+        return True
 
 
 def main():
@@ -148,16 +126,18 @@ def main():
     blue_tank = Tank(550, 200, 'blue')
 
 
-    # initialize the map
+    # initialize the map.  Need to have the tanks as part of this so that tank location can be saved in editor.
     game_map = Map(red_tank, blue_tank)
     map_editor = False
 
     # Set the width and height of the screen [width,height]
-    # size = [700, 500]
-    # screen = pygame.display.set_mode(size)
+    icon = pygame.image.load('tank_icon.bmp')
+    pygame.display.set_icon(icon)
     DISPLAYSURF = pygame.display.set_mode((game_map.MAPWIDTH*game_map.TILESIZE, game_map.MAPHEIGHT*game_map.TILESIZE))
-    pygame.display.set_caption("Tanks")
+    pygame.display.set_caption("Retro Tanks")
 
+    # More tank initialization needed to be done after initial creation of objects so that tank/map relationship works
+    # ok and states can be saved and displays made.
     red_tank.DISPLAYSURF = DISPLAYSURF
     red_tank.game_map = game_map
     red_tank.enemy_tank = blue_tank
@@ -181,7 +161,9 @@ def main():
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
 
-    length = 6000000
+    # Set game length here.  The length_static will be how long the game always is and length will change based upon
+    # using the map editor or on switching maps.
+    length = 6000
     length_static = length
 
     # -------- Main Program Loop -----------
@@ -190,12 +172,13 @@ def main():
         for event in pygame.event.get():  # User did something
             if event.type == pygame.QUIT:  # If user clicked close
                 done = True  # Flag that we are done so we exit this loop
-            elif event.type == pygame.MOUSEMOTION:
-                mousex, mousey = event.pos
-                tileX = int(mousex / game_map.TILESIZE)
-                tileY = int(mousey / game_map.TILESIZE)
-                #print 'Mouse X and Y: %s, %s' % event.pos
-                #print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
+            # Uncomment this if you need to figure out where the mouse location is for troubleshooting.
+            # elif event.type == pygame.MOUSEMOTION:
+            #     mousex, mousey = event.pos
+            #     tileX = int(mousex / game_map.TILESIZE)
+            #     tileY = int(mousey / game_map.TILESIZE)
+            #     print 'Mouse X and Y: %s, %s' % event.pos
+            #     print 'Converted tileX and tileY: %s. %s' % (tileX, tileY)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
@@ -203,7 +186,6 @@ def main():
                 if event.key == pygame.K_w:
                     if not blue_tank.hit and not red_tank.hit:
                         red_tank_move.play(-1)
-                    #print 'W pressed down'
                 if event.key == pygame.K_UP:
                     if not blue_tank.hit and not red_tank.hit:
                         blue_tank_move.play(-1)
@@ -216,7 +198,6 @@ def main():
                 # Map editor commands here
                 if event.key == pygame.K_p:
                     map_editor = True
-                    #print "hi I've been pressed!"
                 if event.key == pygame.K_COMMA:
                     game_map.level_number -= 1
                     length = length_static + pygame.time.get_ticks()
@@ -236,9 +217,9 @@ def main():
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
                     red_tank_move.stop()
-                    #print 'W let up'
                 if event.key == pygame.K_UP:
                     blue_tank_move.stop()
+        # This allows for you to hold down the keys and have it repeat affects instead of having to continually press.
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:
             if not blue_tank.hit and not red_tank.hit:
@@ -262,13 +243,14 @@ def main():
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
-        red_tank.update("red")
+        red_tank.been_shot("red")
         red_bullet.update()
-        blue_tank.update("blue")
+        blue_tank.been_shot("blue")
         blue_bullet.update()
         if map_editor:
             map_editor, length = game_map.editor(map_editor, red_tank, blue_tank, length, DISPLAYSURF)
-
+        replay = check_time(pygame.time.get_ticks(), length, red_tank.score, blue_tank.score, game_over_font,
+                            DISPLAYSURF, game_map, tank_idle, red_tank_move, blue_tank_move)
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
@@ -279,8 +261,6 @@ def main():
         red_tank.draw_red()
         blue_tank.draw_blue()
         display_score(score_font, level_font, DISPLAYSURF, red_tank.score, blue_tank.score, game_map)
-        replay = check_time(pygame.time.get_ticks(), length, red_tank.score, blue_tank.score, game_over_font,
-                            DISPLAYSURF, game_map, tank_idle)
 
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
 
@@ -290,7 +270,7 @@ def main():
         # Limit to 20 frames per second
         clock.tick(20)
         if replay:
-            length += pygame.time.get_ticks()
+            length += pygame.time.get_ticks() + length_static
             tank_idle.play(-1)
             red_bullet.reset()
             blue_bullet.reset()
