@@ -1,0 +1,5 @@
+This is an Atari Combat clone that I created while learning to code!  This is not meant for sale and all original ideas
+belong to the Atari Combat team.
+
+All files needed for the game are included here except for the Pygame framework.  This was built using Python 2.7 and
+the Pygame 1.9 framework.  These can be found at python.org and pygame.org respectively.
