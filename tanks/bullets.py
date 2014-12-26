@@ -10,7 +10,15 @@ import math
 
 
 class Bullet(pygame.sprite.Sprite):
+    '''
+    I added a lot of stuff in init that doesn't get used immediately.  I added it because I was getting warnings about
+    assigning things to self. outside of init when I tried to do it in other functions so figured this was best practice
+    but I could be wrong. :)
 
+    I passed along things in the init to add them to the class for easy access instead of doing it per function, e. g.
+    game_map, the different tanks, so that there would be less typing to do over all.  Not sure if this is best practice
+    but it worked well for what I was trying to do.
+    '''
     def __init__(self, bullet_color, tank_color, DISPLAYSURF, game_map, enemy_tank, my_tank):
         super(Bullet, self).__init__()
         self.image = pygame.Surface([4, 4])
@@ -81,6 +89,7 @@ class Bullet(pygame.sprite.Sprite):
                         both_tests_failed = True
                         if previous_tile_x != self.tileX:
                             if self.game_map.tilemap[self.tileY][previous_tile_x] != self.game_map.wall:
+                                # Check to make sure that if you bounce it won't just hit a wall
                                 self.x_velocity *= -1
                                 both_tests_failed = False
                         if previous_tile_y != self.tileY:

@@ -53,9 +53,18 @@ def display_score(score_font, level_font, DISPLAYSURF, p1_score, p2_score, game_
 
 def check_time(time, length, p1_score, p2_score, score_font, DISPLAYSURF, game_map, tank_idle, red_tank_move,
                blue_tank_move):
+    '''
+    Checks to see if the time limit for the game has passed and if it has checks the score and asks for quit or restart.
+    '''
     if time > length:
+        credit_font = pygame.font.Font('visitor1.ttf', 15)
         pygame.draw.rect(DISPLAYSURF, BLACK, ((game_map.MAPWIDTH * game_map.TILESIZE) / 4.2,
-                                              (game_map.MAPHEIGHT * game_map.TILESIZE) / 2, 400, 125))
+                                              (game_map.MAPHEIGHT * game_map.TILESIZE) / 2, 400, 225))
+        credit_text = credit_font.render('Combat clone made by Jeremy Kenyon 2014', True, WHITE)
+        credit_text_rect = credit_text.get_rect()
+        credit_text_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 4,
+                                    (game_map.MAPHEIGHT * game_map.TILESIZE) / 1.2)
+        DISPLAYSURF.blit(credit_text, credit_text_rect)
         if p1_score > p2_score:
             game_over = score_font.render('Game over!  Red wins!', True,  WHITE)
             game_over_rect = game_over.get_rect()
@@ -163,7 +172,7 @@ def main():
 
     # Set game length here.  The length_static will be how long the game always is and length will change based upon
     # using the map editor or on switching maps.
-    length = 6000
+    length = 60000
     length_static = length
 
     # -------- Main Program Loop -----------

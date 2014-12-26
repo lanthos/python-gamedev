@@ -38,7 +38,7 @@ class Map():
         ]
         self.shot_type = 0
 
-        # Import map from pickled file
+        # Import map from pickled file.  This includes tank states (angle, location).
 
         self.tilemap = []
         filename = 'tanks_map%s.txt' % self.level_number
@@ -166,6 +166,7 @@ class Map():
                 mousex, mousey = event.pos
                 self.add_info(mousex, mousey)
 
+            # This displays all of the text at the top of the screen so you know what's going on.
             level_font = pygame.font.Font('visitor1.ttf', 50)
             shot_font = pygame.font.Font('visitor1.ttf', 20)
             level = level_font.render('%s' % self.level_number, True, WHITE)

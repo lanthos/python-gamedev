@@ -20,7 +20,15 @@ BLUE = (5, 61, 244)
 
 
 class Tank():
+    '''
+    I added a lot of stuff in init that doesn't get used immediately.  I added it because I was getting warnings about
+    assigning things to self. outside of init when I tried to do it in other functions so figured this was best practice
+    but I could be wrong. :)
 
+    I passed along things in the init to add them to the class for easy access instead of doing it per function, e. g.
+    game_map, the different tanks, so that there would be less typing to do over all.  Not sure if this is best practice
+    but it worked well for what I was trying to do.
+    '''
     def __init__(self, tank_x, tank_y, color):
         # super(Tank, self).__init__()
         self.tank_x = tank_x
@@ -71,6 +79,8 @@ class Tank():
                                self.rotated_image.get_height() / 2))
 
     def check_wall(self):
+        # self.game_map is assigned outside of the class.  I know I know, it's bad but it's the only way I could
+        # figure out how to make state saving work with tanks and the map.
         for i in range(0, 11):
             self.tileX = int((self.tank_x + i) / self.game_map.TILESIZE)
             self.tileY = int((self.tank_y + i) / self.game_map.TILESIZE)
@@ -126,10 +136,13 @@ class Tank():
 
     def shoot(self, bullet):
         if bullet.time_alive <= 0:
+            # Here we set the location of the bullet to be at the location of the tank.
             bullet.rect.x = self.tank_x
             bullet.rect.y = self.tank_y
             bullet.time_alive = 30
             self.tank_shot.play()
+            # and here we set the initial velocity for the bullets so we don't do a lot of calculations in the bullet
+            # class itself and cause confusion.  It's not fun, let me tell you.
             if bullet.color == 'red':
                 bullet.angle_rad = self.angle_rad
                 bullet.x_velocity = bullet.speed * round(math.cos(bullet.angle_rad), 3)
@@ -140,6 +153,10 @@ class Tank():
                 bullet.y_velocity = bullet.speed * round(math.sin(bullet.my_tank.angle_rad_blue), 3)
 
     def been_shot(self, color):
+        '''
+        This function makes sure that if the tanks are at the corners of the map when shot that they get wrapped around
+        to the other side.  They also spin the tank around when it gets shot.
+        '''
         if color == 'red':
             if self.hit_counter > 0:
                 if self.hit_move:
