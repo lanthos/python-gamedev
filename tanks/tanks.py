@@ -252,9 +252,9 @@ def main():
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
-        red_tank.been_shot("red")
+        red_tank.been_shot("red", red_bullet)
         red_bullet.update()
-        blue_tank.been_shot("blue")
+        blue_tank.been_shot("blue", blue_bullet)
         blue_bullet.update()
         if map_editor:
             map_editor, length = game_map.editor(map_editor, red_tank, blue_tank, length, DISPLAYSURF)

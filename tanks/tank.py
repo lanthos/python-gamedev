@@ -152,13 +152,14 @@ class Tank():
                 bullet.x_velocity = bullet.speed * round(math.cos(bullet.my_tank.angle_rad_blue), 3)
                 bullet.y_velocity = bullet.speed * round(math.sin(bullet.my_tank.angle_rad_blue), 3)
 
-    def been_shot(self, color):
+    def been_shot(self, color, bullet):
         '''
         This function makes sure that if the tanks are at the corners of the map when shot that they get wrapped around
         to the other side.  They also spin the tank around when it gets shot.
         '''
         if color == 'red':
             if self.hit_counter > 0:
+                bullet.reset()
                 if self.hit_move:
                     self.tank_x -= 50 * round(math.cos(self.angle_rad), 3)
                     if self.tank_x < 20:
@@ -177,6 +178,7 @@ class Tank():
                 self.hit_counter -= 1
         if color == 'blue':
             if self.hit_counter > 0:
+                bullet.reset()
                 if self.hit_move:
                     self.tank_x -= 50 * round(math.cos(self.angle_rad_blue), 3)
                     if self.tank_x < 20:
@@ -193,6 +195,8 @@ class Tank():
                 self.angle_rad_blue = degree_to_radian(self.angle_deg)
                 self.draw_blue()
                 self.hit_counter -= 1
+        if self.hit_counter <= 0:
+            self.hit = False
 
 
 def degree_to_radian(degree):
