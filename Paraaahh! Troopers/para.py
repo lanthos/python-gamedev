@@ -6,24 +6,26 @@
 import sys
 import pygame
 import turret
+import trooper
 
 
 # Globals constants defined here.
 # Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+BLUE = (5, 61, 244)
+GREY = (199, 199, 199)
 GREEN = (63, 177, 79)
 RED = (187, 8, 0)
-BLUE = (5, 61, 244)
 
 
 def display_score(score_font, screen, p1_score, high_score):
     player = score_font.render('Score: %s' % p1_score, True, WHITE)
     player_rect = player.get_rect()
-    player_rect.topleft = (screen.get_width() / 1.5, screen.get_height() - 80)
+    player_rect.topleft = (screen.get_width() / 1.7, screen.get_height() - 50)
     high_score = score_font.render('High Score: %s' % high_score, True, WHITE)
     high_score_rect = high_score.get_rect()
-    high_score_rect.topleft = (screen.get_width() / 10, screen.get_height() - 80)
+    high_score_rect.topleft = (screen.get_width() / 24, screen.get_height() - 50)
     screen.blit(player, player_rect)
     screen.blit(high_score, high_score_rect)
 
@@ -40,16 +42,19 @@ def main():
     # Initialize sounds
 
     # Set the width and height of the screen [width,height]
-    screen_width, screen_height = [1280, 1024]
+    screen_width, screen_height = [1024, 768]
     screen = pygame.display.set_mode([screen_width, screen_height])
     pygame.display.set_caption("Paraaaahhhh! Troopers")
 
     # initialize fonts
-    BASICFONTSIZE = 50
+    BASICFONTSIZE = 40
     score_font = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
 
     # initialize turret and bullets
     player = turret.Turret(screen)
+
+    # Init troopers
+    unit = trooper.Trooper(screen)
 
     # Loop until the user clicks the close button.
     done = False
@@ -57,7 +62,7 @@ def main():
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
 
-    high_score = 12341512
+    high_score = 1234151
 
     # -------- Main Program Loop -----------
     while not done:
@@ -81,6 +86,7 @@ def main():
         player.draw()
         draw_map(screen)
         display_score(score_font, screen, player.score, high_score)
+        unit.draw()
 
 
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
