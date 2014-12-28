@@ -3,3 +3,13 @@ belong to the Atari Combat team.
 
 All files needed for the game are included here except for the Pygame framework.  This was built using Python 2.7 and
 the Pygame 1.9 framework.  These can be found at python.org and pygame.org respectively.
+
+If you are on a Mac the easiest way to get this up and running is to use Homebrew (http://brew.sh/) and use the following
+commands:
+
+brew install mercurial
+brew install libvorbis sdl sdl_image sdl_mixer sdl_ttf portmidi
+
+go to http://xquartz.macosforge.org/landing/ and download the latest xquartz and install it.
+
+sudo pip install hg+http://bitbucket.org/pygame/pygame

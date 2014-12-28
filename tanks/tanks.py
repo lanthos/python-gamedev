@@ -52,12 +52,11 @@ def display_score(score_font, level_font, DISPLAYSURF, p1_score, p2_score, game_
 
 
 def check_time(time, length, p1_score, p2_score, score_font, DISPLAYSURF, game_map, tank_idle, red_tank_move,
-               blue_tank_move):
+               blue_tank_move, credit_font):
     '''
     Checks to see if the time limit for the game has passed and if it has checks the score and asks for quit or restart.
     '''
     if time > length:
-        credit_font = pygame.font.Font('visitor1.ttf', 15)
         pygame.draw.rect(DISPLAYSURF, BLACK, ((game_map.MAPWIDTH * game_map.TILESIZE) / 4.2,
                                               (game_map.MAPHEIGHT * game_map.TILESIZE) / 2, 400, 225))
         credit_text = credit_font.render('Combat clone made by Jeremy Kenyon 2014', True, WHITE)
@@ -119,6 +118,11 @@ def check_time(time, length, p1_score, p2_score, score_font, DISPLAYSURF, game_m
         return True
 
 
+def score_reset(red, blue):
+    red.score = 0
+    blue.score = 0
+
+
 def main():
     """ Main function for the game. """
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -163,6 +167,7 @@ def main():
     score_font = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
     level_font = pygame.font.Font('visitor1.ttf', 50)
     game_over_font = pygame.font.Font('visitor1.ttf', 25)
+    credit_font = pygame.font.Font('visitor1.ttf', 15)
 
     # Loop until the user clicks the close button.
     done = False
@@ -212,6 +217,7 @@ def main():
                     length = length_static + pygame.time.get_ticks()
                     red_bullet.reset()
                     blue_bullet.reset()
+                    score_reset(red_tank, blue_tank)
                     if game_map.level_number <= 0:
                         game_map.level_number = 1
                     game_map.load_map(game_map.level_number, red_tank, blue_tank)
@@ -220,6 +226,7 @@ def main():
                     length = length_static + pygame.time.get_ticks()
                     red_bullet.reset()
                     blue_bullet.reset()
+                    score_reset(red_tank, blue_tank)
                     if game_map.level_number not in game_map.map_levels.values():
                         game_map.level_number -= 1
                     game_map.load_map(game_map.level_number, red_tank, blue_tank)
@@ -259,7 +266,7 @@ def main():
         if map_editor:
             map_editor, length = game_map.editor(map_editor, red_tank, blue_tank, length, DISPLAYSURF)
         replay = check_time(pygame.time.get_ticks(), length, red_tank.score, blue_tank.score, game_over_font,
-                            DISPLAYSURF, game_map, tank_idle, red_tank_move, blue_tank_move)
+                            DISPLAYSURF, game_map, tank_idle, red_tank_move, blue_tank_move, credit_font)
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
