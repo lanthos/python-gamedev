@@ -5,8 +5,8 @@
 
 import sys
 import pygame
-import turret
-import trooper
+import sprites
+import random
 
 
 # Globals constants defined here.
@@ -30,10 +30,6 @@ def display_score(score_font, screen, p1_score, high_score):
     screen.blit(high_score, high_score_rect)
 
 
-def draw_map(screen):
-    pygame.draw.line(screen, GREEN, (0, screen.get_height() / 1.1), (screen.get_width(), screen.get_height() / 1.1), 10)
-
-
 def main():
     """ Main function for the game. """
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -44,17 +40,42 @@ def main():
     # Set the width and height of the screen [width,height]
     screen_width, screen_height = [1024, 768]
     screen = pygame.display.set_mode([screen_width, screen_height])
+    area = screen.get_rect()
     pygame.display.set_caption("Paraaaahhhh! Troopers")
+    background = pygame.Surface((screen_width, screen_height))
+    background.fill(BLACK)
+    background = background.convert()
 
     # initialize fonts
     BASICFONTSIZE = 40
     score_font = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
 
-    # initialize turret and bullets
-    player = turret.Turret(screen)
+    ground = pygame.Surface((screen_width, 10))
+    ground.fill(GREEN)
+    ground = ground.convert()
+    ground_rect = ground.get_rect()
+    ground_rect.x = 0
+    ground_rect.y = screen.get_height() / 1.1
+
+    # Init sprites
+    canon = sprites.Turret(ground_rect)
+    bullet_sprites = pygame.sprite.RenderPlain()
+    canon_sprite = pygame.sprite.RenderPlain(canon)
+    parachute_sprites = pygame.sprite.RenderPlain()
+    trooper_sprites = pygame.sprite.RenderPlain()
+
+    # Initial drawing of everything
+
+    screen.blit(background, (0, 0))
+    canon_sprite.draw(screen)
+    screen.blit(ground, ground_rect)
+    screen.blit(canon.canonbase, canon.cannonbase_rect)
+    screen.blit(canon.canontop, canon.cannontop_rect)
+
+    canon_sprite.draw(screen)
 
     # Init troopers
-    unit = trooper.Trooper(screen)
+    unit = sprites.Trooper()
 
     # Loop until the user clicks the close button.
     done = False
@@ -63,6 +84,10 @@ def main():
     clock = pygame.time.Clock()
 
     high_score = 1234151
+
+    shoot = False
+    shoot_lock = 8
+    t = 0
 
     # -------- Main Program Loop -----------
     while not done:
@@ -74,19 +99,64 @@ def main():
                 if event.key == pygame.K_q:
                     pygame.quit()
                     sys.exit()
+                if event.key == pygame.K_LEFT:
+                        canon.move_counter_clockwise()
+                        print canon.state
+                        print 'going counter clockwise'
+                elif event.key == pygame.K_RIGHT:
+                    canon.move_clockwise()
+                    print canon.state
+                    print 'going clockwise'
+                elif event.key == pygame.K_SPACE:
+                    shoot = True
+                    t = 0
+                elif event.key == pygame.K_p:
+                    trooper = sprites.Trooper()
+                    trooper.rect.bottom = area.bottom - 560
+                    trooper.rect.x = random.randint(area.left + 5, area.right - 20)
+                    trooper_sprites.add(trooper)
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT and canon.state == "counterclockwise":
+                    canon.halt()
+                elif event.key == pygame.K_RIGHT and canon.state == "clockwise":
+                    canon.halt()
+
+        if shoot and t % shoot_lock == 0:
+            #shoot a bullet
+            newbullet = sprites.Bullet()
+            newbullet.direction = canon.angle
+            newbullet.image = pygame.transform.rotate(newbullet.bullet, newbullet.direction)
+            newbullet.rect = newbullet.bullet.get_rect()
+            newbullet.rect.midbottom = canon.cannontop_rect.midbottom
+            newbullet.rect = newbullet.rect.move((0, -24))
+            bullet_sprites.add(newbullet)
+            t = 0
+            t += 1
 
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
         # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
+        canon_sprite.update()
+        bullet_sprites.update()
+        # parachute_sprites.update()
+        # trooper_sprites.update()
 
 
+        meh = None
+        meh = pygame.sprite.groupcollide(bullet_sprites, trooper_sprites, True, True)
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
-        player.draw()
-        draw_map(screen)
-        display_score(score_font, screen, player.score, high_score)
-        unit.draw()
+
+        screen.blit(background, (0, 0))
+        display_score(score_font, screen, canon.score, high_score)
+        canon_sprite.draw(screen)
+        bullet_sprites.draw(screen)
+        # parachute_sprites.draw(screen)
+        trooper_sprites.draw(screen)
+        screen.blit(ground, ground_rect)
+        screen.blit(canon.canonbase, canon.cannonbase_rect)
+        screen.blit(canon.canontop, canon.cannontop_rect)
 
 
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
