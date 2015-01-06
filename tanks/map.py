@@ -71,6 +71,8 @@ class Map():
         with open('map_levels', 'wb') as ml:
             pickle.dump(self.map_levels, ml)
 
+        save =
+
     def load_map(self, level_number, red_tank, blue_tank):
         if not level_number:
             level_number = self.level_number

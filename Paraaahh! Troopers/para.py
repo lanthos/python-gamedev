@@ -7,6 +7,7 @@ import sys
 import pygame
 import sprites
 import random
+import math
 
 
 # Globals constants defined here.
@@ -70,7 +71,7 @@ def main():
     canon_sprite.draw(screen)
     screen.blit(ground, ground_rect)
     screen.blit(canon.canonbase, canon.cannonbase_rect)
-    screen.blit(canon.canontop, canon.cannontop_rect)
+    # screen.blit(canon.canontop, canon.cannontop_rect)
 
     canon_sprite.draw(screen)
 
@@ -128,7 +129,8 @@ def main():
             newbullet.image = pygame.transform.rotate(newbullet.bullet, newbullet.direction)
             newbullet.rect = newbullet.bullet.get_rect()
             newbullet.rect.midbottom = canon.cannontop_rect.midbottom
-            newbullet.rect = newbullet.rect.move((0, -24))
+            canon_rad = math.pi / 180 * canon.angle
+            newbullet.rect = newbullet.rect.move((newbullet.speed * math.sin(canon_rad), -newbullet.speed * math.cos(canon_rad))) # need to make sin and cos sine and whatnot work here
             bullet_sprites.add(newbullet)
             t = 0
             t += 1
@@ -156,7 +158,7 @@ def main():
         trooper_sprites.draw(screen)
         screen.blit(ground, ground_rect)
         screen.blit(canon.canonbase, canon.cannonbase_rect)
-        screen.blit(canon.canontop, canon.cannontop_rect)
+        # screen.blit(canon.canontop, canon.cannontop_rect)
 
 
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT

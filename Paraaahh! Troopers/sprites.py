@@ -58,15 +58,15 @@ class Turret(pygame.sprite.Sprite):
 
     def reinit(self):
         self.state = "still"
-        self.angle = 180
+        self.angle = 0
         self.speed = 3
-        self.rect.midbottom = self.cannonbase_rect.midbottom
+        self.rect.midtop = self.cannonbase_rect.midtop
         self.rect = self.rect.move((0, -70))
 
     def update(self):
         rotated = pygame.transform.rotate(self.base, self.angle)
         self.rect = rotated.get_rect()
-        self.rect.midbottom = self.cannonbase_rect.midbottom
+        self.rect.midtop = self.cannonbase_rect.midbottom
         self.rect = self.rect.move((0, -70))
         self.image = rotated
         if self.state == "clockwise":
@@ -110,7 +110,7 @@ class Bullet(pygame.sprite.Sprite):
 
     def update(self):
         rad = self.direction * (math.pi / 180)
-        dx, dy = self.speed * math.sin(rad), self.speed * math.cos(rad)
+        dx, dy = self.speed * math.sin(rad), -self.speed * math.cos(rad)
         self.rect = self.rect.move((dx, dy))
 
 
