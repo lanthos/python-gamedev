@@ -71,7 +71,7 @@ def main():
     canon_sprite.draw(screen)
     screen.blit(ground, ground_rect)
     screen.blit(canon.canonbase, canon.cannonbase_rect)
-    # screen.blit(canon.canontop, canon.cannontop_rect)
+    screen.blit(canon.canontop, canon.cannontop_rect)
 
     canon_sprite.draw(screen)
 
@@ -103,14 +103,16 @@ def main():
                 if event.key == pygame.K_LEFT:
                         canon.move_counter_clockwise()
                         print canon.state
+                        print canon.angle
                         print 'going counter clockwise'
                 elif event.key == pygame.K_RIGHT:
                     canon.move_clockwise()
                     print canon.state
+                    print canon.angle
                     print 'going clockwise'
-                elif event.key == pygame.K_SPACE:
-                    shoot = True
-                    t = 0
+                # elif event.key == pygame.K_SPACE:
+                #     shoot = True
+                #     t = 0
                 elif event.key == pygame.K_p:
                     trooper = sprites.Trooper()
                     trooper.rect.bottom = area.bottom - 560
@@ -121,6 +123,10 @@ def main():
                     canon.halt()
                 elif event.key == pygame.K_RIGHT and canon.state == "clockwise":
                     canon.halt()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            shoot = True
+            t = 0
 
         if shoot and t % shoot_lock == 0:
             #shoot a bullet
@@ -128,9 +134,10 @@ def main():
             newbullet.direction = canon.angle
             newbullet.image = pygame.transform.rotate(newbullet.bullet, newbullet.direction)
             newbullet.rect = newbullet.bullet.get_rect()
-            newbullet.rect.midbottom = canon.cannontop_rect.midbottom
-            canon_rad = math.pi / 180 * canon.angle
-            newbullet.rect = newbullet.rect.move((newbullet.speed * math.sin(canon_rad), -newbullet.speed * math.cos(canon_rad))) # need to make sin and cos sine and whatnot work here
+            newbullet.rect.midbottom = canon.rect.midtop
+            canon_rad = canon.angle * math.pi / 180
+            newbullet.rect = newbullet.rect.move((newbullet.speed * math.cos(canon_rad),
+                                                  -newbullet.speed * math.sin(canon_rad) +20)) # need to make sin and cos sine and whatnot work here
             bullet_sprites.add(newbullet)
             t = 0
             t += 1
@@ -158,7 +165,7 @@ def main():
         trooper_sprites.draw(screen)
         screen.blit(ground, ground_rect)
         screen.blit(canon.canonbase, canon.cannonbase_rect)
-        # screen.blit(canon.canontop, canon.cannontop_rect)
+        screen.blit(canon.canontop, canon.cannontop_rect)
 
 
         # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT

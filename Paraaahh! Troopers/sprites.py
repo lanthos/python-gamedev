@@ -29,7 +29,7 @@ class Turret(pygame.sprite.Sprite):
         # super(Turret, self).__init__()
         pygame.sprite.Sprite.__init__(self)
         self.screen = pygame.display.get_surface()
-        self.turret_direction = 0
+        self.turret_direction = 90
         self.speed = 2
         self.score = 0
         self.hit_counter = 0
@@ -58,16 +58,16 @@ class Turret(pygame.sprite.Sprite):
 
     def reinit(self):
         self.state = "still"
-        self.angle = 0
+        self.angle = 90
         self.speed = 3
-        self.rect.midtop = self.cannonbase_rect.midtop
-        self.rect = self.rect.move((0, -70))
+        self.rect.center = self.cannonbase_rect.midtop
+        self.rect = self.rect.move((0, -36))
 
     def update(self):
         rotated = pygame.transform.rotate(self.base, self.angle)
         self.rect = rotated.get_rect()
-        self.rect.midtop = self.cannonbase_rect.midbottom
-        self.rect = self.rect.move((0, -70))
+        self.rect.center = self.cannonbase_rect.midtop
+        self.rect = self.rect.move((0, -36))
         self.image = rotated
         if self.state == "clockwise":
             self.move_clockwise()
@@ -75,19 +75,19 @@ class Turret(pygame.sprite.Sprite):
             self.move_counter_clockwise()
 
     def move_clockwise(self):
-        if self.angle - self.speed > 135:
+        if self.angle - self.speed > 25:
             self.angle -= self.speed
             self.state = "clockwise"
         else:
-            self.angle = 135
+            self.angle = 25
             self.state = "still"
 
     def move_counter_clockwise(self):
-        if self.angle + self.speed < 225:
+        if self.angle + self.speed < 155:
             self.angle += self.speed
             self.state = "counterclockwise"
         else:
-            self.angle = 225
+            self.angle = 155
             self.state = "still"
 
     def halt(self):
@@ -110,7 +110,7 @@ class Bullet(pygame.sprite.Sprite):
 
     def update(self):
         rad = self.direction * (math.pi / 180)
-        dx, dy = self.speed * math.sin(rad), -self.speed * math.cos(rad)
+        dx, dy = self.speed * math.cos(rad), -self.speed * math.sin(rad)
         self.rect = self.rect.move((dx, dy))
 
 
