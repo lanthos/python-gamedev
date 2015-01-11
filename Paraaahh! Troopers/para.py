@@ -47,6 +47,12 @@ def main():
     background.fill(BLACK)
     background = background.convert()
 
+    # static load of images that are used a lot
+    heli1_image, heli1_rect = sprites.load_image('heli1.bmp')
+    heli2_image, heli2_rect = sprites.load_image('heli2.bmp')
+    plane_image, plane_rect = sprites.load_image('plane.bmp')
+    troop_image, troop_rect = sprites.load_image('trooper.bmp')
+
     # initialize fonts
     BASICFONTSIZE = 40
     score_font = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
@@ -64,6 +70,7 @@ def main():
     canon_sprite = pygame.sprite.RenderPlain(canon)
     parachute_sprites = pygame.sprite.RenderPlain()
     trooper_sprites = pygame.sprite.RenderPlain()
+    plane_sprites = pygame.sprite.RenderPlain()
 
     # Initial drawing of everything
 
@@ -75,9 +82,6 @@ def main():
 
     canon_sprite.draw(screen)
 
-    # Init troopers
-    unit = sprites.Trooper()
-
     # Loop until the user clicks the close button.
     done = False
 
@@ -87,7 +91,7 @@ def main():
     high_score = 1234151
 
     shoot = False
-    shoot_lock = 8
+    shoot_lock = 6
     t = 0
 
     # -------- Main Program Loop -----------
@@ -110,11 +114,11 @@ def main():
                     print canon.state
                     print canon.angle
                     print 'going clockwise'
-                # elif event.key == pygame.K_SPACE:
-                #     shoot = True
-                #     t = 0
+                elif event.key == pygame.K_SPACE:
+                    shoot = True
+                    t = 0
                 elif event.key == pygame.K_p:
-                    trooper = sprites.Trooper()
+                    trooper = sprites.Trooper(troop_image, troop_rect)
                     trooper.rect.bottom = area.bottom - 560
                     trooper.rect.x = random.randint(area.left + 5, area.right - 20)
                     trooper_sprites.add(trooper)
@@ -123,10 +127,12 @@ def main():
                     canon.halt()
                 elif event.key == pygame.K_RIGHT and canon.state == "clockwise":
                     canon.halt()
+                elif event.key == pygame.K_SPACE:
+                    t = 0
+                    shoot = False
         keys = pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
             shoot = True
-            t = 0
 
         if shoot and t % shoot_lock == 0:
             #shoot a bullet
@@ -137,10 +143,10 @@ def main():
             newbullet.rect.midbottom = canon.rect.midtop
             canon_rad = canon.angle * math.pi / 180
             newbullet.rect = newbullet.rect.move((newbullet.speed * math.cos(canon_rad),
-                                                  -newbullet.speed * math.sin(canon_rad) +20)) # need to make sin and cos sine and whatnot work here
+                                                  -newbullet.speed * math.sin(canon_rad) +20))
             bullet_sprites.add(newbullet)
             t = 0
-            t += 1
+        t += 1
 
         # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 

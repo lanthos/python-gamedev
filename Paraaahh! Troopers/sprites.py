@@ -116,10 +116,25 @@ class Bullet(pygame.sprite.Sprite):
 
 class Trooper(pygame.sprite.Sprite):
 
-    def __init__(self):
+    def __init__(self, image, rect):
         pygame.sprite.Sprite.__init__(self)
 
-        self.image, self.rect = load_image('trooper.bmp')
+        self.image, self.rect = image, rect
         self.image = pygame.transform.scale(self.image, (16, 30))
         self.rect = self.image.get_rect()
 
+
+class Helicopter(pygame.sprite.Sprite):
+
+    def __init__(self, image1, rect1, image2, rect2):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image, self.rect = image1, rect1
+
+
+class Plane(pygame.sprite.Sprite):
+
+    def __init__(self, image, rect):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image, self.rect = image, rect
