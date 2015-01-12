@@ -48,10 +48,11 @@ def main():
     background = background.convert()
 
     # static load of images that are used a lot
-    heli1_image, heli1_rect = sprites.load_image('heli1.bmp')
-    heli2_image, heli2_rect = sprites.load_image('heli2.bmp')
+    heli1_image, heli_rect = sprites.load_image('heli1.bmp')
+    heli2_image, heli_rect = sprites.load_image('heli2.bmp')
     plane_image, plane_rect = sprites.load_image('plane.bmp')
     troop_image, troop_rect = sprites.load_image('trooper.bmp')
+    parachute_image, parachute_rect = sprites.load_image('chute.bmp')
 
     # initialize fonts
     BASICFONTSIZE = 40
@@ -71,6 +72,7 @@ def main():
     parachute_sprites = pygame.sprite.RenderPlain()
     trooper_sprites = pygame.sprite.RenderPlain()
     plane_sprites = pygame.sprite.RenderPlain()
+    heli_sprites = pygame.sprite.RenderPlain()
 
     # Initial drawing of everything
 
@@ -89,6 +91,7 @@ def main():
     clock = pygame.time.Clock()
 
     high_score = 1234151
+    score = 200
 
     shoot = False
     shoot_lock = 6
@@ -118,7 +121,7 @@ def main():
                     shoot = True
                     t = 0
                 elif event.key == pygame.K_p:
-                    trooper = sprites.Trooper(troop_image, troop_rect)
+                    trooper = sprites.Trooper(troop_image, troop_rect, ground_rect)
                     trooper.rect.bottom = area.bottom - 560
                     trooper.rect.x = random.randint(area.left + 5, area.right - 20)
                     trooper_sprites.add(trooper)
@@ -134,6 +137,9 @@ def main():
         if keys[pygame.K_SPACE]:
             shoot = True
 
+        # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
+
+        # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
         if shoot and t % shoot_lock == 0:
             #shoot a bullet
             newbullet = sprites.Bullet()
@@ -143,22 +149,66 @@ def main():
             newbullet.rect.midbottom = canon.rect.midtop
             canon_rad = canon.angle * math.pi / 180
             newbullet.rect = newbullet.rect.move((newbullet.speed * math.cos(canon_rad),
-                                                  -newbullet.speed * math.sin(canon_rad) +20))
+                                                  -newbullet.speed * math.sin(canon_rad) + 20))
             bullet_sprites.add(newbullet)
             t = 0
         t += 1
 
-        # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
+        # should there be a new heli?
+        if random.randrange(0, 100) == 1:
+            heli = sprites.Helicopter(heli1_image, heli2_image, heli_rect)
+            if random.randrange(0, 2) == 1:
+                heli.rect.topright = area.topright
+                heli.direction = -1
+            else:
+                heli.rect.topleft = area.topleft
+                heli.rect = heli.rect.move((0, 62))
+                heli.flip_images()
+                heli.direction = 1
+            heli_sprites.add(heli)
 
-        # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
+        if score < 6500:
+            ch = 150 - (score / 500) * 10
+        else:
+            ch = 20
+
+        para_chance = ch * len(heli_sprites.sprites())
+        for heli in heli_sprites.sprites():
+            if heli.rect.left > area.right and heli.direction == 1:
+                heli_sprites.remove(heli)
+            elif heli.rect.right < area.left and heli.direction == -1:
+                heli_sprites.remove(heli)
+            elif random.randrange(0, 100) == 1:
+                para = sprites.Parachute(parachute_image, parachute_rect, ground_rect)
+                para.rect.bottom = area.top
+                parachute_sprites.add(para)
+
+                trooper = sprites.Trooper(troop_image, troop_rect, ground_rect)
+                trooper.rect.midtop = heli.rect.midbottom
+                trooper_sprites.add(trooper)
+
+                trooper.para = para
+                para.trooper = trooper
+
+        trooper_killed_dict = pygame.sprite.groupcollide(bullet_sprites, trooper_sprites, 1, 1)
+        for bullet in trooper_killed_dict:
+            screen.blit(background, bullet.rect, bullet.rect)
+            for trooper in trooper_killed_dict[bullet]:
+                screen.blit(background, trooper.rect, trooper.rect)
+                screen.blit(background, trooper.para.rect, trooper.para.rect)
+                parachute_sprites.remove(trooper.para)
+
         canon_sprite.update()
         bullet_sprites.update()
+        heli_sprites.update()
         # parachute_sprites.update()
-        # trooper_sprites.update()
+        trooper_sprites.update()
 
 
         meh = None
-        meh = pygame.sprite.groupcollide(bullet_sprites, trooper_sprites, True, True)
+        meh = pygame.sprite.groupcollide(bullet_sprites, heli_sprites, True, True)
+        # meh = pygame.sprite.groupcollide(bullet_sprites, trooper_sprites, True, True)
+        # meh = pygame.sprite.groupcollide(bullet_sprites, parachute_sprites, True, True)
         # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
         # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
@@ -167,7 +217,8 @@ def main():
         display_score(score_font, screen, canon.score, high_score)
         canon_sprite.draw(screen)
         bullet_sprites.draw(screen)
-        # parachute_sprites.draw(screen)
+        heli_sprites.draw(screen)
+        parachute_sprites.draw(screen)
         trooper_sprites.draw(screen)
         screen.blit(ground, ground_rect)
         screen.blit(canon.canonbase, canon.cannonbase_rect)
