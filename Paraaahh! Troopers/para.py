@@ -109,14 +109,14 @@ def main():
                     sys.exit()
                 if event.key == pygame.K_LEFT:
                         canon.move_counter_clockwise()
-                        print canon.state
-                        print canon.angle
-                        print 'going counter clockwise'
+                        # print canon.state
+                        # print canon.angle
+                        # print 'going counter clockwise'
                 elif event.key == pygame.K_RIGHT:
                     canon.move_clockwise()
-                    print canon.state
-                    print canon.angle
-                    print 'going clockwise'
+                    # print canon.state
+                    # print canon.angle
+                    # print 'going clockwise'
                 elif event.key == pygame.K_SPACE:
                     shoot = True
                     t = 0
@@ -179,9 +179,12 @@ def main():
             elif heli.rect.right < area.left and heli.direction == -1:
                 heli_sprites.remove(heli)
             elif random.randrange(0, 100) == 1:
-                para = sprites.Parachute(parachute_image, parachute_rect, ground_rect)
+                para = sprites.Parachute(parachute_image, parachute_rect)
                 para.rect.bottom = area.top
                 parachute_sprites.add(para)
+                print len(parachute_sprites)
+                for i in parachute_sprites:
+                    print i.rect.x
 
                 trooper = sprites.Trooper(troop_image, troop_rect, ground_rect)
                 trooper.rect.midtop = heli.rect.midbottom
@@ -198,10 +201,17 @@ def main():
                 screen.blit(background, trooper.para.rect, trooper.para.rect)
                 parachute_sprites.remove(trooper.para)
 
+        para_hit_dict = pygame.sprite.groupcollide(bullet_sprites, trooper_sprites, 1, 1)
+        for bullet in para_hit_dict:
+            screen.blit(background, bullet.rect, bullet.rect)
+            for para in para_hit_dict[bullet]:
+                screen.blit(background, para.rect, para.rect)
+                para.trooper.speed = 4
+
         canon_sprite.update()
         bullet_sprites.update()
         heli_sprites.update()
-        # parachute_sprites.update()
+        parachute_sprites.update()
         trooper_sprites.update()
 
 

@@ -8,7 +8,7 @@ Created by Jeremy Kenyon.  For questions contact lanthos@gmail.com.
 import pygame
 import pickle
 import sys
-import os
+import json
 
 # Globals constants defined here.
 # Colors
@@ -38,16 +38,10 @@ class Map():
         ]
         self.shot_type = 0
 
-        # Import map from pickled file.  This includes tank states (angle, location).
+        # Import map from json file.  This includes tank states (angle, location).
 
         self.tilemap = []
-        filename = 'tanks_map%s.txt' % self.level_number
-        with open(filename, 'rb') as f:
-            self.tilemap, self.shot_type = pickle.load(f)
-            red_tank.tank_x, red_tank.tank_y, red_tank.angle_rad, red_tank.tank_direction = pickle.load(f)
-            blue_tank.tank_x, blue_tank.tank_y, blue_tank.angle_deg, blue_tank.angle_rad_blue = pickle.load(f)
-        with open('map_levels', 'rb') as ml:
-            self.map_levels = pickle.load(ml)
+        self.load_map(self.level_number, red_tank, blue_tank)
 
         self.colors = {
             self.wall: WHITE,
@@ -71,18 +65,32 @@ class Map():
         with open('map_levels', 'wb') as ml:
             pickle.dump(self.map_levels, ml)
 
-        save =
+        self.save = {'tilemap': self.tilemap, 'shot_type': self.shot_type, 'red_tank.tank_x': red_tank.tank_x,
+                     'red_tank.tank_y': red_tank.tank_y, 'red_tank.angle_rad': red_tank.angle_rad,
+                     'red_tank.tank_direction': red_tank.tank_direction, 'blue_tank.tank_x': blue_tank.tank_x,
+                     'blue_tank.tank_y': blue_tank.tank_y, 'blue_tank.angle_deg': blue_tank.angle_deg,
+                     'blue_tank.angle_rad_blue': blue_tank.angle_rad_blue, 'map_levels': self.map_levels}
+        filename = 'tanks_map%s.save' % self.level_number
+        with open(filename, 'wb') as f:
+            json.dump(self.save, f)
 
     def load_map(self, level_number, red_tank, blue_tank):
         if not level_number:
             level_number = self.level_number
-        filename = 'tanks_map%s.txt' % level_number
+        filename = 'tanks_map%s.save' % level_number
         with open(filename, 'rb') as f:
-            self.tilemap, self.shot_type = pickle.load(f)
-            red_tank.tank_x, red_tank.tank_y, red_tank.angle_rad, red_tank.tank_direction = pickle.load(f)
-            blue_tank.tank_x, blue_tank.tank_y, blue_tank.angle_deg, blue_tank.angle_rad_blue = pickle.load(f)
-        with open('map_levels', 'rb') as ml:
-            self.map_levels = pickle.load(ml)
+            save = json.load(f)
+            self.tilemap = save['tilemap']
+            self.shot_type = save['shot_type']
+            red_tank.tank_x = save['red_tank.tank_x']
+            red_tank.tank_y = save['red_tank.tank_y']
+            red_tank.angle_rad = save['red_tank.angle_rad']
+            red_tank.tank_direction = save['red_tank.tank_direction']
+            blue_tank.tank_x = save['blue_tank.tank_x']
+            blue_tank.tank_y = save['blue_tank.tank_y']
+            blue_tank.angle_deg = save['blue_tank.angle_deg']
+            blue_tank.angle_rad_blue = save['blue_tank.angle_rad_blue']
+            self.map_levels = save['map_levels']
 
     def add_wall(self, mousex, mousey):
         tileX = int(mousex / self.TILESIZE)

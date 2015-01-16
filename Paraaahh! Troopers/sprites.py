@@ -198,7 +198,7 @@ class Plane(pygame.sprite.Sprite):
 
 class Parachute(pygame.sprite.Sprite):
 
-    def __init__(self, image, rect, ground):
+    def __init__(self, image, rect):
         pygame.sprite.Sprite.__init__(self)
 
         self.image, self.rect = image, rect
@@ -206,7 +206,9 @@ class Parachute(pygame.sprite.Sprite):
         self.remove_please = 0
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
-        self.ground = ground
+
+        self.rect = self.image.get_rect()  # makes sure each chute gets its own rect
+        # self.ground = ground
 
     # def update(self):
     #     if self.attached == 1:
