@@ -107,8 +107,10 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.bullet.get_rect()
         self.speed = 15
         self.movepos = (0, 0)
+        self.test = 0
 
     def update(self):
-        rad = self.direction * (math.pi / 180)
-        dx, dy = self.speed * math.cos(rad), -self.speed * math.sin(rad)
-        self.rect = self.rect.move((dx, dy))
+        if not self.test:
+            rad = self.direction * (math.pi / 180)
+            dx, dy = self.speed * math.cos(rad), -self.speed * math.sin(rad)
+            self.rect = self.rect.move((dx, dy))

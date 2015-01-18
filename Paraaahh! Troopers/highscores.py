@@ -57,6 +57,20 @@ class HighScores():
             newl.append(item)
         self.items = newl
 
+    def display_high(self, scorefont, screen, p1_score):
+        high = 0
+        for i in self.items:
+            if int(i.score) > high:
+                high = int(i.score)
+        player = scorefont.render('Score: %s' % p1_score, True, (255, 255, 255))
+        player_rect = player.get_rect()
+        player_rect.topleft = (screen.get_width() / 1.7, screen.get_height() - 50)
+        high_score = scorefont.render('High Score: %s' % high, True, (255, 255, 255))
+        high_score_rect = high_score.get_rect()
+        high_score_rect.topleft = (screen.get_width() / 24, screen.get_height() - 50)
+        screen.blit(player, player_rect)
+        screen.blit(high_score, high_score_rect)
+
 
 class HighScoreEntry():
 

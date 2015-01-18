@@ -43,7 +43,7 @@ class Game():
         self.menu = menu.Menu()
         self.menu.mainmenu()
 
-        self.fadecolor = (100, 0, 0)
+        self.fadecolor = (63, 177, 79)
         self.state = "mainmenu"
         self.t = 0
         self.max = 0
@@ -100,17 +100,6 @@ class Game():
         self.state = "gameover"
 
 
-def display_score(scorefont, screen, p1_score, high_score):
-    player = scorefont.render('Score: %s' % p1_score, True, WHITE)
-    player_rect = player.get_rect()
-    player_rect.topleft = (screen.get_width() / 1.7, screen.get_height() - 50)
-    high_score = scorefont.render('High Score: %s' % high_score, True, WHITE)
-    high_score_rect = high_score.get_rect()
-    high_score_rect.topleft = (screen.get_width() / 24, screen.get_height() - 50)
-    screen.blit(player, player_rect)
-    screen.blit(high_score, high_score_rect)
-
-
 def main():
     """ Main function for the game. """
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -132,6 +121,7 @@ def main():
     heli2_image, heli_rect = player.load_image('heli2.bmp')
     plane_image, plane_rect = player.load_image('plane.bmp')
     troop_image, troop_rect = player.load_image('trooper.bmp')
+    falling_trooper_image, falling_trooper_rect = player.load_image('trooper_falling.bmp')
     parachute_image, parachute_rect = player.load_image('chute.bmp')
 
     # initialize fonts
@@ -192,6 +182,32 @@ def main():
             for event in pygame.event.get():  # User did something
                 if event.type == pygame.QUIT:  # If user clicked close
                     done = True  # Flag that we are done so we exit this loop
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mousex, mousey = event.pos
+                    para = troopers.Parachute(parachute_image, parachute_rect)
+                    para.rect.bottom = area.top
+                    parachute_sprites.add(para)
+
+                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect)
+                    trooper.rect.x = mousex
+                    trooper.rect.y = mousey
+                    trooper_sprites.add(trooper)
+
+                    trooper.para = para
+                    para.trooper = trooper
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                    mousex, mousey = event.pos
+                    newbullet = player.Bullet()
+                    newbullet.direction = canon.angle
+                    newbullet.image = pygame.transform.rotate(newbullet.bullet, newbullet.direction)
+                    newbullet.rect = newbullet.bullet.get_rect()
+                    newbullet.rect.x = mousex
+                    newbullet.rect.y = mousey
+                    canon_rad = canon.angle * math.pi / 180
+                    newbullet.rect = newbullet.rect.move((newbullet.speed * math.cos(canon_rad),
+                                                          -newbullet.speed * math.sin(canon_rad) + 20))
+                    newbullet.test = 1
+                    bullet_sprites.add(newbullet)
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_q:
                         pygame.quit()
@@ -273,11 +289,8 @@ def main():
                     para = troopers.Parachute(parachute_image, parachute_rect)
                     para.rect.bottom = area.top
                     parachute_sprites.add(para)
-                    print len(parachute_sprites)
-                    for i in parachute_sprites:
-                        print i.rect.x
 
-                    trooper = troopers.Trooper(troop_image, troop_rect, ground_rect)
+                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect)
                     trooper.rect.midtop = heli.rect.midbottom
                     trooper_sprites.add(trooper)
 
@@ -309,6 +322,8 @@ def main():
                 for para in para_hit_dict[bullet]:
                     screen.blit(background, para.rect, para.rect)
                     para.trooper.speed = 4
+                    para.trooper.chute_shot = True
+                    para.trooper.chute_attached = False
                     dropping_sprites.add(para.trooper)
                     game.score += PARA_SHOT
 
@@ -340,16 +355,14 @@ def main():
             canon_sprite.update()
             bullet_sprites.update()
             heli_sprites.update()
-            parachute_sprites.update()
             trooper_sprites.update()
 
-            # meh = pygame.sprite.groupcollide(bullet_sprites, parachute_sprites, True, True)
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
             # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
 
             screen.blit(background, (0, 0))
-            display_score(scorefont, screen, game.score, high_score)
+            game.highscores.display_high(scorefont, screen, game.score,)
             canon_sprite.draw(screen)
             bullet_sprites.draw(screen)
             heli_sprites.draw(screen)
@@ -366,7 +379,7 @@ def main():
             pygame.display.flip()
 
             # Limit to 20 frames per second
-            clock.tick(20)
+            clock.tick(25)
 
         elif game.state == 'mainmenu':
             for event in pygame.event.get():
@@ -390,9 +403,9 @@ def main():
             for i in range(0, len(menuitems)):
                 cur = menuitems[i]
                 if i != selected:
-                    color = (150, 0, 0)
+                    color = (63, 117, 79)
                 else:
-                    color = (200, 0, 0)
+                    color = (63, 177, 79)
     
                 if cur.align == 'center':
                     text = menufont_h1.render(cur.caption, 1, color)
