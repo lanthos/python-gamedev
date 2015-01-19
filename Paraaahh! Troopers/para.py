@@ -350,8 +350,10 @@ def main():
                         dropping_sprites.remove(trooper)
                         trooper_sprites.remove(trooper)
                         trooper_sprites.remove(hittrooper)
+                        aahh_sprites.remove(trooper.aahh)
                         screen.blit(background, trooper.rect, trooper.rect)
                         screen.blit(background, hittrooper.rect, hittrooper.rect)
+                        screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                         game.score += TROOPER_DROPPED
 
             # Should we remove any parachutes?
