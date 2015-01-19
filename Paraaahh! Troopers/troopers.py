@@ -45,6 +45,8 @@ class Trooper(pygame.sprite.Sprite):
 
     def update(self):
         if self.falling:
+            if self.chute_shot:
+                self.aahh.rect.midbottom = self.rect.midtop
             if not self.chute_attached:
                 self.image = self.images[1]
                 if self.rect.bottom + self.speed - 1 < self.ground.top:
@@ -86,3 +88,13 @@ class Parachute(pygame.sprite.Sprite):
         self.area = screen.get_rect()
 
         self.rect = self.image.get_rect()  # makes sure each chute gets its own rect
+
+
+class Aahh(pygame.sprite.Sprite):
+
+    def __init__(self, image, rect):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image, self.rect = image, rect
+        self.rect = self.image.get_rect()
+        self.remove_please = 0

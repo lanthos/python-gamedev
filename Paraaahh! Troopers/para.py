@@ -123,6 +123,7 @@ def main():
     troop_image, troop_rect = player.load_image('trooper.bmp')
     falling_trooper_image, falling_trooper_rect = player.load_image('trooper_falling.bmp')
     parachute_image, parachute_rect = player.load_image('chute.bmp')
+    aahh_image, aahh_rect = player.load_image('aahh.bmp')
 
     # initialize fonts
     menufont_h1 = pygame.font.Font('visitor1.ttf', 50)
@@ -149,6 +150,7 @@ def main():
     plane_sprites = pygame.sprite.RenderPlain()
     heli_sprites = pygame.sprite.RenderPlain()
     dropping_sprites = pygame.sprite.RenderPlain()
+    aahh_sprites = pygame.sprite.RenderPlain()
 
     # Initial drawing of everything
 
@@ -326,13 +328,18 @@ def main():
                     para.trooper.chute_attached = False
                     dropping_sprites.add(para.trooper)
                     game.score += PARA_SHOT
+                    aahh = troopers.Aahh(aahh_image, aahh_rect)
+                    aahh_sprites.add(aahh)
+                    para.trooper.aahh = aahh
 
             # Did the falling guy die?
             for trooper in dropping_sprites.sprites():
                 if trooper.falling == 0:
                     dropping_sprites.remove(trooper)
                     trooper_sprites.remove(trooper)
+                    aahh_sprites.remove(trooper.aahh)
                     screen.blit(background, trooper.rect, trooper.rect)
+                    screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                     game.score += TROOPER_DROPPED
 
             # Did the falling guy fall on another guy?
@@ -341,6 +348,7 @@ def main():
                 for hittrooper in hit_trooper[trooper]:
                     if trooper != hittrooper:
                         dropping_sprites.remove(trooper)
+                        trooper_sprites.remove(trooper)
                         trooper_sprites.remove(hittrooper)
                         screen.blit(background, trooper.rect, trooper.rect)
                         screen.blit(background, hittrooper.rect, hittrooper.rect)
@@ -368,6 +376,7 @@ def main():
             heli_sprites.draw(screen)
             parachute_sprites.draw(screen)
             trooper_sprites.draw(screen)
+            aahh_sprites.draw(screen)
             screen.blit(ground, ground_rect)
             screen.blit(canon.canonbase, canon.cannonbase_rect)
             screen.blit(canon.canontop, canon.cannontop_rect)
