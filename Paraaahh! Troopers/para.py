@@ -365,6 +365,13 @@ def main():
                     screen.blit(background, para.rect, para.rect)
                     parachute_sprites.remove(para)
 
+            # Should we remove any bullets?
+            for bullet in bullet_sprites.sprites():
+                if bullet.remove_please:
+                    screen.blit(background, bullet.rect, bullet.rect)
+                    bullet_sprites.remove(bullet)
+                    print 'bullet gone!'
+
             canon_sprite.update()
             bullet_sprites.update()
             heli_sprites.update()
