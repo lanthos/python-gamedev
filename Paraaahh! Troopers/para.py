@@ -263,7 +263,7 @@ def main():
                 t = 0
             t += 1
 
-            # should there be a new heli?
+            # should there be a new heli?  Setup a count down timer and if it's above zero do a count down min and max range
             if random.randrange(0, 100) == 1:
                 heli = vehicles.Helicopter(heli1_image, heli2_image, heli_rect)
                 if random.randrange(0, 2) == 1:
@@ -315,6 +315,9 @@ def main():
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.para.rect, trooper.para.rect)
                     parachute_sprites.remove(trooper.para)
+                    if trooper.chute_shot:
+                        aahh_sprites.remove(trooper.aahh)
+                        screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                     game.score += TROOPER_SHOT
 
             # Did a bullet hit a parachute?
