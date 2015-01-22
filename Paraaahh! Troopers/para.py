@@ -48,6 +48,8 @@ class Game():
         self.t = 0
         self.max = 0
         self.nextstate = ""
+        self.heli_timer = 30
+        self.plane_timer = 120
         self.reset()
         try:
             self.player_name = os.environ["USER"]
@@ -117,8 +119,10 @@ def main():
     background = background.convert()
 
     # static load of images that are used a lot
-    heli1_image, heli_rect = player.load_image('heli1.bmp')
-    heli2_image, heli_rect = player.load_image('heli2.bmp')
+    heli1a_image, heli_rect = player.load_image('heli1a.bmp')
+    heli2a_image, heli_rect = player.load_image('heli2a.bmp')
+    heli1b_image, heli_rect = player.load_image('heli1b.bmp')
+    heli2b_image, heli_rect = player.load_image('heli2b.bmp')
     plane_image, plane_rect = player.load_image('plane.bmp')
     troop_image, troop_rect = player.load_image('trooper.bmp')
     falling_trooper_image, falling_trooper_rect = player.load_image('trooper_falling.bmp')
@@ -126,10 +130,10 @@ def main():
     aahh_image, aahh_rect = player.load_image('aahh.bmp')
 
     # initialize fonts
-    menufont_h1 = pygame.font.Font('visitor1.ttf', 50)
-    menufont_h2 = pygame.font.Font('visitor1.ttf', 40)
-    menufont_h3 = pygame.font.Font('visitor1.ttf', 30)
-    scorefont = pygame.font.Font('visitor1.ttf', 30)
+    menufont_h1 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 50)
+    menufont_h2 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 40)
+    menufont_h3 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 30)
+    scorefont = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 30)
 
     ground = pygame.Surface((screen_width, 10))
     ground.fill(GREEN)
@@ -264,8 +268,8 @@ def main():
             t += 1
 
             # should there be a new heli?  Setup a count down timer and if it's above zero do a count down min and max range
-            if random.randrange(0, 100) == 1:
-                heli = vehicles.Helicopter(heli1_image, heli2_image, heli_rect)
+            if random.randrange(0, game.heli_timer) == 1:
+                heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
                 if random.randrange(0, 2) == 1:
                     heli.rect.topright = area.topright
                     heli.direction = -1
@@ -275,29 +279,33 @@ def main():
                     heli.flip_images()
                     heli.direction = 1
                 heli_sprites.add(heli)
+                game.heli_timer = 30
 
-            if score < 6500:
-                ch = 150 - (score / 500) * 10
-            else:
-                ch = 20
-
-            para_chance = ch * len(heli_sprites.sprites())
             for heli in heli_sprites.sprites():
+                if heli.rect.right > canon.cannonbase_rect.left and heli.rect.left < canon.cannonbase_rect.right:
+                    heli.dz = True
+                else:
+                    heli.dz = False
                 if heli.rect.left > area.right and heli.direction == 1:
                     heli_sprites.remove(heli)
                 elif heli.rect.right < area.left and heli.direction == -1:
                     heli_sprites.remove(heli)
-                elif random.randrange(0, para_chance) == 1:
-                    para = troopers.Parachute(parachute_image, parachute_rect)
-                    para.rect.bottom = area.top
-                    parachute_sprites.add(para)
+                elif heli.trooper and not heli.dz:
+                    if heli.trooper_chance < 1:
+                        heli.trooper_chance = 1
+                    if random.randrange(0, heli.trooper_chance) == 1:
+                        para = troopers.Parachute(parachute_image, parachute_rect)
+                        para.rect.bottom = area.top
+                        parachute_sprites.add(para)
 
-                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect)
-                    trooper.rect.midtop = heli.rect.midbottom
-                    trooper_sprites.add(trooper)
+                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect)
+                        trooper.rect.midtop = heli.rect.midbottom
+                        trooper_sprites.add(trooper)
 
-                    trooper.para = para
-                    para.trooper = trooper
+                        trooper.para = para
+                        para.trooper = trooper
+                        heli.trooper = False
+                    heli.trooper_chance -= 1
 
             # Did a bullet hit a helicopter?
             heli_killed_dict = pygame.sprite.groupcollide(bullet_sprites, heli_sprites, 1, 1)

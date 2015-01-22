@@ -5,6 +5,7 @@ Class for the turret station.
 import pygame
 import math
 import random
+import os
 
 # Globals constants defined here.
 # Colors
@@ -18,7 +19,8 @@ YELLOW = (229, 255, 6)
 
 
 def load_image(name):
-    spritesheet = pygame.image.load(name).convert()
+    fullname = os.path.join("data", name)
+    spritesheet = pygame.image.load(fullname).convert()
     spritesheet.set_colorkey(BLACK)
     spritesheet.convert_alpha()
     return spritesheet, spritesheet.get_rect()

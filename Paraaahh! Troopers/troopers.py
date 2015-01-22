@@ -5,6 +5,7 @@
 
 import pygame
 import random
+import os
 
 
 # Globals constants defined here.
@@ -37,7 +38,6 @@ class Trooper(pygame.sprite.Sprite):
         self.area = screen.get_rect()
 
         # set states
-
         self.stopped = 0
         self.falling = 1
         self.chute_attached = False

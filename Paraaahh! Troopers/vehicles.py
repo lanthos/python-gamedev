@@ -15,24 +15,37 @@ YELLOW = (229, 255, 6)
 
 class Helicopter(pygame.sprite.Sprite):
 
-    def __init__(self, image1, image2, rect):
+    def __init__(self, image1a, image2a, image1b, image2b, rect):
         pygame.sprite.Sprite.__init__(self)
-        self.images = []
-        self.image1, self.image2, self.rect = image1, image2, rect
-        self.images.append(self.image1)
-        self.images.append(self.image2)
+        self.imagesa = []
+        self.imagesb = []
+        self.image1a, self.image2a, self.image1b, self.image2b, self.rect = image1a, image2a, image1b, image2b, rect
+        self.imagesa.append(self.image1a)
+        self.imagesa.append(self.image2a)
+        self.imagesb.append(self.image1b)
+        self.imagesb.append(self.image2b)
 
         self.state = 0
         self.speed = random.randrange(5, 15)
+        self.trooper = True
+        self.trooper_chance = 60
+        self.dz = False
         self.direction = 1
         self.set_image()
 
     def set_image(self):
-        self.image = self.images[self.state]
-        if self.state < len(self.images) - 1:
-            self.state += 1
+        if self.trooper:
+            self.image = self.imagesa[self.state]
+            if self.state < len(self.imagesa) - 1:
+                self.state += 1
+            else:
+                self.state = 0
         else:
-            self.state = 0
+            self.image = self.imagesb[self.state]
+            if self.state < len(self.imagesb) - 1:
+                self.state += 1
+            else:
+                self.state = 0
 
     def update(self):
         dx = self.speed * self.direction
@@ -41,9 +54,13 @@ class Helicopter(pygame.sprite.Sprite):
 
     def flip_images(self):
         new_images = []
-        for i in self.images:
+        for i in self.imagesa:
             new_images.append(pygame.transform.flip(i, 1, 0))
-        self.images = new_images
+        self.imagesa = new_images
+        new_images = []
+        for i in self.imagesb:
+            new_images.append(pygame.transform.flip(i, 1, 0))
+        self.imagesb = new_images
         self.set_image()
 
 

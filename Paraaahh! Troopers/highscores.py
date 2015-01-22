@@ -1,6 +1,7 @@
 '''
 High score class
 '''
+import os
 
 
 class HighScores():
@@ -12,7 +13,7 @@ class HighScores():
     def load(self):
         read_player = 1
 
-        with open('highscores.dat', 'r') as f:
+        with open(os.path.join('data', 'highscores.dat'), 'r') as f:
             content = f.read()
             player = ""
             score = ""
@@ -36,7 +37,7 @@ class HighScores():
         res = ""
         for item in self.items:
             res += item.name + "\n" + item.score + "\n"
-        with open('highscores.dat', 'w') as f:
+        with open(os.path.join('data', 'highscores.dat'), 'w') as f:
             f.write(res)
 
     def add(self, item):
