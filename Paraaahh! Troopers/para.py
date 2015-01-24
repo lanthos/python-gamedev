@@ -98,7 +98,7 @@ class Game():
     def reset(self):
         self.score = 0
 
-    def take_life(self):
+    def game_over(self):
         self.state = "gameover"
 
 
@@ -161,7 +161,7 @@ def main():
     screen.blit(background, (0, 0))
     canon_sprite.draw(screen)
     screen.blit(ground, ground_rect)
-    screen.blit(canon.canonbase, canon.cannonbase_rect)
+    screen.blit(canon.canonbase, canon.canonbase_rect)
     screen.blit(canon.canontop, canon.cannontop_rect)
 
     canon_sprite.draw(screen)
@@ -172,8 +172,6 @@ def main():
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
 
-    high_score = 1234151
-    score = 200
 
     shoot = False
     shoot_lock = 6
@@ -194,7 +192,7 @@ def main():
                     para.rect.bottom = area.top
                     parachute_sprites.add(para)
 
-                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect)
+                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon)
                     trooper.rect.x = mousex
                     trooper.rect.y = mousey
                     trooper_sprites.add(trooper)
@@ -282,7 +280,7 @@ def main():
                 game.heli_timer = 30
 
             for heli in heli_sprites.sprites():
-                if heli.rect.right > canon.cannonbase_rect.left and heli.rect.left < canon.cannonbase_rect.right:
+                if heli.rect.right > canon.canonbase_rect.left and heli.rect.left < canon.canonbase_rect.right:
                     heli.dz = True
                 else:
                     heli.dz = False
@@ -298,7 +296,7 @@ def main():
                         para.rect.bottom = area.top
                         parachute_sprites.add(para)
 
-                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect)
+                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon)
                         trooper.rect.midtop = heli.rect.midbottom
                         trooper_sprites.add(trooper)
 
@@ -378,7 +376,32 @@ def main():
                 if bullet.remove_please:
                     screen.blit(background, bullet.rect, bullet.rect)
                     bullet_sprites.remove(bullet)
-                    print 'bullet gone!'
+
+            # Can a trooper move?
+            game.climbers_l = []
+            game.climbers_r = []
+
+            for trooper in trooper_sprites.sprites():
+                if trooper.stopped:
+                    if trooper.rect.right < canon.canonbase_rect.left and trooper not in game.climbers_l:
+                        game.climbers_l.append(trooper)
+                        if len(game.climbers_l) > 3:
+                            count = 1
+                            for troop in game.climbers_l:
+                                troop.number = count
+                                troop.side = 'left'
+                                count += count
+                    elif trooper.rect.left > canon.canonbase_rect.right and trooper not in game.climbers_r:
+                        game.climbers_r.append(trooper)
+                        if len(game.climbers_r) > 3:
+                            count = 1
+                            for troop in game.climbers_r:
+                                troop.number = count
+                                troop.side = 'right'
+                                count += count
+                    if trooper.winner:
+                        game.game_over()
+
 
             canon_sprite.update()
             bullet_sprites.update()
@@ -398,7 +421,7 @@ def main():
             trooper_sprites.draw(screen)
             aahh_sprites.draw(screen)
             screen.blit(ground, ground_rect)
-            screen.blit(canon.canonbase, canon.cannonbase_rect)
+            screen.blit(canon.canonbase, canon.canonbase_rect)
             screen.blit(canon.canontop, canon.cannontop_rect)
 
 

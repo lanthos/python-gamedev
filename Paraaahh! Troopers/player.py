@@ -37,9 +37,6 @@ class Turret(pygame.sprite.Sprite):
         self.hit_counter = 0
         self.hit = False
         self.hit_move = False
-        # self.bunker = ((self.screen.get_width() / 2) - 75, self.screen.get_height() / 1.22, 144, 70)
-        # self.turret = (self.screen.get_width() / 2, int(self.screen.get_height() / 1.2))
-        # self.gun = pygame.Rect(self.screen.get_width() / 2 - 5, self.screen.get_height() / 1.4, 10, 70)
         self.base, self.rect = load_image('turret.bmp')
 
         self.canonbase = pygame.Surface((100, 60))
@@ -49,10 +46,10 @@ class Turret(pygame.sprite.Sprite):
         self.canontop.fill(BLUE)
         self.canontop = self.canontop.convert()
 
-        self.cannonbase_rect = self.canonbase.get_rect()
+        self.canonbase_rect = self.canonbase.get_rect()
         self.cannontop_rect = self.canontop.get_rect()
-        self.cannonbase_rect.midbottom = ground.midtop
-        self.cannontop_rect.midbottom = self.cannonbase_rect.midtop
+        self.canonbase_rect.midbottom = ground.midtop
+        self.cannontop_rect.midbottom = self.canonbase_rect.midtop
 
 
         self.image = self.base
@@ -62,13 +59,13 @@ class Turret(pygame.sprite.Sprite):
         self.state = "still"
         self.angle = 90
         self.speed = 3
-        self.rect.center = self.cannonbase_rect.midtop
+        self.rect.center = self.canonbase_rect.midtop
         self.rect = self.rect.move((0, -36))
 
     def update(self):
         rotated = pygame.transform.rotate(self.base, self.angle)
         self.rect = rotated.get_rect()
-        self.rect.center = self.cannonbase_rect.midtop
+        self.rect.center = self.canonbase_rect.midtop
         self.rect = self.rect.move((0, -36))
         self.image = rotated
         if self.state == "clockwise":

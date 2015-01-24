@@ -21,13 +21,11 @@ YELLOW = (229, 255, 6)
 
 class Trooper(pygame.sprite.Sprite):
 
-    def __init__(self, image1, image2, rect, ground):
+    def __init__(self, image1, image2, rect, ground, canon):
         pygame.sprite.Sprite.__init__(self)
 
         self.images = []
         self.image1, self.image2, self.rect = image1, image2, rect
-        # self.image1 = pygame.transform.scale(self.image1, (16, 30))
-        # self.image2 = pygame.transform.scale(self.image2, (16, 30))
         self.images.append(self.image1)
         self.images.append(self.image2)
         self.image = self.images[1]
@@ -36,6 +34,9 @@ class Trooper(pygame.sprite.Sprite):
         self.speed = 4
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
+        self.canon = canon
+        self.winner = 0
+        self.number = 0
 
         # set states
         self.stopped = 0
@@ -69,6 +70,65 @@ class Trooper(pygame.sprite.Sprite):
                     # self.rect.bottom = self.ground.top
                     self.falling = 0
                     self.stopped = 1
+        elif self.number != 0 and self.side == 'left':
+            self.falling = 0
+            self.image = self.images[0]
+            # self.rect.bottom = self.ground.top
+            self.para.remove_please = 1
+            self.speed = 2
+            if self.number == 1:
+                if self.rect.right + self.speed < self.area.centerx - 50:
+                    self.rect = self.rect.move((self.speed, 0))
+                    print 'moving right'
+                else:
+                    self.rect.right = self.area.centerx - 50
+                    print 'stopped'
+            elif self.number == 2:
+                if self.rect.right + self.speed - 16 < self.area.centerx - 50:
+                    self.rect = self.rect.move((self.speed, 0))
+                    print 'moving right 2'
+                else:
+                    self.rect.right = self.area.centerx - 66
+                    print 'stopped 2'
+            elif self.number == 3:
+                if self.rect.bottom == self.ground.top:
+                    if self.rect.right + self.speed - 32 < self.area.centerx - 50:
+                        self.rect = self.rect.move((self.speed, 0))
+                        print 'moving right 3'
+                    else:
+                        self.rect.right = self.area.centerx - 82
+                        self.rect = self.rect.move((0, -30))
+                        print 'moving up 3'
+                elif self.rect.bottom == 30:
+                    if self.rect.right + self.speed < self.area.centerx - 50:
+                        self.rect = self.rect.move((self.speed, 0))
+                    else:
+                        self.rect.right = self.area.centerx - 50
+                        print 'stopped 3'
+            elif self.number == 4:
+                if self.rect.bottom == self.ground.top:
+                    if self.rect.right + self.speed - 32 < self.area.centerx - 50:
+                        self.rect = self.rect.move((self.speed, 0))
+                        print 'moving right ground 4'
+                    else:
+                        self.rect.right = self.area.centerx - 82
+                        self.rect = self.rect.move((0, -30))
+                        print 'moving up 4'
+                elif self.rect.bottom == 30:
+                    if self.rect.right + self.speed - 16 < self.area.centerx - 50:
+                        self.rect = self.rect.move((self.speed, 0))
+                        print 'moving right guys 4'
+                    else:
+                        self.rect.right = self.area.centerx - 66
+                        self.rect = self.rect.move((0, -30))
+                        print 'moving up 4'
+                elif self.rect.bottom == 60:
+                    if self.rect.right + self.speed < self.area.centerx - 25:
+                        self.rect = self.rect.move((self.speed, 0))
+                        print 'moving right almost done'
+                    else:
+                        self.rect.right = self.area.centerx - 25
+                        self.winner = 1
         else:
             self.falling = 0
             self.image = self.images[0]
