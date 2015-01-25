@@ -392,18 +392,16 @@ def main():
                     if trooper.rect.right < area.centerx:
                         if len(game.climbers_l) < 4:
                             trooper.number = len(game.climbers_l) + 1
-                            trooper.wait = trooper.number * 5
                             trooper.side = 'left'
                             game.climbers_l.append(trooper)
                     elif trooper.rect.left > area.centerx:
                         if len(game.climbers_r) < 4:
                             trooper.number = len(game.climbers_r) + 1
-                            trooper.wait = trooper.number * 5
                             trooper.side = 'right'
                             game.climbers_r.append(trooper)
                     if trooper.winner:
                         game.game_over()
-            print len(game.climbers_l)
+            # print len(game.climbers_l)
 
             canon_sprite.update()
             bullet_sprites.update()

@@ -39,8 +39,9 @@ class Trooper(pygame.sprite.Sprite):
         self.number = 0
         self.climbing = 0
         self.walking = 0
-        self.wait = 0
-
+        self.go_2 = 0
+        self.go_3 = 0
+        self.go_4 = 0
 
         # set states
         self.stopped = 0
@@ -49,8 +50,6 @@ class Trooper(pygame.sprite.Sprite):
         self.chute_shot = False
 
     def update(self):
-        print 'waiting: {}'.format(self.wait)
-        self.wait -= 1
         if self.falling:
             if self.chute_shot:
                 self.aahh.rect.midbottom = self.rect.midtop
@@ -76,7 +75,7 @@ class Trooper(pygame.sprite.Sprite):
                     # self.rect.bottom = self.ground.top
                     self.falling = 0
                     self.stopped = 1
-        elif self.number != 0 and self.side == 'left' and self.wait < 1:
+        elif self.number != 0 and self.side == 'left':
             self.falling = 0
             self.image = self.images[0]
             if not self.climbing:
@@ -89,15 +88,17 @@ class Trooper(pygame.sprite.Sprite):
                     print 'moving right'
                 else:
                     self.rect.right = self.area.centerx - 50
-                    print 'stopped'
-            elif self.number == 2:
+                    self.go_2 = 1
+                    print 'stopped and self.go_2 {}'.format(self.go_2)
+            elif self.number == 2 and self.go_2 == 1:
                 if self.rect.right + self.speed < self.area.centerx - 66:
                     self.rect = self.rect.move((self.speed, 0))
                     print 'moving right 2'
                 else:
                     self.rect.right = self.area.centerx - 66
+                    self.go_3 = 1
                     print 'stopped 2'
-            if self.number == 3:
+            if self.number == 3 and self.go_3 == 1:
                 if self.rect.bottom == self.ground.top:
                     if self.rect.right + self.speed < self.area.centerx - 82:
                         self.rect = self.rect.move((self.speed, 0))
@@ -112,8 +113,9 @@ class Trooper(pygame.sprite.Sprite):
                         self.rect = self.rect.move((self.speed, 0))
                     else:
                         self.rect.right = self.area.centerx - 50
+                        self.go_4 = 1
                         print 'stopped 3'
-            elif self.number == 4:
+            elif self.number == 4 and self.go_4 == 1:
                 if self.rect.bottom == self.ground.top:
                     if self.rect.right + self.speed < self.area.centerx - 82:
                         self.rect = self.rect.move((self.speed, 0))
