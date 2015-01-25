@@ -48,8 +48,9 @@ class Game():
         self.t = 0
         self.max = 0
         self.nextstate = ""
-        self.heli_timer = 30
+        self.heli_timer = 70
         self.plane_timer = 120
+        self.gameover = 0
         self.reset()
         try:
             self.player_name = os.environ["USER"]
@@ -97,6 +98,7 @@ class Game():
 
     def reset(self):
         self.score = 0
+        self.gameover = 0
 
     def game_over(self):
         self.state = "gameover"
@@ -110,7 +112,8 @@ def main():
     # Initialize sounds
 
     # Set the width and height of the screen [width,height]
-    screen_width, screen_height = [1024, 768]
+    # screen_width, screen_height = [1024, 768]
+    screen_width, screen_height = [800, 600]
     screen = pygame.display.set_mode([screen_width, screen_height])
     area = screen.get_rect()
     pygame.display.set_caption("Paraaaahhhh! Troopers")
@@ -192,7 +195,7 @@ def main():
                     para.rect.bottom = area.top
                     parachute_sprites.add(para)
 
-                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon)
+                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon, screen)
                     trooper.rect.x = mousex
                     trooper.rect.y = mousey
                     trooper_sprites.add(trooper)
@@ -265,19 +268,21 @@ def main():
                 t = 0
             t += 1
 
-            # should there be a new heli?  Setup a count down timer and if it's above zero do a count down min and max range
-            if random.randrange(0, game.heli_timer) == 1:
+            # should there be a new heli?
+            game.heli_timer -= 1
+            if random.randrange(1, game.heli_timer) == 1:
                 heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
                 if random.randrange(0, 2) == 1:
                     heli.rect.topright = area.topright
+                    heli.rect = heli.rect.move((0, 3))
                     heli.direction = -1
                 else:
                     heli.rect.topleft = area.topleft
-                    heli.rect = heli.rect.move((0, 62))
+                    heli.rect = heli.rect.move((0, 67))
                     heli.flip_images()
                     heli.direction = 1
                 heli_sprites.add(heli)
-                game.heli_timer = 30
+                game.heli_timer = 70
 
             for heli in heli_sprites.sprites():
                 if heli.rect.right > canon.canonbase_rect.left and heli.rect.left < canon.canonbase_rect.right:
@@ -291,12 +296,12 @@ def main():
                 elif heli.trooper and not heli.dz:
                     if heli.trooper_chance < 1:
                         heli.trooper_chance = 1
-                    if random.randrange(0, heli.trooper_chance) == 1:
+                    if random.randrange(1, heli.trooper_chance) == 1:
                         para = troopers.Parachute(parachute_image, parachute_rect)
                         para.rect.bottom = area.top
                         parachute_sprites.add(para)
 
-                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon)
+                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon, screen)
                         trooper.rect.midtop = heli.rect.midbottom
                         trooper_sprites.add(trooper)
 
@@ -360,6 +365,7 @@ def main():
                         trooper_sprites.remove(trooper)
                         trooper_sprites.remove(hittrooper)
                         aahh_sprites.remove(trooper.aahh)
+                        hittrooper.para.remove_please = 1
                         screen.blit(background, trooper.rect, trooper.rect)
                         screen.blit(background, hittrooper.rect, hittrooper.rect)
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
@@ -383,25 +389,21 @@ def main():
 
             for trooper in trooper_sprites.sprites():
                 if trooper.stopped:
-                    if trooper.rect.right < canon.canonbase_rect.left and trooper not in game.climbers_l:
-                        game.climbers_l.append(trooper)
-                        if len(game.climbers_l) > 3:
-                            count = 1
-                            for troop in game.climbers_l:
-                                troop.number = count
-                                troop.side = 'left'
-                                count += count
-                    elif trooper.rect.left > canon.canonbase_rect.right and trooper not in game.climbers_r:
-                        game.climbers_r.append(trooper)
-                        if len(game.climbers_r) > 3:
-                            count = 1
-                            for troop in game.climbers_r:
-                                troop.number = count
-                                troop.side = 'right'
-                                count += count
+                    if trooper.rect.right < area.centerx:
+                        if len(game.climbers_l) < 4:
+                            trooper.number = len(game.climbers_l) + 1
+                            trooper.wait = trooper.number * 5
+                            trooper.side = 'left'
+                            game.climbers_l.append(trooper)
+                    elif trooper.rect.left > area.centerx:
+                        if len(game.climbers_r) < 4:
+                            trooper.number = len(game.climbers_r) + 1
+                            trooper.wait = trooper.number * 5
+                            trooper.side = 'right'
+                            game.climbers_r.append(trooper)
                     if trooper.winner:
                         game.game_over()
-
+            print len(game.climbers_l)
 
             canon_sprite.update()
             bullet_sprites.update()
@@ -503,7 +505,10 @@ def main():
             else:
                 screen.blit(background, (0, 0))
                 # game.state = game.nextstate
-                game.state = 'ingame'
+                if game.gameover:
+                    game.state = 'mainmenu'
+                else:
+                    game.state = 'ingame'
                 game.nextstate = ""
                 game.t = 0
 
@@ -511,6 +516,7 @@ def main():
             game.highscores.add(highscores.HighScoreEntry(game.player_name, str(game.score)))
             game.menu.highscoresmenu(game.highscores)
             game.highscores.save()
+            game.gameover = 1
 
             print game.player_name + ' died with a score of ' + str(game.score)
 
