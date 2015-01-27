@@ -273,22 +273,24 @@ def main():
             if random.randrange(1, game.heli_timer) == 1:
                 heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
                 if random.randrange(0, 2) == 1:
+                    random.seed()
                     heli.rect.topright = area.topright
-                    heli.rect = heli.rect.move((0, 3))
+                    heli.rect = heli.rect.move((0, random.randint(3, 10)))
                     heli.direction = -1
                 else:
+                    random.seed()
                     heli.rect.topleft = area.topleft
-                    heli.rect = heli.rect.move((0, 67))
+                    heli.rect = heli.rect.move((0, random.randrange(60, 70)))
                     heli.flip_images()
                     heli.direction = 1
                 heli_sprites.add(heli)
                 game.heli_timer = 70
 
-            for heli in heli_sprites.sprites():  # drop if right is midbottom of heli is left of right +5 or vice a versa
-                if heli.rect.right > canon.canonbase_rect.left and heli.rect.left < canon.canonbase_rect.right:
-                    heli.dz = True
-                else:
+            for heli in heli_sprites.sprites():
+                if heli.rect.right < canon.canonbase_rect.left or heli.rect.left > canon.canonbase_rect.right:
                     heli.dz = False
+                else:
+                    heli.dz = True
                 if heli.rect.left > area.right and heli.direction == 1:
                     heli_sprites.remove(heli)
                 elif heli.rect.right < area.left and heli.direction == -1:
