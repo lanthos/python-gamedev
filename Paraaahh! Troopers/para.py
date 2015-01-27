@@ -284,7 +284,7 @@ def main():
                 heli_sprites.add(heli)
                 game.heli_timer = 70
 
-            for heli in heli_sprites.sprites():
+            for heli in heli_sprites.sprites():  # drop if right is midbottom of heli is left of right +5 or vice a versa
                 if heli.rect.right > canon.canonbase_rect.left and heli.rect.left < canon.canonbase_rect.right:
                     heli.dz = True
                 else:
@@ -332,7 +332,7 @@ def main():
                     game.score += TROOPER_SHOT
 
             # Did a bullet hit a parachute?
-            para_hit_dict = pygame.sprite.groupcollide(bullet_sprites, parachute_sprites, 1, 1)
+            para_hit_dict = pygame.sprite.groupcollide(bullet_sprites, parachute_sprites, 0, 1)
             for bullet in para_hit_dict:
                 screen.blit(background, bullet.rect, bullet.rect)
                 for para in para_hit_dict[bullet]:
@@ -390,12 +390,12 @@ def main():
             for trooper in trooper_sprites.sprites():
                 if trooper.stopped:
                     if trooper.rect.right < area.centerx:
-                        if len(game.climbers_l) < 4:
+                        if len(game.climbers_l) < 5:
                             trooper.number = len(game.climbers_l) + 1
                             trooper.side = 'left'
                             game.climbers_l.append(trooper)
                     elif trooper.rect.left > area.centerx:
-                        if len(game.climbers_r) < 4:
+                        if len(game.climbers_r) < 5:
                             trooper.number = len(game.climbers_r) + 1
                             trooper.side = 'right'
                             game.climbers_r.append(trooper)

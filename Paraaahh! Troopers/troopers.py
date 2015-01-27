@@ -50,6 +50,7 @@ class Trooper(pygame.sprite.Sprite):
         self.chute_shot = False
 
     def update(self):
+        print self.number
         if self.falling:
             if self.chute_shot:
                 self.aahh.rect.midbottom = self.rect.midtop
