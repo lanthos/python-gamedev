@@ -51,6 +51,9 @@ class Game():
         self.heli_timer = 70
         self.plane_timer = 120
         self.gameover = 0
+        self.nearest_dude = None
+        self.left_pyramid = []
+        self.right_pyramid = {'alien1': 55, 'alien2': 66, 'alien3': [82, -31], 'alien4': 25}
         self.reset()
         try:
             self.player_name = os.environ["USER"]
@@ -287,7 +290,7 @@ def main():
                 game.heli_timer = 70
 
             for heli in heli_sprites.sprites():
-                if heli.rect.right < canon.canonbase_rect.left or heli.rect.left > canon.canonbase_rect.right:
+                if heli.rect.right < area.centerx - 55 or heli.rect.left > area.centerx + 55:
                     heli.dz = False
                 else:
                     heli.dz = True
@@ -386,24 +389,37 @@ def main():
                     bullet_sprites.remove(bullet)
 
             # Can a trooper move?
-            game.climbers_l = []
-            game.climbers_r = []
+            left_nearest_dude = None
+            right_nearest_dude = None
+            left_side_dudes = []
+            right_side_dudes = []
 
             for trooper in trooper_sprites.sprites():
                 if trooper.stopped:
                     if trooper.rect.right < area.centerx:
-                        if len(game.climbers_l) < 5:
-                            trooper.number = len(game.climbers_l) + 1
-                            trooper.side = 'left'
-                            game.climbers_l.append(trooper)
+                        left_side_dudes.append(trooper)
+                        trooper.side = 'left'
                     elif trooper.rect.left > area.centerx:
-                        if len(game.climbers_r) < 5:
-                            trooper.number = len(game.climbers_r) + 1
-                            trooper.side = 'right'
-                            game.climbers_r.append(trooper)
+                        right_side_dudes.append(trooper)
+                        trooper.side = 'right'
                     if trooper.winner:
                         game.game_over()
             # print len(game.climbers_l)
+            if len(left_side_dudes) >= 4:
+                for d in left_side_dudes:
+                    if not d.in_pyramid:
+                        if not left_nearest_dude:
+                            left_nearest_dude = d
+                        else:
+                            if d.rect.right > left_nearest_dude.rect.right:
+                                left_nearest_dude = d
+            if left_nearest_dude:
+                if len(game.left_pyramid) < 5:
+                    game.left_pyramid.append(left_nearest_dude)
+                    left_nearest_dude.number = len(game.left_pyramid)
+
+
+
 
             canon_sprite.update()
             bullet_sprites.update()
