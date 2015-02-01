@@ -13,6 +13,7 @@ import troopers
 import menu
 import highscores
 import os
+import particle
 
 
 # Globals constants defined here.
@@ -23,6 +24,8 @@ BLUE = (5, 61, 244)
 GREY = (199, 199, 199)
 GREEN = (63, 177, 79)
 RED = (187, 8, 0)
+BROWN = (94, 56, 25)
+YELLOW = (229, 255, 6)
 
 # Score
 HELI_SHOT = 50
@@ -51,9 +54,7 @@ class Game():
         self.heli_timer = 70
         self.plane_timer = 120
         self.gameover = 0
-        self.nearest_dude = None
-        self.left_pyramid = []
-        self.right_pyramid = {'alien1': 55, 'alien2': 66, 'alien3': [82, -31], 'alien4': 25}
+        self.playing = False
         self.reset()
         try:
             self.player_name = os.environ["USER"]
@@ -75,20 +76,23 @@ class Game():
     def menu_select(self):
         if self.menu.selected != None:
             newstate = self.menu.items[self.menu.selected].changestate
-            if newstate == "mainmenu":
+            if newstate == "mainmenu" and not self.playing:
                 self.menu.mainmenu()
+            elif newstate == "mainmenu" and self.playing:
+                self.menu.ingamemenu()
             elif newstate == "credits":
                 self.menu.creditsmenu()
             elif newstate == "scores":
                 self.menu.highscoresmenu(self.highscores)
             elif newstate == "newgame":
                 self.max = 30
-                self.nextstate = "reset"
-                self.state = "fadeout_y"
+                # self.nextstate = "reset"
+                # self.state = "fadeout_y"
+                self.state = 'reset'
             elif newstate == "returntogame":
                 self.max = 30
                 self.nextstate = "ingame"
-                self.state = "fadein_y"
+                self.state = "fadeout_y"
             else:
                 self.state = newstate
 
@@ -117,6 +121,7 @@ def main():
     # Set the width and height of the screen [width,height]
     # screen_width, screen_height = [1024, 768]
     screen_width, screen_height = [800, 600]
+    # screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
     screen = pygame.display.set_mode([screen_width, screen_height])
     area = screen.get_rect()
     pygame.display.set_caption("Paraaaahhhh! Troopers")
@@ -147,6 +152,12 @@ def main():
     ground_rect = ground.get_rect()
     ground_rect.x = 0
     ground_rect.y = screen.get_height() / 1.1
+    dirt = pygame.Surface((screen_width, 10))
+    dirt.fill(BROWN)
+    dirt = dirt.convert()
+    dirt_rect = dirt.get_rect()
+    dirt_rect.x = 0
+    dirt_rect.y = screen.get_height() / 1.05
 
     # Init game
     game = Game()
@@ -154,6 +165,7 @@ def main():
     # Init sprites
     canon = player.Turret(ground_rect)
     bullet_sprites = pygame.sprite.RenderPlain()
+    troop_particle_sprites = pygame.sprite.RenderPlain()
     canon_sprite = pygame.sprite.RenderPlain(canon)
     parachute_sprites = pygame.sprite.RenderPlain()
     trooper_sprites = pygame.sprite.RenderPlain()
@@ -161,12 +173,14 @@ def main():
     heli_sprites = pygame.sprite.RenderPlain()
     dropping_sprites = pygame.sprite.RenderPlain()
     aahh_sprites = pygame.sprite.RenderPlain()
+    heli_particle_sprites = pygame.sprite.RenderPlain()
 
     # Initial drawing of everything
 
     screen.blit(background, (0, 0))
     canon_sprite.draw(screen)
     screen.blit(ground, ground_rect)
+    screen.blit(dirt, dirt_rect)
     screen.blit(canon.canonbase, canon.canonbase_rect)
     screen.blit(canon.canontop, canon.cannontop_rect)
 
@@ -187,6 +201,7 @@ def main():
     while not done:
 
         if game.state == 'ingame':
+            game.playing = True
 
             # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
             for event in pygame.event.get():  # User did something
@@ -198,7 +213,8 @@ def main():
                     para.rect.bottom = area.top
                     parachute_sprites.add(para)
 
-                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon, screen)
+                    trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon,
+                                               screen, game)
                     trooper.rect.x = mousex
                     trooper.rect.y = mousey
                     trooper_sprites.add(trooper)
@@ -222,7 +238,7 @@ def main():
                     if event.key == pygame.K_q:
                         pygame.quit()
                         sys.exit()
-                    if event.key == pygame.K_ESCAPE:
+                    if event.key == pygame.K_p:
                         game.ingamemenu()
                     if event.key == pygame.K_LEFT:
                             canon.move_counter_clockwise()
@@ -237,11 +253,6 @@ def main():
                     elif event.key == pygame.K_SPACE:
                         shoot = True
                         t = 0
-                    elif event.key == pygame.K_p:
-                        trooper = troopers.Trooper(troop_image, troop_rect, ground_rect)
-                        trooper.rect.bottom = area.bottom - 560
-                        trooper.rect.x = random.randint(area.left + 5, area.right - 20)
-                        trooper_sprites.add(trooper)
                 elif event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT and canon.state == 'counterclockwise':
                         canon.halt()
@@ -291,14 +302,16 @@ def main():
 
             for heli in heli_sprites.sprites():
                 if heli.rect.right < area.centerx - 55 or heli.rect.left > area.centerx + 55:
-                    heli.dz = False
+                    heli.dmz = False
+                elif heli.rect.right > screen_width or heli.rect.left < 0:
+                    heli.dmz = True
                 else:
-                    heli.dz = True
+                    heli.dmz = True
                 if heli.rect.left > area.right and heli.direction == 1:
                     heli_sprites.remove(heli)
                 elif heli.rect.right < area.left and heli.direction == -1:
                     heli_sprites.remove(heli)
-                elif heli.trooper and not heli.dz:
+                elif heli.trooper and not heli.dmz:
                     if heli.trooper_chance < 1:
                         heli.trooper_chance = 1
                     if random.randrange(1, heli.trooper_chance) == 1:
@@ -306,7 +319,8 @@ def main():
                         para.rect.bottom = area.top
                         parachute_sprites.add(para)
 
-                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon, screen)
+                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon,
+                                                   screen, game)
                         trooper.rect.midtop = heli.rect.midbottom
                         trooper_sprites.add(trooper)
 
@@ -322,6 +336,10 @@ def main():
                 for heli in heli_killed_dict:
                     screen.blit(background, heli.rect, heli.rect)
                     game.score += HELI_SHOT
+                    for i in range(10):
+                        part = particle.Particle(heli.rect.centerx, heli.rect.centery, YELLOW, bullet)
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        heli_particle_sprites.add(part)
 
             # Did a bullet hit a trooper?
             trooper_killed_dict = pygame.sprite.groupcollide(bullet_sprites, trooper_sprites, 1, 1)
@@ -335,12 +353,44 @@ def main():
                         aahh_sprites.remove(trooper.aahh)
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                     game.score += TROOPER_SHOT
+                    for i in range(10):
+                        part = particle.Particle(trooper.rect.centerx, trooper.rect.centery, RED, bullet)
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        troop_particle_sprites.add(part)
+
+            # Did heli shrapnel hit a trooper?
+            trooper_killed_dict = pygame.sprite.groupcollide(heli_particle_sprites, trooper_sprites, 1, 1)
+            for part in trooper_killed_dict:
+                screen.blit(background, part.rect, part.rect)
+                for trooper in trooper_killed_dict[part]:
+                    screen.blit(background, trooper.rect, trooper.rect)
+                    screen.blit(background, trooper.para.rect, trooper.para.rect)
+                    parachute_sprites.remove(trooper.para)
+                    if trooper.chute_shot:
+                        aahh_sprites.remove(trooper.aahh)
+                        screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
+                    game.score += TROOPER_SHOT
 
             # Did a bullet hit a parachute?
             para_hit_dict = pygame.sprite.groupcollide(bullet_sprites, parachute_sprites, 0, 1)
             for bullet in para_hit_dict:
                 screen.blit(background, bullet.rect, bullet.rect)
                 for para in para_hit_dict[bullet]:
+                    screen.blit(background, para.rect, para.rect)
+                    para.trooper.speed = 4
+                    para.trooper.chute_shot = True
+                    para.trooper.chute_attached = False
+                    dropping_sprites.add(para.trooper)
+                    game.score += PARA_SHOT
+                    aahh = troopers.Aahh(aahh_image, aahh_rect)
+                    aahh_sprites.add(aahh)
+                    para.trooper.aahh = aahh
+
+            # Did heli shrapnel hit a parachute?
+            para_hit_dict = pygame.sprite.groupcollide(heli_particle_sprites, parachute_sprites, 0, 1)
+            for part in para_hit_dict:
+                screen.blit(background, part.rect, part.rect)
+                for para in para_hit_dict[part]:
                     screen.blit(background, para.rect, para.rect)
                     para.trooper.speed = 4
                     para.trooper.chute_shot = True
@@ -388,24 +438,34 @@ def main():
                     screen.blit(background, bullet.rect, bullet.rect)
                     bullet_sprites.remove(bullet)
 
+            # Should we remove any particles?
+            for part in troop_particle_sprites:
+                if part.timer <= 0:
+                    screen.blit(background, part.rect, part.rect)
+                    troop_particle_sprites.remove(part)
+            for part in heli_particle_sprites:
+                if part.timer <= 0:
+                    screen.blit(background, part.rect, part.rect)
+                    heli_particle_sprites.remove(part)
+
             # Can a trooper move?
             left_nearest_dude = None
             right_nearest_dude = None
             left_side_dudes = []
             right_side_dudes = []
+            left_pyramid = 0
+            right_pyramid = 0
 
             for trooper in trooper_sprites.sprites():
                 if trooper.stopped:
                     if trooper.rect.right < area.centerx:
                         left_side_dudes.append(trooper)
-                        trooper.side = 'left'
                     elif trooper.rect.left > area.centerx:
                         right_side_dudes.append(trooper)
-                        trooper.side = 'right'
                     if trooper.winner:
                         game.game_over()
             # print len(game.climbers_l)
-            if len(left_side_dudes) >= 4:
+            if len(left_side_dudes) >= 1:
                 for d in left_side_dudes:
                     if not d.in_pyramid:
                         if not left_nearest_dude:
@@ -413,32 +473,165 @@ def main():
                         else:
                             if d.rect.right > left_nearest_dude.rect.right:
                                 left_nearest_dude = d
+                    else:
+                        left_pyramid += 1
             if left_nearest_dude:
-                if len(game.left_pyramid) < 5:
-                    game.left_pyramid.append(left_nearest_dude)
-                    left_nearest_dude.number = len(game.left_pyramid)
+                if left_pyramid == 0:
+                    if left_nearest_dude.rect.right + left_nearest_dude.speed < left_nearest_dude.area.centerx - 50:
+                        left_nearest_dude.rect = left_nearest_dude.rect.move((left_nearest_dude.speed, 0))
+                        # print 'moving right'
+                    else:
+                        left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 50
+                        left_nearest_dude.in_pyramid = 1
+                elif left_pyramid == 1:
+                    if left_nearest_dude.rect.right + left_nearest_dude.speed < left_nearest_dude.area.centerx - 66:
+                        left_nearest_dude.rect = left_nearest_dude.rect.move((left_nearest_dude.speed, 0))
+                        # print 'moving right 2'
+                    else:
+                        left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 66
+                        left_nearest_dude.in_pyramid = 1
+                        # print 'stopped 2'
+                elif left_pyramid == 2:
+                    if left_nearest_dude.rect.bottom == left_nearest_dude.ground.top:
+                        if left_nearest_dude.rect.right + left_nearest_dude.speed < left_nearest_dude.area.centerx - 82:
+                            left_nearest_dude.rect = left_nearest_dude.rect.move((left_nearest_dude.speed, 0))
+                            # print 'moving right 3'
+                        else:
+                            left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 82
+                            left_nearest_dude.rect = left_nearest_dude.rect.move((0, -31))
+                            left_nearest_dude.climbing = 1
+                            # print 'moving up 3'
+                    elif left_nearest_dude.rect.bottom == left_nearest_dude.ground.top - 31:
+                        if left_nearest_dude.rect.right + left_nearest_dude.speed < left_nearest_dude.area.centerx - 50:
+                            left_nearest_dude.rect = left_nearest_dude.rect.move((left_nearest_dude.speed, 0))
+                        else:
+                            left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 50
+                            left_nearest_dude.in_pyramid = 1
+                            # print 'stopped 3'
+                elif left_pyramid == 3:
+                    if left_nearest_dude.rect.bottom == left_nearest_dude.ground.top:
+                        if left_nearest_dude.rect.right + left_nearest_dude.speed < left_nearest_dude.area.centerx - 82:
+                            left_nearest_dude.rect = left_nearest_dude.rect.move((left_nearest_dude.speed, 0))
+                            # print 'moving right ground 4'
+                        else:
+                            left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 82
+                            left_nearest_dude.rect = left_nearest_dude.rect.move((0, -31))
+                            left_nearest_dude.climbing = 1
+                            # print 'moving up 4'
+                    elif left_nearest_dude.rect.bottom == left_nearest_dude.ground.top - 31:
+                        if left_nearest_dude.rect.right + left_nearest_dude.speed < left_nearest_dude.area.centerx - 66:
+                            left_nearest_dude.rect = left_nearest_dude.rect.move((left_nearest_dude.speed, 0))
+                            # print 'moving right guys 4'
+                        else:
+                            left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 66
+                            left_nearest_dude.rect = left_nearest_dude.rect.move((0, -31))
+                            # print 'movi/ng up 4'
+                    elif left_nearest_dude.rect.bottom == left_nearest_dude.ground.top - 62:
+                        if left_nearest_dude.rect.right + left_nearest_dude.speed < left_nearest_dude.area.centerx - 25:
+                            left_nearest_dude.rect = left_nearest_dude.rect.move((left_nearest_dude.speed, 0))
+                            # print 'moving/ right almost done'
+                        else:
+                            left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 25
+                            left_nearest_dude.winner = 1
 
-
+            if len(right_side_dudes) >= 1:
+                for d in right_side_dudes:
+                    if not d.in_pyramid:
+                        if not right_nearest_dude:
+                            right_nearest_dude = d
+                        else:
+                            if d.rect.left < right_nearest_dude.rect.left:
+                                right_nearest_dude = d
+                    else:
+                        right_pyramid += 1
+            if right_nearest_dude:
+                if right_pyramid == 0:
+                    if right_nearest_dude.rect.right + right_nearest_dude.speed > right_nearest_dude.area.centerx + 70:
+                        right_nearest_dude.rect = right_nearest_dude.rect.move((right_nearest_dude.speed * -1, 0))
+                        # print 'moving right'
+                    else:
+                        right_nearest_dude.rect.right = right_nearest_dude.area.centerx + 66
+                        right_nearest_dude.in_pyramid = 1
+                elif right_pyramid == 1:
+                    if right_nearest_dude.rect.right + right_nearest_dude.speed > right_nearest_dude.area.centerx + 85:
+                        right_nearest_dude.rect = right_nearest_dude.rect.move((right_nearest_dude.speed * -1, 0))
+                        # print 'moving right 2'
+                    else:
+                        right_nearest_dude.rect.right = right_nearest_dude.area.centerx + 82
+                        right_nearest_dude.in_pyramid = 1
+                        # print 'stopped 2'
+                elif right_pyramid == 2:
+                    if right_nearest_dude.rect.bottom == right_nearest_dude.ground.top:
+                        if right_nearest_dude.rect.right + right_nearest_dude.speed > right_nearest_dude.area.centerx + \
+                                101:
+                            right_nearest_dude.rect = right_nearest_dude.rect.move((right_nearest_dude.speed * -1, 0))
+                            # print 'moving right 3'
+                        else:
+                            right_nearest_dude.rect.right = right_nearest_dude.area.centerx + 98
+                            right_nearest_dude.rect = right_nearest_dude.rect.move((0, -31))
+                            right_nearest_dude.climbing = 1
+                            # print 'moving up 3'
+                    elif right_nearest_dude.rect.bottom == right_nearest_dude.ground.top - 31:
+                        if right_nearest_dude.rect.right + right_nearest_dude.speed > right_nearest_dude.area.centerx + \
+                                70:
+                            right_nearest_dude.rect = right_nearest_dude.rect.move((right_nearest_dude.speed * -1, 0))
+                        else:
+                            right_nearest_dude.rect.right = right_nearest_dude.area.centerx + 66
+                            right_nearest_dude.in_pyramid = 1
+                            # print 'stopped 3'
+                elif right_pyramid == 3:
+                    if right_nearest_dude.rect.bottom == right_nearest_dude.ground.top:
+                        if right_nearest_dude.rect.right + right_nearest_dude.speed > right_nearest_dude.area.centerx + \
+                                101:
+                            right_nearest_dude.rect = right_nearest_dude.rect.move((right_nearest_dude.speed * -1, 0))
+                            # print 'moving right ground 4'
+                        else:
+                            right_nearest_dude.rect.right = right_nearest_dude.area.centerx + 98
+                            right_nearest_dude.rect = right_nearest_dude.rect.move((0, -31))
+                            right_nearest_dude.climbing = 1
+                            # print 'moving up 4'
+                    elif right_nearest_dude.rect.bottom == right_nearest_dude.ground.top - 31:
+                        if right_nearest_dude.rect.right + right_nearest_dude.speed > right_nearest_dude.area.centerx + \
+                                82:
+                            right_nearest_dude.rect = right_nearest_dude.rect.move((right_nearest_dude.speed * -1, 0))
+                            # print 'moving right guys 4'
+                        else:
+                            right_nearest_dude.rect.right = right_nearest_dude.area.centerx + 82
+                            right_nearest_dude.rect = right_nearest_dude.rect.move((0, -31))
+                            # print 'moving up 4'
+                    elif right_nearest_dude.rect.bottom == right_nearest_dude.ground.top - 62:
+                        if right_nearest_dude.rect.right + right_nearest_dude.speed > right_nearest_dude.area.centerx + \
+                                50:
+                            right_nearest_dude.rect = right_nearest_dude.rect.move((right_nearest_dude.speed * -1, 0))
+                            # print 'moving right almost done'
+                        else:
+                            right_nearest_dude.rect.right = right_nearest_dude.area.centerx + 45
+                            right_nearest_dude.winner = 1
 
 
             canon_sprite.update()
             bullet_sprites.update()
             heli_sprites.update()
             trooper_sprites.update()
+            heli_particle_sprites.update()
+            troop_particle_sprites.update()
 
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
             # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
 
             screen.blit(background, (0, 0))
-            game.highscores.display_high(scorefont, screen, game.score,)
+            game.highscores.display_high(scorefont, screen, game.score)
             canon_sprite.draw(screen)
             bullet_sprites.draw(screen)
             heli_sprites.draw(screen)
             parachute_sprites.draw(screen)
             trooper_sprites.draw(screen)
             aahh_sprites.draw(screen)
+            heli_particle_sprites.draw(screen)
+            troop_particle_sprites.draw(screen)
             screen.blit(ground, ground_rect)
+            screen.blit(dirt, dirt_rect)
             screen.blit(canon.canonbase, canon.canonbase_rect)
             screen.blit(canon.canontop, canon.cannontop_rect)
 
@@ -462,10 +655,12 @@ def main():
                         game.menu_down()
                     elif event.key == pygame.K_q:
                         sys.exit()
+                    elif event.key == pygame.K_ESCAPE:
+                        sys.exit()
                     elif event.key == pygame.K_RETURN:
                         game.menu_select()
 
-            screen.blit(background, (0, 100))
+            screen.blit(background, (0, 0))
             
             
             menuitems = game.get_current_menu()
@@ -531,8 +726,11 @@ def main():
         elif game.state == 'gameover':
             game.highscores.add(highscores.HighScoreEntry(game.player_name, str(game.score)))
             game.menu.highscoresmenu(game.highscores)
+            if game.score > 9999999:
+                game.score = 9999999
             game.highscores.save()
             game.gameover = 1
+            game.playing = False
 
             print game.player_name + ' died with a score of ' + str(game.score)
 
@@ -540,15 +738,43 @@ def main():
             game.state = 'fadein_y'
 
         elif game.state == 'reset':
+            # for sprite in bullet_sprites:
+            #     bullet_sprites.remove(sprite)
+            #     screen.blit(background, sprite.rect, sprite.rect)
+            # for sprite in heli_particle_sprites:
+            #     heli_particle_sprites.remove(sprite)
+            #     screen.blit(background, sprite.rect, sprite.rect)
+            # for sprite in troop_particle_sprites:
+            #     troop_particle_sprites.remove(sprite)
+            #     screen.blit(background, sprite.rect, sprite.rect)
+            # for sprite in parachute_sprites:
+            #     parachute_sprites.remove(sprite)
+            #     screen.blit(background, sprite.rect, sprite.rect)
+            # for sprite in plane_sprites:
+            #     plane_sprites.remove(sprite)
+            #     screen.blit(background, sprite.rect, sprite.rect)
+            # # bomb_sprites.empty()
+            # for sprite in trooper_sprites:
+            #     trooper_sprites.remove(sprite)
+            #     screen.blit(background, sprite.rect, sprite.rect)
+            # for sprite in dropping_sprites:
+            #     dropping_sprites.remove(sprite)
+            #     screen.blit(background, sprite.rect, sprite.rect)
+            # for sprite in heli_sprites:
+            #     heli_sprites.remove(sprite)
+            #     screen.blit(background, sprite.rect, sprite.rect)
             bullet_sprites.empty()
+            heli_particle_sprites.empty()
+            troop_particle_sprites.empty()
             parachute_sprites.empty()
             plane_sprites.empty()
-            # bomb_sprites.empty()
             trooper_sprites.empty()
             dropping_sprites.empty()
             heli_sprites.empty()
+
+            print 'resetting'
             game.reset()
-            game.nextstate = 'ingame'
+            game.state = 'ingame'
 
         elif game.state == 'quit':
             sys.exit(0)

@@ -110,11 +110,12 @@ class Bullet(pygame.sprite.Sprite):
         self.movepos = (0, 0)
         self.test = 0
         self.remove_please = 0
+        self.rad = None
 
     def update(self):
         if not self.test:
-            rad = self.direction * (math.pi / 180)
-            dx, dy = self.speed * math.cos(rad), -self.speed * math.sin(rad)
+            self.rad = self.direction * (math.pi / 180)
+            dx, dy = self.speed * math.cos(self.rad), -self.speed * math.sin(self.rad)
             self.rect = self.rect.move((dx, dy))
         if self.rect.bottom < self.screen_rect.top:
             self.remove_please = 1

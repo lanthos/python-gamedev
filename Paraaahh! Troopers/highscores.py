@@ -63,7 +63,9 @@ class HighScores():
         for i in self.items:
             if int(i.score) > high:
                 high = int(i.score)
-        player = scorefont.render('Score: %s' % p1_score, True, (255, 255, 255))
+        if p1_score > 9999999:
+            p1_score = 9999999
+        player = scorefont.render('Score: %07d' % p1_score, True, (255, 255, 255))
         player_rect = player.get_rect()
         player_rect.topleft = (screen.get_width() / 1.7, screen.get_height() - 50)
         high_score = scorefont.render('High Score: %s' % high, True, (255, 255, 255))

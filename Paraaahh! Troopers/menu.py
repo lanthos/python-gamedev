@@ -46,11 +46,13 @@ class Menu():
         self.add_item(MenuItem("Highscores", "scores"))
         self.add_item(MenuItem("Credits", "credits"))
         self.add_item(MenuItem("Quit", "quit"))
+        self.add_item(MenuItem("Use keyboard to play", "pause"))
         self.selected = None
         self.move_down()
         
     def ingamemenu(self):
         self.clear()
+        self.add_item(MenuItem("PAUSE MENU", "pause"))
         self.add_item(MenuItem("Return", "returntogame"))
         self.add_item(MenuItem("New Game", "newgame"))
         # self.add_item(MenuItem("Options", "options"))
@@ -99,6 +101,9 @@ class MenuItem():
         if changestate == "":
             self.selectable = 0
             self.align = "left"
+        elif changestate == 'pause':
+            self.selectable = 0
+            self.align = "center"
         else:
             self.selectable = 1
             self.align = "center"
