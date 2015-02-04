@@ -17,21 +17,23 @@ class Particle(pygame.sprite.Sprite):
         self.x_offset = random.randrange(1, 40) + 1
         self.y_offset = random.randrange(1, 40) + 1
         self.y_velocity_offset = int(random.random() * 2 + 1)
+        self.x_velocity_offset = int(random.random() * 2 + 1)
         self.rect.x = self.x_offset + startx
         self.rect.y = self.y_offset + starty
         self.color = color
         self.speed = shot.speed / 3 + self.y_velocity_offset
         self.gravity = 12
-        self.direction = shot.direction
-        if not shot.rad:
-            self.rad = self.direction * (math.pi / 180)
-        else:
-            self.rad = shot.rad
-        self.timer = 10
+        self.direction = random.randint(1, 180)
+        # if not shot.rad:
+        self.rad = self.direction * (math.pi / 180)
+        # else:
+        #     self.rad = shot.rad
+        self.timer = 20
         self.direction = shot.direction
 
     def update(self):
         dx, dy = self.speed * math.cos(self.rad), -self.speed * math.sin(self.rad)
         dy += self.gravity
+        dx *= self.x_velocity_offset
         self.rect = self.rect.move((dx, dy))
         self.timer -= 1

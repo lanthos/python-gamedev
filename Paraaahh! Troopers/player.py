@@ -74,19 +74,19 @@ class Turret(pygame.sprite.Sprite):
             self.move_counter_clockwise()
 
     def move_clockwise(self):
-        if self.angle - self.speed > 25:
+        if self.angle - self.speed > 20:
             self.angle -= self.speed
             self.state = "clockwise"
         else:
-            self.angle = 25
+            self.angle = 20
             self.state = "still"
 
     def move_counter_clockwise(self):
-        if self.angle + self.speed < 155:
+        if self.angle + self.speed < 160:
             self.angle += self.speed
             self.state = "counterclockwise"
         else:
-            self.angle = 155
+            self.angle = 160
             self.state = "still"
 
     def halt(self):

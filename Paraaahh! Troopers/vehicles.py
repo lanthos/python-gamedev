@@ -26,12 +26,12 @@ class Helicopter(pygame.sprite.Sprite):
         self.imagesb.append(self.image2b)
 
         self.state = 0
-        self.speed = random.randrange(5, 15)
+        self.speed = random.randrange(5, 13)
         self.trooper = True
         self.trooper_chance = 60
-        self.dz = False
         self.direction = 1
         self.set_image()
+        self.random_x = random.randint(100, 400)
 
     def set_image(self):
         if self.trooper:

@@ -46,13 +46,20 @@ class Menu():
         self.add_item(MenuItem("Highscores", "scores"))
         self.add_item(MenuItem("Credits", "credits"))
         self.add_item(MenuItem("Quit", "quit"))
-        self.add_item(MenuItem("Use keyboard to play", "pause"))
+        self.add_item(MenuItem("", "pause"))
+        self.add_item(MenuItem("", "pause"))
+        self.add_item(MenuItem("Use the keyboard to play", "pause"))
+        self.add_item(MenuItem("Left/Right Arrow to move turret", "pause"))
+        self.add_item(MenuItem("Space Bar to shoot", "pause"))
+        self.add_item(MenuItem("P to pause", "pause"))
         self.selected = None
         self.move_down()
         
     def ingamemenu(self):
         self.clear()
         self.add_item(MenuItem("PAUSE MENU", "pause"))
+        self.add_item(MenuItem("", "pause"))
+        self.add_item(MenuItem("", "pause"))
         self.add_item(MenuItem("Return", "returntogame"))
         self.add_item(MenuItem("New Game", "newgame"))
         # self.add_item(MenuItem("Options", "options"))
@@ -84,14 +91,16 @@ class Menu():
         self.clear()
         c = 0
         for score in highscores.items:
-            if c < 4:
+            if c < 5:
                 self.add_item(MenuItem(score.name, ""))
                 newm = MenuItem(score.score, "")
                 newm.align = "right"
                 self.add_item(newm)
             c += 1
+        self.add_item(MenuItem("Reset Highscore", "resetscores"))
         self.add_item(MenuItem("Back", "mainmenu"))
         self.selected = None
+        self.move_down()
         
     
 class MenuItem():

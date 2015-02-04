@@ -33,6 +33,30 @@ class HighScores():
                     else:
                         score += content[i]
 
+    def reset(self):
+        read_player = 1
+        self.items = []
+        with open(os.path.join('data', 'highscores.bak'), 'r') as f:
+            content = f.read()
+            player = ""
+            score = ""
+
+            for i in range(0, len(content)):
+                if content[i] == '\n':
+                    if read_player:
+                        read_player = 0
+                    else:
+                        self.add(HighScoreEntry(player, score))
+                        read_player = 1
+                        player = ""
+                        score = ""
+                else:
+                    if read_player:
+                        player += content[i]
+                    else:
+                        score += content[i]
+        self.save()
+
     def save(self):
         res = ""
         for item in self.items:

@@ -84,6 +84,9 @@ class Game():
                 self.menu.creditsmenu()
             elif newstate == "scores":
                 self.menu.highscoresmenu(self.highscores)
+            elif newstate == "resetscores":
+                self.highscores.reset()
+                self.menu.highscoresmenu(self.highscores)
             elif newstate == "newgame":
                 self.max = 30
                 # self.nextstate = "reset"
@@ -141,10 +144,10 @@ def main():
     aahh_image, aahh_rect = player.load_image('aahh.bmp')
 
     # initialize fonts
-    menufont_h1 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 50)
-    menufont_h2 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 40)
-    menufont_h3 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 30)
-    scorefont = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 30)
+    menufont_h1 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 40)
+    menufont_h2 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 30)
+    menufont_h3 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 20)
+    scorefont = pygame.font.Font(os.path.join('data', 'MonospaceTypewriter.ttf'), 18)
 
     ground = pygame.Surface((screen_width, 10))
     ground.fill(GREEN)
@@ -152,12 +155,12 @@ def main():
     ground_rect = ground.get_rect()
     ground_rect.x = 0
     ground_rect.y = screen.get_height() / 1.1
-    dirt = pygame.Surface((screen_width, 10))
+    dirt = pygame.Surface((screen_width, 45))
     dirt.fill(BROWN)
     dirt = dirt.convert()
     dirt_rect = dirt.get_rect()
     dirt_rect.x = 0
-    dirt_rect.y = screen.get_height() / 1.05
+    dirt_rect.y = screen.get_height() / 1.08
 
     # Init game
     game = Game()
@@ -284,7 +287,7 @@ def main():
 
             # should there be a new heli?
             game.heli_timer -= 1
-            if random.randrange(1, game.heli_timer) == 1:
+            if game.heli_timer <= 0:
                 heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
                 if random.randrange(0, 2) == 1:
                     random.seed()
@@ -298,35 +301,33 @@ def main():
                     heli.flip_images()
                     heli.direction = 1
                 heli_sprites.add(heli)
-                game.heli_timer = 70
+                game.heli_timer = random.randint(20, 40)
 
             for heli in heli_sprites.sprites():
-                if heli.rect.right < area.centerx - 55 or heli.rect.left > area.centerx + 55:
-                    heli.dmz = False
-                elif heli.rect.right > screen_width or heli.rect.left < 0:
-                    heli.dmz = True
-                else:
-                    heli.dmz = True
                 if heli.rect.left > area.right and heli.direction == 1:
                     heli_sprites.remove(heli)
                 elif heli.rect.right < area.left and heli.direction == -1:
                     heli_sprites.remove(heli)
-                elif heli.trooper and not heli.dmz:
-                    if heli.trooper_chance < 1:
-                        heli.trooper_chance = 1
-                    if random.randrange(1, heli.trooper_chance) == 1:
-                        para = troopers.Parachute(parachute_image, parachute_rect)
-                        para.rect.bottom = area.top
-                        parachute_sprites.add(para)
+                elif heli.trooper:
+                    if (heli.direction == 1 and heli.rect.centerx > heli.random_x) or (heli.direction == -1 and
+                                                                                               heli.rect.centerx <
+                                                                                               heli.direction):
 
-                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon,
-                                                   screen, game)
-                        trooper.rect.midtop = heli.rect.midbottom
-                        trooper_sprites.add(trooper)
+                        if heli.trooper_chance < 2:
+                            heli.trooper_chance = 2
+                        if random.randrange(1, heli.trooper_chance) == 1:
+                            para = troopers.Parachute(parachute_image, parachute_rect)
+                            para.rect.bottom = area.top
+                            parachute_sprites.add(para)
 
-                        trooper.para = para
-                        para.trooper = trooper
-                        heli.trooper = False
+                            trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon,
+                                                       screen, game)
+                            trooper.rect.midtop = heli.rect.midbottom
+                            trooper_sprites.add(trooper)
+
+                            trooper.para = para
+                            para.trooper = trooper
+                            heli.trooper = False
                     heli.trooper_chance -= 1
 
             # Did a bullet hit a helicopter?
@@ -465,7 +466,7 @@ def main():
                     if trooper.winner:
                         game.game_over()
             # print len(game.climbers_l)
-            if len(left_side_dudes) >= 1:
+            if len(left_side_dudes) >= 3:
                 for d in left_side_dudes:
                     if not d.in_pyramid:
                         if not left_nearest_dude:
@@ -534,7 +535,7 @@ def main():
                             left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 25
                             left_nearest_dude.winner = 1
 
-            if len(right_side_dudes) >= 1:
+            if len(right_side_dudes) >= 3:
                 for d in right_side_dudes:
                     if not d.in_pyramid:
                         if not right_nearest_dude:
@@ -632,6 +633,7 @@ def main():
             troop_particle_sprites.draw(screen)
             screen.blit(ground, ground_rect)
             screen.blit(dirt, dirt_rect)
+            game.highscores.display_high(scorefont, screen, game.score)
             screen.blit(canon.canonbase, canon.canonbase_rect)
             screen.blit(canon.canontop, canon.cannontop_rect)
 
@@ -661,8 +663,7 @@ def main():
                         game.menu_select()
 
             screen.blit(background, (0, 0))
-            
-            
+
             menuitems = game.get_current_menu()
             selected = game.menu.selected
             for i in range(0, len(menuitems)):
