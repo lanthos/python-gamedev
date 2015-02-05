@@ -54,6 +54,7 @@ class Game():
         self.heli_timer = 70
         self.plane_timer = 120
         self.gameover = 0
+        self.timer = 50
         self.playing = False
         self.reset()
         try:
@@ -217,7 +218,7 @@ def main():
                     parachute_sprites.add(para)
 
                     trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon,
-                                               screen, game)
+                                               screen)
                     trooper.rect.x = mousex
                     trooper.rect.y = mousey
                     trooper_sprites.add(trooper)
@@ -309,9 +310,9 @@ def main():
                 elif heli.rect.right < area.left and heli.direction == -1:
                     heli_sprites.remove(heli)
                 elif heli.trooper:
-                    if (heli.direction == 1 and heli.rect.centerx > heli.random_x) or (heli.direction == -1 and
+                    if (heli.direction == 1 and heli.rect.centerx > heli.random_x - 20) or (heli.direction == -1 and
                                                                                                heli.rect.centerx <
-                                                                                               heli.direction):
+                                                                                               heli.random_x - 500):
 
                         if heli.trooper_chance < 2:
                             heli.trooper_chance = 2
@@ -321,7 +322,7 @@ def main():
                             parachute_sprites.add(para)
 
                             trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon,
-                                                       screen, game)
+                                                       screen)
                             trooper.rect.midtop = heli.rect.midbottom
                             trooper_sprites.add(trooper)
 
@@ -338,7 +339,7 @@ def main():
                     screen.blit(background, heli.rect, heli.rect)
                     game.score += HELI_SHOT
                     for i in range(10):
-                        part = particle.Particle(heli.rect.centerx, heli.rect.centery, YELLOW, bullet)
+                        part = particle.Particle(heli.rect.centerx, heli.rect.centery, YELLOW, 'heli')
                         part.image = pygame.transform.rotate(part.particle, part.direction)
                         heli_particle_sprites.add(part)
 
@@ -355,7 +356,7 @@ def main():
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                     game.score += TROOPER_SHOT
                     for i in range(10):
-                        part = particle.Particle(trooper.rect.centerx, trooper.rect.centery, RED, bullet)
+                        part = particle.Particle(trooper.rect.centerx, trooper.rect.centery, RED, 'trooper')
                         part.image = pygame.transform.rotate(part.particle, part.direction)
                         troop_particle_sprites.add(part)
 
@@ -463,8 +464,6 @@ def main():
                         left_side_dudes.append(trooper)
                     elif trooper.rect.left > area.centerx:
                         right_side_dudes.append(trooper)
-                    if trooper.winner:
-                        game.game_over()
             # print len(game.climbers_l)
             if len(left_side_dudes) >= 3:
                 for d in left_side_dudes:
@@ -609,6 +608,20 @@ def main():
                             right_nearest_dude.rect.right = right_nearest_dude.area.centerx + 45
                             right_nearest_dude.winner = 1
 
+            # Check for winner
+            for trooper in trooper_sprites.sprites():
+                if trooper.winner:
+                    for i in range(25):
+                        part = particle.Particle(canon.cannontop_rect.centerx - 20, canon.cannontop_rect.centery,
+                                                 random.choice((RED, YELLOW)), 'base')
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        troop_particle_sprites.add(part)
+                    game.gameover = 1
+
+            if game.gameover == 1:
+                game.timer -= 1
+                if game.timer <= 0:
+                    game.game_over()
 
             canon_sprite.update()
             bullet_sprites.update()
@@ -630,12 +643,12 @@ def main():
             trooper_sprites.draw(screen)
             aahh_sprites.draw(screen)
             heli_particle_sprites.draw(screen)
-            troop_particle_sprites.draw(screen)
             screen.blit(ground, ground_rect)
             screen.blit(dirt, dirt_rect)
             game.highscores.display_high(scorefont, screen, game.score)
             screen.blit(canon.canonbase, canon.canonbase_rect)
             screen.blit(canon.canontop, canon.cannontop_rect)
+            troop_particle_sprites.draw(screen)
 
 
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT

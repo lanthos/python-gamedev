@@ -31,7 +31,8 @@ class Helicopter(pygame.sprite.Sprite):
         self.trooper_chance = 60
         self.direction = 1
         self.set_image()
-        self.random_x = random.randint(100, 400)
+        random.seed()
+        self.random_x = random.randint(520, 800)
 
     def set_image(self):
         if self.trooper:

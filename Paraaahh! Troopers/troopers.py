@@ -21,7 +21,7 @@ YELLOW = (229, 255, 6)
 
 class Trooper(pygame.sprite.Sprite):
 
-    def __init__(self, image1, image2, rect, ground, canon, screen, game):
+    def __init__(self, image1, image2, rect, ground, canon, screen):
         pygame.sprite.Sprite.__init__(self)
 
         self.images = []
@@ -40,7 +40,6 @@ class Trooper(pygame.sprite.Sprite):
         self.climbing = 0
         self.walking = 0
         self.in_pyramid = 0
-        self.game = game
 
         # set states
         self.stopped = 0

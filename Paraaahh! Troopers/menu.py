@@ -101,6 +101,7 @@ class Menu():
         self.add_item(MenuItem("Back", "mainmenu"))
         self.selected = None
         self.move_down()
+        self.move_down()
         
     
 class MenuItem():
