@@ -119,6 +119,8 @@ class Sounds():
 
     def __init__(self):
         self.shot = pygame.mixer.Sound(os.path.join('data', 'shot1.wav'))
+        self.splat = pygame.mixer.Sound(os.path.join('data', 'splat1.wav'))
+        self.hit = pygame.mixer.Sound(os.path.join('data', 'trooper_hit1.wav'))
         self.aahhh = pygame.mixer.Sound(os.path.join('data', 'aahhh1.wav'))
 
 
@@ -396,6 +398,7 @@ def main():
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.para.rect, trooper.para.rect)
                     parachute_sprites.remove(trooper.para)
+                    game.sounds.hit.play()
                     if trooper.chute_shot:
                         aahh_sprites.remove(trooper.aahh)
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
@@ -457,6 +460,7 @@ def main():
                     aahh_sprites.remove(trooper.aahh)
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
+                    game.sounds.splat.play()
                     game.score += TROOPER_DROPPED
 
             # Did the falling guy fall on another guy?
