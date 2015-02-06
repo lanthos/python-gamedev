@@ -71,3 +71,16 @@ class Plane(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.image, self.rect = image, rect
+
+        self.state = 0
+        self.speed = random.randrange(5, 13)
+        self.direction = 1
+        random.seed()
+        self.random_x = random.randint(520, 800)
+
+    def update(self):
+        dx = self.speed * self.direction
+        self.rect = self.rect.move((dx, 0))
+
+    def flip_images(self):
+        self.image = pygame.transform.flip(self.image, 1, 0)

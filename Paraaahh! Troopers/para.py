@@ -42,7 +42,7 @@ class Game():
     def __init__(self):
 
         self.highscores = highscores.HighScores()
-        # self.sounds = Sounds()
+        self.sounds = Sounds()
         self.menu = menu.Menu()
         self.menu.mainmenu()
 
@@ -115,6 +115,12 @@ class Game():
         self.state = "gameover"
 
 
+class Sounds():
+
+    def __init__(self):
+        self.shot = pygame.mixer.Sound(os.path.join('data', 'shot1.wav'))
+
+
 def main():
     """ Main function for the game. """
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -178,6 +184,7 @@ def main():
     dropping_sprites = pygame.sprite.RenderPlain()
     aahh_sprites = pygame.sprite.RenderPlain()
     heli_particle_sprites = pygame.sprite.RenderPlain()
+    plane_particle_sprites = pygame.sprite.RenderPlain()
 
     # Initial drawing of everything
 
@@ -284,7 +291,32 @@ def main():
                                                       -newbullet.speed * math.sin(canon_rad) + 20))
                 bullet_sprites.add(newbullet)
                 t = 0
+                game.sounds.shot.play()
             t += 1
+
+            # should there be a new plane?
+            game.plane_timer -= 1
+            if game.plane_timer <= 0:
+                plane = vehicles.Plane(plane_image, plane_rect)
+                if random.randrange(0, 2) == 1:
+                    random.seed()
+                    plane.rect.topright = area.topright
+                    plane.rect = plane.rect.move((0, random.randint(3, 10)))
+                    plane.direction = -1
+                else:
+                    random.seed()
+                    plane.rect.topleft = area.topleft
+                    plane.rect = plane.rect.move((0, random.randrange(60, 70)))
+                    plane.flip_images()
+                    plane.direction = 1
+                plane_sprites.add(plane)
+                game.plane_timer = random.randint(20, 40)
+
+            for plane in plane_sprites.sprites():
+                if plane.rect.left > area.right and plane.direction == 1:
+                    plane_sprites.remove(plane)
+                elif plane.rect.right < area.left and plane.direction == -1:
+                    plane_sprites.remove(plane)
 
             # should there be a new heli?
             game.heli_timer -= 1
@@ -342,6 +374,18 @@ def main():
                         part = particle.Particle(heli.rect.centerx, heli.rect.centery, YELLOW, 'heli')
                         part.image = pygame.transform.rotate(part.particle, part.direction)
                         heli_particle_sprites.add(part)
+
+            # Did a bullet hit a plane?
+            plane_killed_dict = pygame.sprite.groupcollide(bullet_sprites, plane_sprites, 1, 1)
+            for bullet in plane_killed_dict:
+                screen.blit(background, bullet.rect, bullet.rect)
+                for plane in plane_killed_dict:
+                    screen.blit(background, plane.rect, plane.rect)
+                    game.score += PLANE_SHOT
+                    for i in range(10):
+                        part = particle.Particle(plane.rect.centerx, plane.rect.centery, YELLOW, 'plane')
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        plane_particle_sprites.add(part)
 
             # Did a bullet hit a trooper?
             trooper_killed_dict = pygame.sprite.groupcollide(bullet_sprites, trooper_sprites, 1, 1)
@@ -626,9 +670,11 @@ def main():
             canon_sprite.update()
             bullet_sprites.update()
             heli_sprites.update()
+            plane_sprites.update()
             trooper_sprites.update()
             heli_particle_sprites.update()
             troop_particle_sprites.update()
+            plane_particle_sprites.update()
 
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
@@ -639,6 +685,8 @@ def main():
             canon_sprite.draw(screen)
             bullet_sprites.draw(screen)
             heli_sprites.draw(screen)
+            plane_sprites.draw(screen)
+            plane_particle_sprites.draw(screen)
             parachute_sprites.draw(screen)
             trooper_sprites.draw(screen)
             aahh_sprites.draw(screen)
