@@ -119,6 +119,7 @@ class Sounds():
 
     def __init__(self):
         self.shot = pygame.mixer.Sound(os.path.join('data', 'shot1.wav'))
+        self.aahhh = pygame.mixer.Sound(os.path.join('data', 'aahhh1.wav'))
 
 
 def main():
@@ -431,6 +432,7 @@ def main():
                     aahh = troopers.Aahh(aahh_image, aahh_rect)
                     aahh_sprites.add(aahh)
                     para.trooper.aahh = aahh
+                    game.sounds.aahhh.play()
 
             # Did heli shrapnel hit a parachute?
             para_hit_dict = pygame.sprite.groupcollide(heli_particle_sprites, parachute_sprites, 0, 1)
