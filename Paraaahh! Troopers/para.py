@@ -48,13 +48,15 @@ class Game():
 
         self.fadecolor = (63, 177, 79)
         self.state = "mainmenu"
-        self.t = 0
-        self.max = 0
+        self.t = 1
         self.nextstate = ""
+        self.wave = 1
+        self.heli_count_base = 5
+        self.heli_count = 5
         self.heli_timer = 70
-        self.plane_timer = 120
-        self.gameover = 0
+        self.plane_timer = 420
         self.timer = 50
+        self.gameover = 0
         self.playing = False
         self.reset()
         try:
@@ -110,6 +112,7 @@ class Game():
     def reset(self):
         self.score = 0
         self.gameover = 0
+        self.t = 1
 
     def game_over(self):
         self.state = "gameover"
@@ -122,6 +125,13 @@ class Sounds():
         self.splat = pygame.mixer.Sound(os.path.join('data', 'splat1.wav'))
         self.hit = pygame.mixer.Sound(os.path.join('data', 'trooper_hit1.wav'))
         self.aahhh = pygame.mixer.Sound(os.path.join('data', 'aahhh1.wav'))
+
+
+def display_wave(wave, wave_count, font, screen):
+    wave = font.render('Wave {}: {} helicopters.'.format(wave, wave_count), True, (255, 255, 255))
+    wave_rect = wave.get_rect()
+    wave_rect.topleft = (screen.get_width() / 3, screen.get_height() - 50)
+    screen.blit(wave, wave_rect)
 
 
 def main():
@@ -149,6 +159,7 @@ def main():
     heli2b_image, heli_rect = player.load_image('heli2b.bmp')
     plane_image, plane_rect = player.load_image('plane.bmp')
     troop_image, troop_rect = player.load_image('trooper.bmp')
+    bomb_image, bomb_rect = player.load_image('bomb.bmp')
     falling_trooper_image, falling_trooper_rect = player.load_image('trooper_falling.bmp')
     parachute_image, parachute_rect = player.load_image('chute.bmp')
     aahh_image, aahh_rect = player.load_image('aahh.bmp')
@@ -178,10 +189,13 @@ def main():
     # Init sprites
     canon = player.Turret(ground_rect)
     bullet_sprites = pygame.sprite.RenderPlain()
+    bomb_sprites = pygame.sprite.RenderPlain()
+    bomb_particle_sprites = pygame.sprite.RenderPlain()
     troop_particle_sprites = pygame.sprite.RenderPlain()
     canon_sprite = pygame.sprite.RenderPlain(canon)
     parachute_sprites = pygame.sprite.RenderPlain()
     trooper_sprites = pygame.sprite.RenderPlain()
+    base_particle_sprites = pygame.sprite.RenderPlain()
     plane_sprites = pygame.sprite.RenderPlain()
     heli_sprites = pygame.sprite.RenderPlain()
     dropping_sprites = pygame.sprite.RenderPlain()
@@ -313,7 +327,7 @@ def main():
                     plane.flip_images()
                     plane.direction = 1
                 plane_sprites.add(plane)
-                game.plane_timer = random.randint(20, 40)
+                game.plane_timer = random.randint(100, 120)
 
             for plane in plane_sprites.sprites():
                 if plane.rect.left > area.right and plane.direction == 1:
@@ -321,23 +335,55 @@ def main():
                 elif plane.rect.right < area.left and plane.direction == -1:
                     plane_sprites.remove(plane)
 
+            # should the plane drop a bomb?
+            for plane in plane_sprites.sprites():
+                if not plane.bomb_released:
+                    if (plane.direction == 1 and plane.rect.centerx > plane.random_x) or \
+                            (plane.direction == -1 and plane.rect.centerx < plane.random_x + 450):
+                        bomb = vehicles.Bomb(bomb_image, bomb_rect)
+                        bomb.rect.midtop = plane.rect.midbottom
+                        bomb.rad = math.atan2(canon.cannontop_rect.centery - bomb.rect.centery, bomb.rect.centerx -
+                                              canon.cannontop_rect.centerx)
+                        bomb.dx, bomb.dy = -bomb.speed * math.cos(bomb.rad), bomb.speed * math.sin(bomb.rad)
+                        bomb_sprites.add(bomb)
+                        plane.bomb_released = True
+
+            # did the bomb hit the base?
+            for bomb in bomb_sprites.sprites():
+                if bomb.rect.center == canon.cannontop_rect.center:
+                    bomb_sprites.remove(bomb)
+                    screen.blit(background, bomb.rect, bomb.rect)
+                    for i in range(25):
+                        part = particle.Particle(canon.cannontop_rect.centerx - 20, canon.cannontop_rect.centery,
+                                                 random.choice((RED, YELLOW)), 'base')
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        base_particle_sprites.add(part)
+                    game.gameover = 1
+
+
             # should there be a new heli?
-            game.heli_timer -= 1
-            if game.heli_timer <= 0:
-                heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
-                if random.randrange(0, 2) == 1:
-                    random.seed()
-                    heli.rect.topright = area.topright
-                    heli.rect = heli.rect.move((0, random.randint(3, 10)))
-                    heli.direction = -1
-                else:
-                    random.seed()
-                    heli.rect.topleft = area.topleft
-                    heli.rect = heli.rect.move((0, random.randrange(60, 70)))
-                    heli.flip_images()
-                    heli.direction = 1
-                heli_sprites.add(heli)
-                game.heli_timer = random.randint(20, 40)
+            if game.heli_count > 0:
+                game.heli_timer -= 1
+                if game.heli_timer <= 0:
+                    heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
+                    if random.randrange(0, 2) == 1:
+                        random.seed()
+                        heli.rect.topright = area.topright
+                        heli.rect = heli.rect.move((0, random.randint(3, 10)))
+                        heli.direction = -1
+                    else:
+                        random.seed()
+                        heli.rect.topleft = area.topleft
+                        heli.rect = heli.rect.move((0, random.randrange(60, 70)))
+                        heli.flip_images()
+                        heli.direction = 1
+                    heli_sprites.add(heli)
+                    game.heli_count -= 1
+                    game.heli_timer = random.randint(20, 40)
+            elif game.heli_count == 0:
+                game.heli_count = game.heli_count_base + game.wave
+                game.wave += 1
+                game.heli_timer = 320
 
             for heli in heli_sprites.sprites():
                 if heli.rect.left > area.right and heli.direction == 1:
@@ -416,6 +462,7 @@ def main():
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.para.rect, trooper.para.rect)
                     parachute_sprites.remove(trooper.para)
+                    game.sounds.hit.play()
                     if trooper.chute_shot:
                         aahh_sprites.remove(trooper.aahh)
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
@@ -437,6 +484,19 @@ def main():
                     para.trooper.aahh = aahh
                     game.sounds.aahhh.play()
 
+            # Did a bullet hit a bomb?
+            bomb_hit_dict = pygame.sprite.groupcollide(bullet_sprites, bomb_sprites, 1, 1)
+            for bullet in bomb_hit_dict:
+                screen.blit(background, bullet.rect, bullet.rect)
+                for bomb in bomb_hit_dict[bullet]:
+                    screen.blit(background, bomb.rect, bomb.rect)
+                    # bomb_sprites.remove(bomb)
+                    game.score += BOMB_SHOT
+                    for i in range(5):
+                        part = particle.Particle(bomb.rect.centerx, bomb.rect.centery, GREY, 'bomb')
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        bomb_particle_sprites.add(part)
+
             # Did heli shrapnel hit a parachute?
             para_hit_dict = pygame.sprite.groupcollide(heli_particle_sprites, parachute_sprites, 0, 1)
             for part in para_hit_dict:
@@ -451,6 +511,7 @@ def main():
                     aahh = troopers.Aahh(aahh_image, aahh_rect)
                     aahh_sprites.add(aahh)
                     para.trooper.aahh = aahh
+                    game.sounds.aahhh.play()
 
             # Did the falling guy die?
             for trooper in dropping_sprites.sprites():
@@ -477,6 +538,8 @@ def main():
                         screen.blit(background, hittrooper.rect, hittrooper.rect)
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                         game.score += TROOPER_DROPPED
+                        game.sounds.splat.play()
+                        game.sounds.hit.play()
 
             # Should we remove any parachutes?
             for para in parachute_sprites.sprites():
@@ -665,7 +728,7 @@ def main():
                         part = particle.Particle(canon.cannontop_rect.centerx - 20, canon.cannontop_rect.centery,
                                                  random.choice((RED, YELLOW)), 'base')
                         part.image = pygame.transform.rotate(part.particle, part.direction)
-                        troop_particle_sprites.add(part)
+                        base_particle_sprites.add(part)
                     game.gameover = 1
 
             if game.gameover == 1:
@@ -674,32 +737,39 @@ def main():
                     game.game_over()
 
             canon_sprite.update()
+            base_particle_sprites.update()
             bullet_sprites.update()
             heli_sprites.update()
             plane_sprites.update()
             trooper_sprites.update()
+            bomb_sprites.update()
             heli_particle_sprites.update()
             troop_particle_sprites.update()
             plane_particle_sprites.update()
+            bomb_particle_sprites.update()
 
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
             # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
 
             screen.blit(background, (0, 0))
-            game.highscores.display_high(scorefont, screen, game.score)
+            display_wave(game.wave, game.heli_count, scorefont, screen)
             canon_sprite.draw(screen)
             bullet_sprites.draw(screen)
             heli_sprites.draw(screen)
             plane_sprites.draw(screen)
+            bomb_particle_sprites.draw(screen)
             plane_particle_sprites.draw(screen)
             parachute_sprites.draw(screen)
             trooper_sprites.draw(screen)
             aahh_sprites.draw(screen)
             heli_particle_sprites.draw(screen)
+            bomb_sprites.draw(screen)
+            base_particle_sprites.draw(screen)
             screen.blit(ground, ground_rect)
             screen.blit(dirt, dirt_rect)
             game.highscores.display_high(scorefont, screen, game.score)
+            display_wave(game.wave, game.heli_count, scorefont, screen)
             screen.blit(canon.canonbase, canon.canonbase_rect)
             screen.blit(canon.canontop, canon.cannontop_rect)
             troop_particle_sprites.draw(screen)
@@ -806,31 +876,6 @@ def main():
             game.state = 'fadein_y'
 
         elif game.state == 'reset':
-            # for sprite in bullet_sprites:
-            #     bullet_sprites.remove(sprite)
-            #     screen.blit(background, sprite.rect, sprite.rect)
-            # for sprite in heli_particle_sprites:
-            #     heli_particle_sprites.remove(sprite)
-            #     screen.blit(background, sprite.rect, sprite.rect)
-            # for sprite in troop_particle_sprites:
-            #     troop_particle_sprites.remove(sprite)
-            #     screen.blit(background, sprite.rect, sprite.rect)
-            # for sprite in parachute_sprites:
-            #     parachute_sprites.remove(sprite)
-            #     screen.blit(background, sprite.rect, sprite.rect)
-            # for sprite in plane_sprites:
-            #     plane_sprites.remove(sprite)
-            #     screen.blit(background, sprite.rect, sprite.rect)
-            # # bomb_sprites.empty()
-            # for sprite in trooper_sprites:
-            #     trooper_sprites.remove(sprite)
-            #     screen.blit(background, sprite.rect, sprite.rect)
-            # for sprite in dropping_sprites:
-            #     dropping_sprites.remove(sprite)
-            #     screen.blit(background, sprite.rect, sprite.rect)
-            # for sprite in heli_sprites:
-            #     heli_sprites.remove(sprite)
-            #     screen.blit(background, sprite.rect, sprite.rect)
             bullet_sprites.empty()
             heli_particle_sprites.empty()
             troop_particle_sprites.empty()

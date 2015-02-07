@@ -76,7 +76,8 @@ class Plane(pygame.sprite.Sprite):
         self.speed = random.randrange(5, 13)
         self.direction = 1
         random.seed()
-        self.random_x = random.randint(520, 800)
+        self.random_x = random.randint(40, 250)
+        self.bomb_released = False
 
     def update(self):
         dx = self.speed * self.direction
@@ -84,3 +85,23 @@ class Plane(pygame.sprite.Sprite):
 
     def flip_images(self):
         self.image = pygame.transform.flip(self.image, 1, 0)
+
+
+class Bomb(pygame.sprite.Sprite):
+
+    def __init__(self, image, rect):
+
+        #init sprite
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image, self.rect = image, rect
+        self.rect = self.image.get_rect()
+        # self.screen = pygame.display.get_surface()
+        # self.screen_rect = self.screen.get_rect()
+        self.speed = 8
+        # self.movepos = (0, 0)
+        self.rad = None
+        # self.dx, self.dy = self.speed * math.cos(self.rad), -self.speed * math.sin(self.rad)
+
+    def update(self):
+        self.rect = self.rect.move((self.dx, self.dy))
