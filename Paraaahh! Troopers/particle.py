@@ -24,10 +24,11 @@ class Particle(pygame.sprite.Sprite):
         self.speed = random.randint(10, 15) / 3 + self.y_velocity_offset
         if object == 'base':
             random.seed()
-            self.direction = random.randint(-180, -1)
-            self.gravity = -7
+            self.direction = random.randint(-160, -20)
+            self.gravity = -5
             self.x_offset = random.randrange(1, 50) + 1
             self.y_offset = random.randrange(1, 50) + 1
+            self.speed = 5
         else:
             self.direction = random.randint(1, 180)
             self.gravity = 12

@@ -98,7 +98,7 @@ class Bomb(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         # self.screen = pygame.display.get_surface()
         # self.screen_rect = self.screen.get_rect()
-        self.speed = 8
+        self.speed = random.randint(5, 10)
         # self.movepos = (0, 0)
         self.rad = None
         # self.dx, self.dy = self.speed * math.cos(self.rad), -self.speed * math.sin(self.rad)

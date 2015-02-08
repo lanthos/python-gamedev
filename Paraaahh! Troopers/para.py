@@ -51,10 +51,12 @@ class Game():
         self.t = 1
         self.nextstate = ""
         self.wave = 1
+        self.wave_timer = 50
+        self.wave_timer_base = 50
         self.heli_count_base = 5
         self.heli_count = 5
         self.heli_timer = 70
-        self.plane_timer = 420
+        self.plane_timer = 70
         self.timer = 50
         self.gameover = 0
         self.playing = False
@@ -113,6 +115,9 @@ class Game():
         self.score = 0
         self.gameover = 0
         self.t = 1
+        self.heli_count = self.heli_count_base
+        self.wave = 1
+        self.timer = 50
 
     def game_over(self):
         self.state = "gameover"
@@ -125,12 +130,13 @@ class Sounds():
         self.splat = pygame.mixer.Sound(os.path.join('data', 'splat1.wav'))
         self.hit = pygame.mixer.Sound(os.path.join('data', 'trooper_hit1.wav'))
         self.aahhh = pygame.mixer.Sound(os.path.join('data', 'aahhh1.wav'))
+        self.explosion = pygame.mixer.Sound(os.path.join('data', 'explosion1.wav'))
 
 
 def display_wave(wave, wave_count, font, screen):
-    wave = font.render('Wave {}: {} helicopters.'.format(wave, wave_count), True, (255, 255, 255))
+    wave = font.render('Wave {}: {} helicopters'.format(wave, wave_count), True, (255, 255, 255))
     wave_rect = wave.get_rect()
-    wave_rect.topleft = (screen.get_width() / 3, screen.get_height() - 50)
+    wave_rect.topleft = (screen.get_width() / 2.7, screen.get_height() / 7)
     screen.blit(wave, wave_rect)
 
 
@@ -268,20 +274,20 @@ def main():
                         sys.exit()
                     if event.key == pygame.K_p:
                         game.ingamemenu()
-                    if event.key == pygame.K_LEFT:
+                    if event.key == pygame.K_LEFT and game.gameover == 0:
                             canon.move_counter_clockwise()
                             # print canon.state
                             # print canon.angle
                             # print 'going counter clockwise'
-                    elif event.key == pygame.K_RIGHT:
+                    elif event.key == pygame.K_RIGHT and game.gameover == 0:
                         canon.move_clockwise()
                         # print canon.state
                         # print canon.angle
                         # print 'going clockwise'
-                    elif event.key == pygame.K_SPACE:
+                    elif event.key == pygame.K_SPACE and game.gameover == 0:
                         shoot = True
                         t = 0
-                elif event.type == pygame.KEYUP:
+                elif event.type == pygame.KEYUP and game.gameover == 0:
                     if event.key == pygame.K_LEFT and canon.state == 'counterclockwise':
                         canon.halt()
                     elif event.key == pygame.K_RIGHT and canon.state == 'clockwise':
@@ -296,7 +302,7 @@ def main():
             # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
             # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
-            if shoot and t % shoot_lock == 0:
+            if shoot and t % shoot_lock == 0 and game.gameover == 0:
                 #shoot a bullet
                 newbullet = player.Bullet()
                 newbullet.direction = canon.angle
@@ -311,23 +317,28 @@ def main():
                 game.sounds.shot.play()
             t += 1
 
+            # Wave timer countdown
+            game.wave_timer -= 1
+
+
             # should there be a new plane?
-            game.plane_timer -= 1
-            if game.plane_timer <= 0:
-                plane = vehicles.Plane(plane_image, plane_rect)
-                if random.randrange(0, 2) == 1:
-                    random.seed()
-                    plane.rect.topright = area.topright
-                    plane.rect = plane.rect.move((0, random.randint(3, 10)))
-                    plane.direction = -1
-                else:
-                    random.seed()
-                    plane.rect.topleft = area.topleft
-                    plane.rect = plane.rect.move((0, random.randrange(60, 70)))
-                    plane.flip_images()
-                    plane.direction = 1
-                plane_sprites.add(plane)
-                game.plane_timer = random.randint(100, 120)
+            if game.wave_timer <= 0:
+                game.plane_timer -= 1
+                if game.plane_timer <= 0:
+                    plane = vehicles.Plane(plane_image, plane_rect)
+                    if random.randrange(0, 2) == 1:
+                        random.seed()
+                        plane.rect.topright = area.topright
+                        plane.rect = plane.rect.move((0, random.randint(3, 10)))
+                        plane.direction = -1
+                    else:
+                        random.seed()
+                        plane.rect.topleft = area.topleft
+                        plane.rect = plane.rect.move((0, random.randrange(60, 70)))
+                        plane.flip_images()
+                        plane.direction = 1
+                    plane_sprites.add(plane)
+                    game.plane_timer = random.randint(100, 120)
 
             for plane in plane_sprites.sprites():
                 if plane.rect.left > area.right and plane.direction == 1:
@@ -348,21 +359,9 @@ def main():
                         bomb_sprites.add(bomb)
                         plane.bomb_released = True
 
-            # did the bomb hit the base?
-            for bomb in bomb_sprites.sprites():
-                if bomb.rect.center == canon.cannontop_rect.center:
-                    bomb_sprites.remove(bomb)
-                    screen.blit(background, bomb.rect, bomb.rect)
-                    for i in range(25):
-                        part = particle.Particle(canon.cannontop_rect.centerx - 20, canon.cannontop_rect.centery,
-                                                 random.choice((RED, YELLOW)), 'base')
-                        part.image = pygame.transform.rotate(part.particle, part.direction)
-                        base_particle_sprites.add(part)
-                    game.gameover = 1
-
 
             # should there be a new heli?
-            if game.heli_count > 0:
+            if game.heli_count > 0 and game.wave_timer <= 0:
                 game.heli_timer -= 1
                 if game.heli_timer <= 0:
                     heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
@@ -383,7 +382,8 @@ def main():
             elif game.heli_count == 0:
                 game.heli_count = game.heli_count_base + game.wave
                 game.wave += 1
-                game.heli_timer = 320
+                game.heli_timer = 220
+                game.wave_timer = 100
 
             for heli in heli_sprites.sprites():
                 if heli.rect.left > area.right and heli.direction == 1:
@@ -419,6 +419,7 @@ def main():
                 for heli in heli_killed_dict:
                     screen.blit(background, heli.rect, heli.rect)
                     game.score += HELI_SHOT
+                    game.sounds.explosion.play()
                     for i in range(10):
                         part = particle.Particle(heli.rect.centerx, heli.rect.centery, YELLOW, 'heli')
                         part.image = pygame.transform.rotate(part.particle, part.direction)
@@ -431,6 +432,7 @@ def main():
                 for plane in plane_killed_dict:
                     screen.blit(background, plane.rect, plane.rect)
                     game.score += PLANE_SHOT
+                    game.sounds.explosion.play()
                     for i in range(10):
                         part = particle.Particle(plane.rect.centerx, plane.rect.centery, YELLOW, 'plane')
                         part.image = pygame.transform.rotate(part.particle, part.direction)
@@ -723,7 +725,19 @@ def main():
 
             # Check for winner
             for trooper in trooper_sprites.sprites():
-                if trooper.winner:
+                if trooper.winner and game.gameover == 0:
+                    for i in range(100):
+                        part = particle.Particle(canon.cannontop_rect.centerx - 20, canon.cannontop_rect.centery,
+                                                 random.choice((RED, YELLOW)), 'base')
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        base_particle_sprites.add(part)
+                    game.gameover = 1
+
+            # did the bomb hit the base?
+            for bomb in bomb_sprites.sprites():
+                if bomb.rect.colliderect(canon.cannontop_rect):
+                    bomb_sprites.remove(bomb)
+                    screen.blit(background, bomb.rect, bomb.rect)
                     for i in range(25):
                         part = particle.Particle(canon.cannontop_rect.centerx - 20, canon.cannontop_rect.centery,
                                                  random.choice((RED, YELLOW)), 'base')
@@ -732,6 +746,7 @@ def main():
                     game.gameover = 1
 
             if game.gameover == 1:
+                canon.halt()
                 game.timer -= 1
                 if game.timer <= 0:
                     game.game_over()
@@ -753,7 +768,6 @@ def main():
             # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
 
             screen.blit(background, (0, 0))
-            display_wave(game.wave, game.heli_count, scorefont, screen)
             canon_sprite.draw(screen)
             bullet_sprites.draw(screen)
             heli_sprites.draw(screen)
@@ -765,14 +779,15 @@ def main():
             aahh_sprites.draw(screen)
             heli_particle_sprites.draw(screen)
             bomb_sprites.draw(screen)
-            base_particle_sprites.draw(screen)
             screen.blit(ground, ground_rect)
             screen.blit(dirt, dirt_rect)
             game.highscores.display_high(scorefont, screen, game.score)
-            display_wave(game.wave, game.heli_count, scorefont, screen)
+            if game.wave_timer > 0 and len(heli_sprites) == 0 and len(plane_sprites) == 0:
+                display_wave(game.wave, game.heli_count, scorefont, screen)
             screen.blit(canon.canonbase, canon.canonbase_rect)
             screen.blit(canon.canontop, canon.cannontop_rect)
             troop_particle_sprites.draw(screen)
+            base_particle_sprites.draw(screen)
 
 
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
@@ -884,6 +899,10 @@ def main():
             trooper_sprites.empty()
             dropping_sprites.empty()
             heli_sprites.empty()
+            plane_sprites.empty()
+            base_particle_sprites.empty()
+            plane_particle_sprites.empty()
+            pygame.event.clear()
 
             print 'resetting'
             game.reset()
