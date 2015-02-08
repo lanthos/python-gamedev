@@ -126,7 +126,7 @@ def score_reset(red, blue):
 
 def main():
     """ Main function for the game. """
-    pygame.mixer.pre_init(44100, -16, 2, 4096)
+    pygame.mixer.pre_init(44100, -16, 2, 2048)
     pygame.init()
 
     # Initialize sounds
