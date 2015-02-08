@@ -11,6 +11,7 @@ import sys
 from tank import *
 from bullets import *
 from map import *
+import os
 
 # Globals constants defined here.
 # Colors
@@ -23,8 +24,8 @@ replay = False
 
 
 def display_score(score_font, level_font, DISPLAYSURF, p1_score, p2_score, game_map):
-    shot_font = pygame.font.Font('visitor1.ttf', 20)
-    move_font = pygame.font.Font('visitor1.ttf', 15)
+    shot_font = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 20)
+    move_font = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 15)
     player1 = score_font.render('%s' % p1_score, True, WHITE)
     player1_rect = player1.get_rect()
     player1_rect.topleft = ((game_map.MAPWIDTH * game_map.TILESIZE) / 4, 25)
@@ -129,9 +130,9 @@ def main():
     pygame.init()
 
     # Initialize sounds
-    tank_idle = pygame.mixer.Sound("tank_idle.wav")
-    red_tank_move = pygame.mixer.Sound("tank_moving.wav")
-    blue_tank_move = pygame.mixer.Sound("tank_moving.wav")
+    tank_idle = pygame.mixer.Sound(os.path.join('data', 'tank_idle.wav'))
+    red_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving.wav'))
+    blue_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving.wav'))
     tank_idle.play(-1)
 
     # initialize tanks
@@ -144,7 +145,7 @@ def main():
     map_editor = False
 
     # Set the width and height of the screen [width,height]
-    icon = pygame.image.load('tank_icon.bmp')
+    icon = pygame.image.load(os.path.join('data', 'tank_icon.bmp'))
     pygame.display.set_icon(icon)
     DISPLAYSURF = pygame.display.set_mode((game_map.MAPWIDTH*game_map.TILESIZE, game_map.MAPHEIGHT*game_map.TILESIZE))
     pygame.display.set_caption("Retro Tanks")
@@ -164,10 +165,10 @@ def main():
 
     # initialize fonts
     BASICFONTSIZE = 70
-    score_font = pygame.font.Font('visitor1.ttf', BASICFONTSIZE)
-    level_font = pygame.font.Font('visitor1.ttf', 50)
-    game_over_font = pygame.font.Font('visitor1.ttf', 25)
-    credit_font = pygame.font.Font('visitor1.ttf', 15)
+    score_font = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), BASICFONTSIZE)
+    level_font = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 50)
+    game_over_font = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 25)
+    credit_font = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 15)
 
     # Loop until the user clicks the close button.
     done = False

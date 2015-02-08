@@ -9,6 +9,7 @@ Created by Jeremy Kenyon.  For questions contact lanthos@gmail.com.
 
 import pygame
 import math
+import os
 
 # Globals constants defined here.
 # Colors
@@ -44,14 +45,14 @@ class Tank():
         self.hit_counter = 0
         self.hit = False
         self.hit_move = False
-        self.tank_shot = pygame.mixer.Sound("tank_shot.wav")
+        self.tank_shot = pygame.mixer.Sound(os.path.join('data', 'tank_shot.wav'))
 
     def hack(self, color):
         # This was a hack that was needed so that I could initialize the tanks before a color was selected so that the
         # map class could have copies of the tank objects for state loading.
         if color == 'red':
             self.angle_rad = 0
-            self.spritesheet = pygame.image.load('red_tanks.bmp').convert()
+            self.spritesheet = pygame.image.load(os.path.join('data', 'red_tanks.bmp')).convert()
             self.tanks = []
             for nbr in range(8):
                 self.tanks.append(self.spritesheet.subsurface((40*nbr), 0, 40, 40))
@@ -63,7 +64,7 @@ class Tank():
         if color == 'blue':
             self.angle_deg = 180
             self.angle_rad_blue = math.pi
-            self.spritesheet = pygame.image.load('blue_tank.bmp').convert()
+            self.spritesheet = pygame.image.load(os.path.join('data', 'blue_tank.bmp')).convert()
             self.spritesheet.set_colorkey(WHITE)
             self.spritesheet.convert_alpha()
 

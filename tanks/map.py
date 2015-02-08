@@ -9,6 +9,7 @@ import pygame
 import pickle
 import sys
 import json
+import os
 
 # Globals constants defined here.
 # Colors
@@ -56,14 +57,14 @@ class Map():
                                      (column*self.TILESIZE, row*self.TILESIZE, self.TILESIZE, self.TILESIZE))
 
     def save_map(self, red_tank, blue_tank):
-        filename = 'tanks_map%s.txt' % self.level_number
-        self.map_levels[filename] = self.level_number
-        with open(filename, 'wb') as f:
-            pickle.dump((self.tilemap, self.shot_type), f)
-            pickle.dump((red_tank.tank_x, red_tank.tank_y, red_tank.angle_rad, red_tank.tank_direction), f)
-            pickle.dump((blue_tank.tank_x, blue_tank.tank_y, blue_tank.angle_deg, blue_tank.angle_rad_blue), f)
-        with open('map_levels', 'wb') as ml:
-            pickle.dump(self.map_levels, ml)
+        # filename = 'tanks_map%s.txt' % self.level_number
+        # self.map_levels[filename] = self.level_number
+        # with open(filename, 'wb') as f:
+        #     pickle.dump((self.tilemap, self.shot_type), f)
+        #     pickle.dump((red_tank.tank_x, red_tank.tank_y, red_tank.angle_rad, red_tank.tank_direction), f)
+        #     pickle.dump((blue_tank.tank_x, blue_tank.tank_y, blue_tank.angle_deg, blue_tank.angle_rad_blue), f)
+        # with open('map_levels', 'wb') as ml:
+        #     pickle.dump(self.map_levels, ml)
 
         self.save = {'tilemap': self.tilemap, 'shot_type': self.shot_type, 'red_tank.tank_x': red_tank.tank_x,
                      'red_tank.tank_y': red_tank.tank_y, 'red_tank.angle_rad': red_tank.angle_rad,
@@ -71,14 +72,14 @@ class Map():
                      'blue_tank.tank_y': blue_tank.tank_y, 'blue_tank.angle_deg': blue_tank.angle_deg,
                      'blue_tank.angle_rad_blue': blue_tank.angle_rad_blue, 'map_levels': self.map_levels}
         filename = 'tanks_map%s.save' % self.level_number
-        with open(filename, 'wb') as f:
+        with open(os.path.join('data', filename), 'wb') as f:
             json.dump(self.save, f)
 
     def load_map(self, level_number, red_tank, blue_tank):
         if not level_number:
             level_number = self.level_number
         filename = 'tanks_map%s.save' % level_number
-        with open(filename, 'rb') as f:
+        with open(os.path.join('data', filename), 'rb') as f:
             save = json.load(f)
             self.tilemap = save['tilemap']
             self.shot_type = save['shot_type']
@@ -177,8 +178,8 @@ class Map():
                 self.add_info(mousex, mousey)
 
             # This displays all of the text at the top of the screen so you know what's going on.
-            level_font = pygame.font.Font('visitor1.ttf', 50)
-            shot_font = pygame.font.Font('visitor1.ttf', 20)
+            level_font = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 50)
+            shot_font = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 20)
             level = level_font.render('%s' % self.level_number, True, WHITE)
             level_rect = level.get_rect()
             level_rect.topleft = ((self.MAPWIDTH * self.TILESIZE) / 2 + 40, 25)
