@@ -28,7 +28,7 @@ class Particle(pygame.sprite.Sprite):
             self.gravity = -5
             self.x_offset = random.randrange(1, 50) + 1
             self.y_offset = random.randrange(1, 50) + 1
-            self.speed = 5
+            # self.speed = 5
         else:
             self.direction = random.randint(1, 180)
             self.gravity = 12
