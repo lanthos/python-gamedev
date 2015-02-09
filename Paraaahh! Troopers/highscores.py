@@ -91,10 +91,10 @@ class HighScores():
             p1_score = 9999999
         player = scorefont.render('Score: %07d' % p1_score, True, (255, 255, 255))
         player_rect = player.get_rect()
-        player_rect.topleft = (screen.get_width() / 1.5, screen.get_height() - 50)
+        player_rect.topleft = (screen.get_width() / 1.5, screen.get_height() - 45)
         high_score = scorefont.render('High Score: %s' % high, True, (255, 255, 255))
         high_score_rect = high_score.get_rect()
-        high_score_rect.topleft = (screen.get_width() / 24, screen.get_height() - 50)
+        high_score_rect.topleft = (screen.get_width() / 24, screen.get_height() - 45)
         screen.blit(player, player_rect)
         screen.blit(high_score, high_score_rect)
 

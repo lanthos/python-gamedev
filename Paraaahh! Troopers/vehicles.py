@@ -105,3 +105,32 @@ class Bomb(pygame.sprite.Sprite):
 
     def update(self):
         self.rect = self.rect.move((self.dx, self.dy))
+
+
+class Star(pygame.sprite.Sprite):
+
+    def __init__(self, image1, image2, rect):
+        pygame.sprite.Sprite.__init__(self)
+        self.images = []
+        self.image1, self.image2, self.rect = image1, image2, rect
+        self.rect = self.image1.get_rect()
+        self.images.append(self.image1)
+        self.images.append(self.image2)
+        random.seed()
+        self.state = 0
+        self.speed = random.randrange(5, 23)
+        self.twinkle = self.speed
+        self.set_image()
+
+    def set_image(self):
+        self.image = self.images[self.state]
+        if self.state < len(self.images) - 1:
+            self.state += 1
+        else:
+            self.state = 0
+
+    def update(self):
+        self.twinkle -= 1
+        if self.twinkle <= 0:
+            self.set_image()
+            self.twinkle = self.speed

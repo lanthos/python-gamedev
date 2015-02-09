@@ -15,32 +15,34 @@ class Particle(pygame.sprite.Sprite):
         self.particle = particle.convert()
         self.rect = self.particle.get_rect()
         self.x_offset = random.randrange(1, 20) + 1
-        self.y_offset = random.randrange(1, 20) + 1
-        self.y_velocity_offset = int(random.random() * 2 + 1)
-        self.x_velocity_offset = int(random.random() * 2 + 1)
+        self.y_offset = random.randrange(-20, 20)
+        # self.y_velocity_offset = int(random.random() * 2 + 1)
+        # self.x_velocity_offset = int(random.random() * 2 + 1)
         self.rect.x = self.x_offset + startx
         self.rect.y = self.y_offset + starty
         self.color = color
-        self.speed = random.randint(10, 15) / 3 + self.y_velocity_offset
+        self.speed = random.randrange(5, 10)
         if object == 'base':
             random.seed()
-            self.direction = random.randint(-160, -20)
-            self.gravity = -5
-            self.x_offset = random.randrange(1, 50) + 1
-            self.y_offset = random.randrange(1, 50) + 1
+            self.direction = random.randrange(20, 160)
+            self.gravity = 1
+            self.x_offset = random.randrange(1, 75) + 1
+            self.y_offset = random.randrange(-80, 50) + 1
+            self.rect.x = self.x_offset + startx
+            self.rect.y = self.y_offset + starty
             # self.speed = 5
         else:
-            self.direction = random.randint(1, 180)
-            self.gravity = 12
+            self.direction = random.randrange(1, 180)
+            self.gravity = 2
         # if not shot.rad:
         self.rad = self.direction * (math.pi / 180)
         # else:
         #     self.rad = shot.rad
-        self.timer = 20
+        self.timer = 15
+        self.dx, self.dy = self.speed * math.cos(self.rad), -self.speed * math.sin(self.rad)
 
     def update(self):
-        dx, dy = self.speed * math.cos(self.rad), -self.speed * math.sin(self.rad)
-        dy += self.gravity
-        dx += self.x_velocity_offset
-        self.rect = self.rect.move((dx, dy))
+        self.dy += self.gravity
+        # dx += self.x_velocity_offset
+        self.rect = self.rect.move((self.dx, self.dy))
         self.timer -= 1

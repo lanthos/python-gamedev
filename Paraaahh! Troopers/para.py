@@ -163,6 +163,8 @@ def main():
     background = background.convert()
 
     # static load of images that are used a lot
+    star1_image, star_rect = player.load_image('star01.bmp')
+    star2_image, star_rect = player.load_image('star02.bmp')
     heli1a_image, heli_rect = player.load_image('heli1a.bmp')
     heli2a_image, heli_rect = player.load_image('heli2a.bmp')
     heli1b_image, heli_rect = player.load_image('heli1b.bmp')
@@ -198,6 +200,7 @@ def main():
 
     # Init sprites
     canon = player.Turret(ground_rect)
+    star_sprites = pygame.sprite.RenderPlain()
     bullet_sprites = pygame.sprite.RenderPlain()
     bomb_sprites = pygame.sprite.RenderPlain()
     bomb_particle_sprites = pygame.sprite.RenderPlain()
@@ -213,8 +216,15 @@ def main():
     heli_particle_sprites = pygame.sprite.RenderPlain()
     plane_particle_sprites = pygame.sprite.RenderPlain()
 
-    # Initial drawing of everything
+    # Create stars!
+    for i in range(25):
+        star = vehicles.Star(star1_image, star2_image, star_rect)
+        random.seed()
+        star.rect.x = random.randrange(screen_width)
+        star.rect.y = random.randrange(screen_height)
+        star_sprites.add(star)
 
+    # Initial drawing of everything
     screen.blit(background, (0, 0))
     canon_sprite.draw(screen)
     screen.blit(ground, ground_rect)
@@ -328,16 +338,16 @@ def main():
             # should there be a new plane?
             # if game.wave_timer <= 0:
                 # game.plane_timer -= 1
-            if 4 % game.wave and game.wave > 2 and game.plane_timer == 1:
+            if game.wave % 4 == 3 and game.wave > 2 and game.plane_timer:
                 plane = vehicles.Plane(plane_image, plane_rect)
                 if random.randrange(0, 2) == 1:
                     random.seed()
-                    plane.rect.topright = area.topright
+                    plane.rect.topleft = area.topright
                     plane.rect = plane.rect.move((0, random.randint(3, 10)))
                     plane.direction = -1
                 else:
                     random.seed()
-                    plane.rect.topleft = area.topleft
+                    plane.rect.topright = area.topleft
                     plane.rect = plane.rect.move((0, random.randrange(60, 70)))
                     plane.flip_images()
                     plane.direction = 1
@@ -358,13 +368,12 @@ def main():
                             (plane.direction == -1 and plane.rect.centerx < plane.random_x + 450):
                         bomb = vehicles.Bomb(bomb_image, bomb_rect)
                         bomb.rect.midtop = plane.rect.midbottom
-                        bomb.rad = math.atan2(canon.cannontop_rect.centery - bomb.rect.centery, bomb.rect.centerx -
-                                              canon.cannontop_rect.centerx)
-                        bomb.dx, bomb.dy = -bomb.speed * math.cos(bomb.rad), bomb.speed * math.sin(bomb.rad)
+                        bomb.rad = math.atan2(canon.cannontop_rect.centery - bomb.rect.centery,
+                                              canon.cannontop_rect.centerx - bomb.rect.centerx)
+                        bomb.dx, bomb.dy = bomb.speed * math.cos(bomb.rad), bomb.speed * math.sin(bomb.rad)
                         bomb_sprites.add(bomb)
                         game.sounds.bomb_falling.play()
                         plane.bomb_released = True
-
 
             # should there be a new heli?
             if game.heli_count > 0 and game.wave_timer <= 0:
@@ -373,12 +382,12 @@ def main():
                     heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
                     if random.randrange(0, 2) == 1:
                         random.seed()
-                        heli.rect.topright = area.topright
+                        heli.rect.topleft = area.topright
                         heli.rect = heli.rect.move((0, random.randint(3, 10)))
                         heli.direction = -1
                     else:
                         random.seed()
-                        heli.rect.topleft = area.topleft
+                        heli.rect.topright = area.topleft
                         heli.rect = heli.rect.move((0, random.randrange(60, 70)))
                         heli.flip_images()
                         heli.direction = 1
@@ -458,6 +467,10 @@ def main():
                         aahh_sprites.remove(trooper.aahh)
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                     game.score += TROOPER_SHOT
+                    for troop in trooper_sprites.sprites():
+                        if troop.in_pyramid:
+                            troop.in_pyramid = False
+                            troop.rect.bottom = ground_rect.top
                     for i in range(10):
                         part = particle.Particle(trooper.rect.centerx, trooper.rect.centery, RED, 'trooper')
                         part.image = pygame.transform.rotate(part.particle, part.direction)
@@ -532,6 +545,10 @@ def main():
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                     game.sounds.splat.play()
+                    for i in range(10):
+                        part = particle.Particle(trooper.rect.centerx, trooper.rect.centery, RED, 'trooper')
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        troop_particle_sprites.add(part)
                     game.score += TROOPER_DROPPED
 
             # Did the falling guy fall on another guy?
@@ -547,9 +564,17 @@ def main():
                         screen.blit(background, trooper.rect, trooper.rect)
                         screen.blit(background, hittrooper.rect, hittrooper.rect)
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
+                        for i in range(10):
+                            part = particle.Particle(trooper.rect.centerx, trooper.rect.centery, RED, 'trooper')
+                            part.image = pygame.transform.rotate(part.particle, part.direction)
+                            troop_particle_sprites.add(part)
                         game.score += TROOPER_DROPPED
                         game.sounds.splat.play()
                         game.sounds.hit.play()
+                        for troop in trooper_sprites.sprites():
+                            if troop.in_pyramid:
+                                troop.in_pyramid = False
+                                troop.rect.bottom = ground_rect.top
 
             # Should we remove any parachutes?
             for para in parachute_sprites.sprites():
@@ -572,6 +597,14 @@ def main():
                 if part.timer <= 0:
                     screen.blit(background, part.rect, part.rect)
                     heli_particle_sprites.remove(part)
+            for part in plane_particle_sprites.sprites():
+                if part.timer <= 0:
+                    screen.blit(background, part.rect, part.rect)
+                    plane_particle_sprites.remove(part)
+            for part in bomb_particle_sprites.sprites():
+                if part.timer <= 0:
+                    screen.blit(background, part.rect, part.rect)
+                    bomb_particle_sprites.remove(part)
 
             # Can a trooper move?
             left_nearest_dude = None
@@ -588,7 +621,7 @@ def main():
                     elif trooper.rect.left > area.centerx:
                         right_side_dudes.append(trooper)
             # print len(game.climbers_l)
-            if len(left_side_dudes) >= 3:
+            if len(left_side_dudes) >= 4:
                 for d in left_side_dudes:
                     if not d.in_pyramid:
                         if not left_nearest_dude:
@@ -657,7 +690,7 @@ def main():
                             left_nearest_dude.rect.right = left_nearest_dude.area.centerx - 25
                             left_nearest_dude.winner = 1
 
-            if len(right_side_dudes) >= 3:
+            if len(right_side_dudes) >= 4:
                 for d in right_side_dudes:
                     if not d.in_pyramid:
                         if not right_nearest_dude:
@@ -735,6 +768,8 @@ def main():
             for trooper in trooper_sprites.sprites():
                 if trooper.winner and game.gameover == 0:
                     game.sounds.base_explosion.play()
+                    screen.blit(background, canon.rect, canon.rect)
+                    canon_sprite.remove(canon)
                     for i in range(100):
                         part = particle.Particle(canon.cannontop_rect.centerx - 20, canon.cannontop_rect.centery,
                                                  random.choice((RED, YELLOW)), 'base')
@@ -774,12 +809,14 @@ def main():
             troop_particle_sprites.update()
             plane_particle_sprites.update()
             bomb_particle_sprites.update()
+            star_sprites.update()
 
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
             # ALL CODE TO DRAW SHOULD GO BELOW THIS COMMENT
 
             screen.blit(background, (0, 0))
+            star_sprites.draw(screen)
             canon_sprite.draw(screen)
             bullet_sprites.draw(screen)
             heli_sprites.draw(screen)
@@ -797,7 +834,8 @@ def main():
             if game.wave_timer > 0 and len(heli_sprites) == 0 and len(plane_sprites) == 0:
                 display_wave(game.wave, game.heli_count, scorefont, screen)
             screen.blit(canon.canonbase, canon.canonbase_rect)
-            screen.blit(canon.canontop, canon.cannontop_rect)
+            if game.gameover == 0:
+                screen.blit(canon.canontop, canon.cannontop_rect)
             troop_particle_sprites.draw(screen)
             base_particle_sprites.draw(screen)
 
@@ -823,8 +861,10 @@ def main():
                         sys.exit()
                     elif event.key == pygame.K_ESCAPE:
                         sys.exit()
-                    elif event.key == pygame.K_RETURN:
+                    elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                         game.menu_select()
+                    elif event.key == pygame.K_p and game.playing:
+                        game.state = 'ingame'
 
             screen.blit(background, (0, 0))
 
@@ -914,6 +954,7 @@ def main():
             plane_sprites.empty()
             base_particle_sprites.empty()
             plane_particle_sprites.empty()
+            bomb_sprites.empty()
             pygame.event.clear()
 
             print 'resetting'
