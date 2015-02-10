@@ -52,11 +52,13 @@ class Game():
         self.t = 1
         self.nextstate = ""
         self.wave = 1
+        self.spawn_heli = False
+        self.spawn_plane = False
         self.wave_timer = 50
         self.wave_timer_base = 50
         self.heli_count_base = 5
         self.heli_count = 5
-        self.heli_timer = 70
+        self.heli_timer = 30
         self.plane_timer = 1
         self.timer = 50
         self.gameover = 0
@@ -240,16 +242,19 @@ def main():
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
 
-
     shoot = False
     shoot_lock = 6
     t = 0
-
+    clear_events = True
     # -------- Main Program Loop -----------
     while not done:
 
         if game.state == 'ingame':
             game.playing = True
+
+            if clear_events:
+                pygame.event.clear()
+                clear_events = False
 
             # ALL EVENT PROCESSING SHOULD GO BELOW THIS COMMENT
             for event in pygame.event.get():  # User did something
@@ -286,6 +291,10 @@ def main():
                     if event.key == pygame.K_q:
                         pygame.quit()
                         sys.exit()
+                    if event.key == pygame.K_l:
+                        game.spawn_plane = True
+                    if event.key == pygame.K_h:
+                        game.spawn_heli = True
                     if event.key == pygame.K_p:
                         game.ingamemenu()
                     if event.key == pygame.K_LEFT and game.gameover == 0:
@@ -338,7 +347,7 @@ def main():
             # should there be a new plane?
             # if game.wave_timer <= 0:
                 # game.plane_timer -= 1
-            if game.wave % 4 == 3 and game.wave > 2 and game.plane_timer:
+            if game.wave % 4 == 3 and game.wave > 2 and game.plane_timer or game.spawn_plane:
                 plane = vehicles.Plane(plane_image, plane_rect)
                 if random.randrange(0, 2) == 1:
                     random.seed()
@@ -354,6 +363,7 @@ def main():
                 plane_sprites.add(plane)
                 # game.plane_timer = random.randint(100, 120)
                 game.plane_timer = 0
+                game.spawn_plane = False
 
             for plane in plane_sprites.sprites():
                 if plane.rect.left > area.right and plane.direction == 1:
@@ -376,7 +386,7 @@ def main():
                         plane.bomb_released = True
 
             # should there be a new heli?
-            if game.heli_count > 0 and game.wave_timer <= 0:
+            if game.heli_count > 0 and game.wave_timer <= 0 or game.spawn_heli:
                 game.heli_timer -= 1
                 if game.heli_timer <= 0:
                     heli = vehicles.Helicopter(heli1a_image, heli2a_image, heli1b_image, heli2b_image, heli_rect)
@@ -397,9 +407,10 @@ def main():
             elif game.heli_count == 0:
                 game.heli_count = game.heli_count_base + game.wave
                 game.wave += 1
-                game.heli_timer = 220
+                game.heli_timer = 50
                 game.wave_timer = 100
                 game.plane_timer = 1
+                game.spawn_heli = False
 
             for heli in heli_sprites.sprites():
                 if heli.rect.left > area.right and heli.direction == 1:
@@ -782,6 +793,8 @@ def main():
                 if bomb.rect.colliderect(canon.cannontop_rect):
                     bomb_sprites.remove(bomb)
                     screen.blit(background, bomb.rect, bomb.rect)
+                    screen.blit(background, canon.rect, canon.rect)
+                    canon_sprite.remove(canon)
                     game.sounds.bomb_falling.stop()
                     game.sounds.explosion.play()
                     for i in range(50):
@@ -916,8 +929,6 @@ def main():
                 rect = rect.move((0, game.t*dy))
                 screen.blit(background, rect, rect)
                 game.t += 1
-                # explosionsprites.update()
-                # explosionsprites.draw(screen)
             else:
                 screen.blit(background, (0, 0))
                 # game.state = game.nextstate
@@ -955,9 +966,11 @@ def main():
             base_particle_sprites.empty()
             plane_particle_sprites.empty()
             bomb_sprites.empty()
-            pygame.event.clear()
 
             print 'resetting'
+            canon_sprite = pygame.sprite.RenderPlain(canon)
+            canon.angle = 90
+            clear_events = True
             game.reset()
             game.state = 'ingame'
 
