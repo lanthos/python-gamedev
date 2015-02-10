@@ -119,3 +119,66 @@ class Bullet(pygame.sprite.Sprite):
             self.rect = self.rect.move((dx, dy))
         if self.rect.bottom < self.screen_rect.top:
             self.remove_please = 1
+
+
+class Dude(pygame.sprite.Sprite):
+
+    def __init__(self, image1, image2, image3, image4, rect, ground, screen):
+        pygame.sprite.Sprite.__init__(self)
+        self.imagesa = []
+        self.imagesb = []
+        self.image1, self.image2, self.image3, self.image4, self.rect = image1, image2, image3, image4, rect
+        self.rect = self.image1.get_rect()
+        self.imagesa.append(self.image1)
+        self.imagesa.append(self.image2)
+        self.imagesb.append(self.image3)
+        self.imagesb.append(self.image4)
+        self.screen = screen
+        self.area = self.screen.get_rect()
+        self.ground = ground
+        self.speed = -3
+        self.music = None
+        self.state = 0
+        self.walking = True
+        self.glasses = False
+        self.glasses_counter = 10
+        self.walk_timer = 3
+        self.set_image()
+        self.music_playing = False
+
+    def set_image(self):
+        if self.walking:
+            self.image = self.imagesa[self.state]
+            self.walk_timer -= 1
+            if self.walk_timer <= 0:
+                if self.state < len(self.imagesa) - 1:
+                    self.state += 1
+                    self.walk_timer = 3
+                else:
+                    self.state = 0
+                    self.walk_timer = 3
+        # elif self.glasses:
+        #     self.image = self.imagesb[self.state]
+        #     if self.state < len(self.imagesb) - 1:
+        #         self.state += 1
+        #     else:
+        #         self.state = 0
+
+    def update(self):
+        if self.rect.right + self.speed > self.area.centerx + 70:
+            self.rect = self.rect.move((self.speed, 0))
+            self.set_image()
+        else:
+            self.rect.right = self.area.centerx + 70
+            self.walking = False
+            self.glasses = True
+            self.state = 0
+        if self.glasses:
+            self.image = self.imagesb[0]
+            self.glasses_counter -= 1
+            if not self.music_playing:
+                    self.music.play()
+                    self.music_playing = True
+            if self.glasses_counter <= 0:
+                self.image = self.imagesb[1]
+                self.glasses = False

@@ -137,6 +137,7 @@ class Sounds():
         self.explosion = pygame.mixer.Sound(os.path.join('data', 'explosion1.wav'))
         self.base_explosion = pygame.mixer.Sound(os.path.join('data', 'base_explosion.wav'))
         self.bomb_falling = pygame.mixer.Sound(os.path.join('data', 'bomb_falling.wav'))
+        self.music = pygame.mixer.Sound(os.path.join('data', 'who_likes_to_party.wav'))
 
 
 def display_wave(wave, wave_count, font, screen):
@@ -171,6 +172,10 @@ def main():
     heli2a_image, heli_rect = player.load_image('heli2a.bmp')
     heli1b_image, heli_rect = player.load_image('heli1b.bmp')
     heli2b_image, heli_rect = player.load_image('heli2b.bmp')
+    dude1a_image, dude_rect = player.load_image('dude01.bmp')
+    dude2a_image, dude_rect = player.load_image('dude02.bmp')
+    dude1b_image, dude_rect = player.load_image('dude03.bmp')
+    dude2b_image, dude_rect = player.load_image('dude04.bmp')
     plane_image, plane_rect = player.load_image('plane.bmp')
     troop_image, troop_rect = player.load_image('trooper.bmp')
     bomb_image, bomb_rect = player.load_image('bomb.bmp')
@@ -200,8 +205,14 @@ def main():
     # Init game
     game = Game()
 
+    dude = player.Dude(dude1a_image, dude2a_image, dude1b_image, dude2b_image, dude_rect, ground_rect, screen)
+    dude.rect.bottom = ground_rect.top
+    dude.rect.left = area.right
+    dude.music = game.sounds.music
+
     # Init sprites
     canon = player.Turret(ground_rect)
+    dude_sprite = pygame.sprite.RenderPlain(dude)
     star_sprites = pygame.sprite.RenderPlain()
     bullet_sprites = pygame.sprite.RenderPlain()
     bomb_sprites = pygame.sprite.RenderPlain()
@@ -823,6 +834,7 @@ def main():
             plane_particle_sprites.update()
             bomb_particle_sprites.update()
             star_sprites.update()
+            dude_sprite.update()
 
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
@@ -851,6 +863,7 @@ def main():
                 screen.blit(canon.canontop, canon.cannontop_rect)
             troop_particle_sprites.draw(screen)
             base_particle_sprites.draw(screen)
+            dude_sprite.draw(screen)
 
 
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
