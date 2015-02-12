@@ -142,6 +142,7 @@ class Sounds():
         self.base_explosion = pygame.mixer.Sound(os.path.join('data', 'base_explosion.wav'))
         self.bomb_falling = pygame.mixer.Sound(os.path.join('data', 'bomb_falling.wav'))
         self.music = pygame.mixer.Sound(os.path.join('data', 'who_likes_to_party.wav'))
+        self.music.set_volume(0.3)
 
 
 def display_wave(wave, wave_count, font, screen):
@@ -209,14 +210,14 @@ def main():
     # Init game
     game = Game()
 
-    # dude = player.Dude(dude1a_image, dude2a_image, dude1b_image, dude2b_image, dude_rect, ground_rect, screen)
-    # dude.rect.bottom = ground_rect.top
-    # dude.rect.left = area.right
-    # dude.music = game.sounds.music
+    dude = player.Dude(dude1a_image, dude2a_image, dude1b_image, dude2b_image, dude_rect, ground_rect, screen)
+    dude.rect.bottom = ground_rect.top
+    dude.rect.left = area.right
+    dude.music = game.sounds.music
 
     # Init sprites
     canon = player.Turret(ground_rect)
-    # dude_sprite = pygame.sprite.RenderPlain(dude)
+    dude_sprite = pygame.sprite.RenderPlain(dude)
     star_sprites = pygame.sprite.RenderPlain()
     mine_sprites = pygame.sprite.RenderPlain()
     bullet_sprites = pygame.sprite.RenderPlain()
@@ -873,7 +874,7 @@ def main():
             plane_particle_sprites.update()
             bomb_particle_sprites.update()
             star_sprites.update()
-            # dude_sprite.update()
+            dude_sprite.update()
 
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
@@ -903,7 +904,7 @@ def main():
                 screen.blit(canon.canontop, canon.cannontop_rect)
             troop_particle_sprites.draw(screen)
             base_particle_sprites.draw(screen)
-            # dude_sprite.draw(screen)
+            dude_sprite.draw(screen)
 
 
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
