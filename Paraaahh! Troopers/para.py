@@ -14,7 +14,6 @@ import menu
 import highscores
 import os
 import particle
-import copy
 
 
 # Globals constants defined here.
@@ -61,8 +60,11 @@ class Game():
         self.heli_timer = 30
         self.plane_timer = 1
         self.timer = 50
+        self.game_speed = 25
+        self.game_speed_base = 25
         self.gameover = 0
         self.playing = False
+        self.mine_count = 2
         self.reset()
         try:
             self.player_name = os.environ["USER"]
@@ -122,6 +124,8 @@ class Game():
         self.wave = 1
         self.timer = 50
         self.wave_timer = 50
+        self.mine_count = 2
+        self.game_speed = self.game_speed_base
 
     def game_over(self):
         self.state = "gameover"
@@ -205,15 +209,16 @@ def main():
     # Init game
     game = Game()
 
-    dude = player.Dude(dude1a_image, dude2a_image, dude1b_image, dude2b_image, dude_rect, ground_rect, screen)
-    dude.rect.bottom = ground_rect.top
-    dude.rect.left = area.right
-    dude.music = game.sounds.music
+    # dude = player.Dude(dude1a_image, dude2a_image, dude1b_image, dude2b_image, dude_rect, ground_rect, screen)
+    # dude.rect.bottom = ground_rect.top
+    # dude.rect.left = area.right
+    # dude.music = game.sounds.music
 
     # Init sprites
     canon = player.Turret(ground_rect)
-    dude_sprite = pygame.sprite.RenderPlain(dude)
+    # dude_sprite = pygame.sprite.RenderPlain(dude)
     star_sprites = pygame.sprite.RenderPlain()
+    mine_sprites = pygame.sprite.RenderPlain()
     bullet_sprites = pygame.sprite.RenderPlain()
     bomb_sprites = pygame.sprite.RenderPlain()
     bomb_particle_sprites = pygame.sprite.RenderPlain()
@@ -287,7 +292,7 @@ def main():
                     para.trooper = trooper
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
                     mousex, mousey = event.pos
-                    newbullet = player.Bullet()
+                    newbullet = player.Bullet('bullet')
                     newbullet.direction = canon.angle
                     newbullet.image = pygame.transform.rotate(newbullet.bullet, newbullet.direction)
                     newbullet.rect = newbullet.bullet.get_rect()
@@ -336,9 +341,24 @@ def main():
             # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
 
             # ALL GAME LOGIC SHOULD GO BELOW THIS COMMENT
+            # Create and place mines
+
+            if game.mine_count > 0:
+                left_mine = player.Bullet('mine')
+                left_mine.image = pygame.transform.rotate(left_mine.bullet, 0)
+                left_mine.rect.bottomright = canon.canonbase_rect.bottomleft
+                left_mine.test = True
+                right_mine = player.Bullet('mine')
+                right_mine.image = pygame.transform.rotate(left_mine.bullet, 0)
+                right_mine.rect.bottomleft = canon.canonbase_rect.bottomright
+                right_mine.test = True
+                mine_sprites.add(left_mine)
+                mine_sprites.add(right_mine)
+                game.mine_count = 0
+
             if shoot and t % shoot_lock == 0 and game.gameover == 0:
                 #shoot a bullet
-                newbullet = player.Bullet()
+                newbullet = player.Bullet('bullet')
                 newbullet.direction = canon.angle
                 newbullet.image = pygame.transform.rotate(newbullet.bullet, newbullet.direction)
                 newbullet.rect = newbullet.bullet.get_rect()
@@ -389,6 +409,7 @@ def main():
                             (plane.direction == -1 and plane.rect.centerx < plane.random_x + 450):
                         bomb = vehicles.Bomb(bomb_image, bomb_rect)
                         bomb.rect.midtop = plane.rect.midbottom
+                        bomb.speed = plane.speed
                         bomb.rad = math.atan2(canon.cannontop_rect.centery - bomb.rect.centery,
                                               canon.cannontop_rect.centerx - bomb.rect.centerx)
                         bomb.dx, bomb.dy = bomb.speed * math.cos(bomb.rad), bomb.speed * math.sin(bomb.rad)
@@ -422,6 +443,7 @@ def main():
                 game.wave_timer = 100
                 game.plane_timer = 1
                 game.spawn_heli = False
+                game.game_speed += 1
 
             for heli in heli_sprites.sprites():
                 if heli.rect.left > area.right and heli.direction == 1:
@@ -429,26 +451,21 @@ def main():
                 elif heli.rect.right < area.left and heli.direction == -1:
                     heli_sprites.remove(heli)
                 elif heli.trooper:
-                    if (heli.direction == 1 and heli.rect.centerx > heli.random_x - 20) or (heli.direction == -1 and
-                                                                                               heli.rect.centerx <
-                                                                                               heli.random_x - 500):
+                    if (heli.direction == 1 and heli.rect.centerx > heli.random_x) \
+                            or (heli.direction == -1 and heli.rect.centerx < heli.random_x):
+                        para = troopers.Parachute(parachute_image, parachute_rect)
+                        para.rect.bottom = area.top
+                        parachute_sprites.add(para)
 
-                        if heli.trooper_chance < 2:
-                            heli.trooper_chance = 2
-                        if random.randrange(1, heli.trooper_chance) == 1:
-                            para = troopers.Parachute(parachute_image, parachute_rect)
-                            para.rect.bottom = area.top
-                            parachute_sprites.add(para)
+                        trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon,
+                                                   screen)
+                        trooper.rect.midtop = heli.rect.midbottom
+                        trooper_sprites.add(trooper)
+                        print 'trooper x {}'.format(trooper.rect.x)
 
-                            trooper = troopers.Trooper(troop_image, falling_trooper_image, troop_rect, ground_rect, canon,
-                                                       screen)
-                            trooper.rect.midtop = heli.rect.midbottom
-                            trooper_sprites.add(trooper)
-
-                            trooper.para = para
-                            para.trooper = trooper
-                            heli.trooper = False
-                    heli.trooper_chance -= 1
+                        trooper.para = para
+                        para.trooper = trooper
+                        heli.trooper = False
 
             # Did a bullet hit a helicopter?
             heli_killed_dict = pygame.sprite.groupcollide(bullet_sprites, heli_sprites, 1, 1)
@@ -481,6 +498,28 @@ def main():
             for bullet in trooper_killed_dict:
                 screen.blit(background, bullet.rect, bullet.rect)
                 for trooper in trooper_killed_dict[bullet]:
+                    screen.blit(background, trooper.rect, trooper.rect)
+                    screen.blit(background, trooper.para.rect, trooper.para.rect)
+                    parachute_sprites.remove(trooper.para)
+                    game.sounds.hit.play()
+                    if trooper.chute_shot:
+                        aahh_sprites.remove(trooper.aahh)
+                        screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
+                    game.score += TROOPER_SHOT
+                    for troop in trooper_sprites.sprites():
+                        if troop.in_pyramid:
+                            troop.in_pyramid = False
+                            troop.rect.bottom = ground_rect.top
+                    for i in range(10):
+                        part = particle.Particle(trooper.rect.centerx, trooper.rect.centery, RED, 'trooper')
+                        part.image = pygame.transform.rotate(part.particle, part.direction)
+                        troop_particle_sprites.add(part)
+
+            # Did a mine hit a trooper?
+            trooper_killed_dict = pygame.sprite.groupcollide(mine_sprites, trooper_sprites, 1, 1)
+            for mine in trooper_killed_dict:
+                screen.blit(background, mine.rect, mine.rect)
+                for trooper in trooper_killed_dict[mine]:
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.para.rect, trooper.para.rect)
                     parachute_sprites.remove(trooper.para)
@@ -834,7 +873,7 @@ def main():
             plane_particle_sprites.update()
             bomb_particle_sprites.update()
             star_sprites.update()
-            dude_sprite.update()
+            # dude_sprite.update()
 
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
@@ -846,6 +885,7 @@ def main():
             bullet_sprites.draw(screen)
             heli_sprites.draw(screen)
             plane_sprites.draw(screen)
+            mine_sprites.draw(screen)
             bomb_particle_sprites.draw(screen)
             plane_particle_sprites.draw(screen)
             parachute_sprites.draw(screen)
@@ -863,7 +903,7 @@ def main():
                 screen.blit(canon.canontop, canon.cannontop_rect)
             troop_particle_sprites.draw(screen)
             base_particle_sprites.draw(screen)
-            dude_sprite.draw(screen)
+            # dude_sprite.draw(screen)
 
 
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
@@ -871,8 +911,8 @@ def main():
             # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
 
-            # Limit to 20 frames per second
-            clock.tick(25)
+            # Limit to 25 frames per second
+            clock.tick(game.game_speed)
 
         elif game.state == 'mainmenu':
             for event in pygame.event.get():

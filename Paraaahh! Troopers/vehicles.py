@@ -32,7 +32,7 @@ class Helicopter(pygame.sprite.Sprite):
         self.direction = 1
         self.set_image()
         random.seed()
-        self.random_x = random.randint(520, 800)
+        self.random_x = random.choice((random.randint(550, 780), random.randint(40, 320)))
 
     def set_image(self):
         if self.trooper:
@@ -73,7 +73,7 @@ class Plane(pygame.sprite.Sprite):
         self.image, self.rect = image, rect
 
         self.state = 0
-        self.speed = random.randrange(5, 13)
+        self.speed = random.randrange(8, 13)
         self.direction = 1
         random.seed()
         self.random_x = random.randint(40, 250)
@@ -98,7 +98,7 @@ class Bomb(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         # self.screen = pygame.display.get_surface()
         # self.screen_rect = self.screen.get_rect()
-        self.speed = random.randint(5, 10)
+        self.speed = None  #random.randint(5, 10)
         # self.movepos = (0, 0)
         self.rad = None
         # self.dx, self.dy = self.speed * math.cos(self.rad), -self.speed * math.sin(self.rad)

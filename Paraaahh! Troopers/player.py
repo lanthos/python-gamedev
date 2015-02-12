@@ -95,13 +95,16 @@ class Turret(pygame.sprite.Sprite):
 
 class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self):
+    def __init__(self, type):
 
         #init sprite
         pygame.sprite.Sprite.__init__(self)
-
-        bullet = pygame.Surface((6, 6))
-        bullet.fill(YELLOW)
+        if type == 'bullet':
+            bullet = pygame.Surface((6, 6))
+            bullet.fill(YELLOW)
+        if type == 'mine':
+            bullet = pygame.Surface((8, 6))
+            bullet.fill(BLUE)
         self.screen = pygame.display.get_surface()
         self.screen_rect = self.screen.get_rect()
         self.bullet = bullet.convert()
