@@ -162,8 +162,8 @@ def main():
     # Set the width and height of the screen [width,height]
     # screen_width, screen_height = [1024, 768]
     screen_width, screen_height = [800, 600]
-    # screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
-    screen = pygame.display.set_mode([screen_width, screen_height])
+    screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
+    # screen = pygame.display.set_mode([screen_width, screen_height])
     area = screen.get_rect()
     pygame.display.set_caption("Paraaaahhhh! Troopers")
     background = pygame.Surface((screen_width, screen_height))
@@ -904,7 +904,8 @@ def main():
                 screen.blit(canon.canontop, canon.cannontop_rect)
             troop_particle_sprites.draw(screen)
             base_particle_sprites.draw(screen)
-            dude_sprite.draw(screen)
+            if not dude.hide:
+                dude_sprite.draw(screen)
 
 
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT

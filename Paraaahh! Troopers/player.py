@@ -142,6 +142,8 @@ class Dude(pygame.sprite.Sprite):
         self.speed = -3
         self.music = None
         self.state = 0
+        self.hide = False
+        self.hide_timer = 30
         self.walking = True
         self.glasses = False
         self.glasses_counter = 10
@@ -185,3 +187,6 @@ class Dude(pygame.sprite.Sprite):
             if self.glasses_counter <= 0:
                 self.image = self.imagesb[1]
                 self.glasses = False
+                self.hide_timer -= 1
+                if self.hide_timer <= 0:
+                    self.hide = True
