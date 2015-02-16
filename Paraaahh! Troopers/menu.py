@@ -51,7 +51,9 @@ class Menu():
         self.add_item(MenuItem("Use the keyboard to play", "pause"))
         self.add_item(MenuItem("Left/Right Arrow to move turret", "pause"))
         self.add_item(MenuItem("Space Bar to shoot", "pause"))
-        self.add_item(MenuItem("P to pause", "pause"))
+        self.add_item(MenuItem("P or ESC to pause", "pause"))
+        self.add_item(MenuItem("Q to quit", "pause"))
+        self.add_item(MenuItem("M to mute/unmute music", "pause"))
         self.selected = None
         self.move_down()
         

@@ -38,6 +38,7 @@ class Trooper(pygame.sprite.Sprite):
         self.winner = 0
         self.number = 0
         self.climbing = 0
+        self.sound = None
         self.walking = 0
         self.in_pyramid = 0
 

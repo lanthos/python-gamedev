@@ -104,7 +104,7 @@ class Bullet(pygame.sprite.Sprite):
             bullet.fill(YELLOW)
         if type == 'mine':
             bullet = pygame.Surface((8, 6))
-            bullet.fill(BLUE)
+            bullet.fill(RED)
         self.screen = pygame.display.get_surface()
         self.screen_rect = self.screen.get_rect()
         self.bullet = bullet.convert()
@@ -114,6 +114,9 @@ class Bullet(pygame.sprite.Sprite):
         self.test = 0
         self.remove_please = 0
         self.rad = None
+        self.type = type
+        self.counter = 5
+        self.fill = 'blue'
 
     def update(self):
         if not self.test:
@@ -180,7 +183,7 @@ class Dude(pygame.sprite.Sprite):
             self.image = self.imagesb[0]
             self.glasses_counter -= 1
             if not self.music_playing:
-                    self.music.play()
+                    self.music.play(-1)
                     self.music_playing = True
             if self.glasses_counter <= 0:
                 self.image = self.imagesb[1]

@@ -59,6 +59,7 @@ class Game():
         self.heli_count = 5
         self.heli_timer = 30
         self.plane_timer = 1
+        self.music = True
         self.timer = 50
         self.game_speed = 25
         self.game_speed_base = 25
@@ -162,8 +163,8 @@ def main():
     # Set the width and height of the screen [width,height]
     # screen_width, screen_height = [1024, 768]
     screen_width, screen_height = [800, 600]
-    # screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
-    screen = pygame.display.set_mode([screen_width, screen_height])
+    screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
+    # screen = pygame.display.set_mode([screen_width, screen_height])
     area = screen.get_rect()
     pygame.display.set_caption("Paraaaahhhh! Troopers")
     background = pygame.Surface((screen_width, screen_height))
@@ -174,6 +175,8 @@ def main():
 
     star1_image, star_rect = player.load_image('star01.bmp')
     star2_image, star_rect = player.load_image('star02.bmp')
+    star3_image, star_rect = player.load_image('star03.bmp')
+    star4_image, star_rect = player.load_image('star04.bmp')
     heli1a_image, heli_rect = player.load_image('heli1a.bmp')
     heli2a_image, heli_rect = player.load_image('heli2a.bmp')
     heli1b_image, heli_rect = player.load_image('heli1b.bmp')
@@ -240,11 +243,17 @@ def main():
     plane_particle_sprites = pygame.sprite.RenderPlain()
 
     # Create stars!
-    for i in range(25):
+    for i in range(60):
+        star = vehicles.Star(star3_image, star4_image, star_rect)
+        random.seed()
+        star.rect.x = random.randrange(screen_width)
+        star.rect.y = random.randrange(0, screen_height / 2)
+        star_sprites.add(star)
+    for i in range(15):
         star = vehicles.Star(star1_image, star2_image, star_rect)
         random.seed()
         star.rect.x = random.randrange(screen_width)
-        star.rect.y = random.randrange(screen_height)
+        star.rect.y = random.randrange(screen_height / 2, screen_height)
         star_sprites.add(star)
 
     # Initial drawing of everything
@@ -312,11 +321,18 @@ def main():
                     if event.key == pygame.K_q:
                         pygame.quit()
                         sys.exit()
+                    if event.key == pygame.K_m:
+                        if game.music:
+                            game.sounds.music.set_volume(0)
+                            game.music = False
+                        elif not game.music:
+                            game.sounds.music.set_volume(0.3)
+                            game.music = True
                     if event.key == pygame.K_l:
                         game.spawn_plane = True
                     if event.key == pygame.K_h:
                         game.spawn_heli = True
-                    if event.key == pygame.K_p:
+                    if event.key == pygame.K_p or event.key == pygame.K_ESCAPE:
                         game.ingamemenu()
                     if event.key == pygame.K_LEFT and game.gameover == 0:
                             canon.move_counter_clockwise()
@@ -351,13 +367,22 @@ def main():
             # Create and place mines
 
             if game.mine_count > 0:
+                bl = []
+                for i in canon.canonbase_rect.bottomleft:
+                    bl.append(i)
+                bl[0] -= 10
                 left_mine = player.Bullet('mine')
                 left_mine.image = pygame.transform.rotate(left_mine.bullet, 0)
-                left_mine.rect.bottomright = canon.canonbase_rect.bottomleft
+                left_mine.rect.bottomright = bl
                 left_mine.test = True
+                bl = []
+                for i in canon.canonbase_rect.bottomright:
+                    bl.append(i)
+                bl[0] += 10
                 right_mine = player.Bullet('mine')
-                right_mine.image = pygame.transform.rotate(left_mine.bullet, 0)
-                right_mine.rect.bottomleft = canon.canonbase_rect.bottomright
+                right_mine.image = pygame.transform.rotate(right_mine.bullet, 0)
+                right_mine.rect.bottomleft = bl
+
                 right_mine.test = True
                 mine_sprites.add(left_mine)
                 mine_sprites.add(right_mine)
@@ -444,7 +469,7 @@ def main():
                     heli_sprites.add(heli)
                     game.heli_count -= 1
                     game.heli_timer = random.randint(20, 40)
-            elif game.heli_count == 0:
+            elif game.heli_count == 0 and len(heli_sprites) == 0:
                 game.heli_count = game.heli_count_base + game.wave
                 game.wave += 1
                 game.heli_timer = 50
@@ -509,6 +534,8 @@ def main():
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.para.rect, trooper.para.rect)
                     parachute_sprites.remove(trooper.para)
+                    if trooper.sound:
+                        trooper.sound.stop()
                     game.sounds.hit.play()
                     if trooper.chute_shot:
                         aahh_sprites.remove(trooper.aahh)
@@ -558,6 +585,8 @@ def main():
                         aahh_sprites.remove(trooper.aahh)
                         screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
                     game.score += TROOPER_SHOT
+                    if trooper.sound:
+                        trooper.sound.stop()
 
             # Did a bullet hit a parachute?
             para_hit_dict = pygame.sprite.groupcollide(bullet_sprites, parachute_sprites, 0, 1)
@@ -573,7 +602,8 @@ def main():
                     aahh = troopers.Aahh(aahh_image, aahh_rect)
                     aahh_sprites.add(aahh)
                     para.trooper.aahh = aahh
-                    game.sounds.aahhh.play()
+                    para.trooper.sound = game.sounds.aahhh
+                    para.trooper.sound.play()
 
             # Did a bullet hit a bomb?
             bomb_hit_dict = pygame.sprite.groupcollide(bullet_sprites, bomb_sprites, 1, 1)
@@ -904,7 +934,7 @@ def main():
             screen.blit(ground, ground_rect)
             screen.blit(dirt, dirt_rect)
             game.highscores.display_high(scorefont, screen, game.score)
-            if game.wave_timer > 0 and len(heli_sprites) == 0 and len(plane_sprites) == 0:
+            if game.wave_timer > 0:
                 display_wave(game.wave, game.heli_count, scorefont, screen)
             screen.blit(canon.canonbase, canon.canonbase_rect)
             if game.gameover == 0:
@@ -960,7 +990,7 @@ def main():
                     text = menufont_h3.render(cur.caption, 1, color)
      
                 text_rect = text.get_rect()
-                text_rect = text_rect.move((0, (300 / len(menuitems)) * i + 100))
+                text_rect = text_rect.move((0, (350 / len(menuitems)) * i + 100))
                 
                 #alignment
                 if menuitems[i].align == 'center':
