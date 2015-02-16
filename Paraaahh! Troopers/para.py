@@ -262,7 +262,7 @@ def main():
 
     # Used to manage how fast the screen updates
     clock = pygame.time.Clock()
-
+    var = 0
     shoot = False
     shoot_lock = 6
     t = 0
@@ -341,6 +341,8 @@ def main():
                         shoot = False
             keys = pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
+                random.seed()
+                var = random.randint(-40, 40)
                 shoot = True
 
             # ALL EVENT PROCESSING SHOULD GO ABOVE THIS COMMENT
@@ -363,12 +365,13 @@ def main():
 
             if shoot and t % shoot_lock == 0 and game.gameover == 0:
                 #shoot a bullet
+                print var
                 newbullet = player.Bullet('bullet')
                 newbullet.direction = canon.angle
                 newbullet.image = pygame.transform.rotate(newbullet.bullet, newbullet.direction)
                 newbullet.rect = newbullet.bullet.get_rect()
                 newbullet.rect.midbottom = canon.rect.midtop
-                canon_rad = canon.angle * math.pi / 180
+                canon_rad = (canon.angle + var) * math.pi / 180
                 newbullet.rect = newbullet.rect.move((newbullet.speed * math.cos(canon_rad),
                                                       -newbullet.speed * math.sin(canon_rad) + 20))
                 bullet_sprites.add(newbullet)

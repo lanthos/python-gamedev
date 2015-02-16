@@ -166,12 +166,6 @@ class Dude(pygame.sprite.Sprite):
                 else:
                     self.state = 0
                     self.walk_timer = 3
-        # elif self.glasses:
-        #     self.image = self.imagesb[self.state]
-        #     if self.state < len(self.imagesb) - 1:
-        #         self.state += 1
-        #     else:
-        #         self.state = 0
 
     def update(self):
         if self.rect.right + self.speed > self.area.centerx + 70:
