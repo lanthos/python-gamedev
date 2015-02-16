@@ -126,16 +126,20 @@ class Bullet(pygame.sprite.Sprite):
 
 class Dude(pygame.sprite.Sprite):
 
-    def __init__(self, image1, image2, image3, image4, rect, ground, screen):
+    def __init__(self, image1, image2, image3, image4, image5, image6, rect, ground, screen):
         pygame.sprite.Sprite.__init__(self)
         self.imagesa = []
         self.imagesb = []
+        self.imagesc = []
         self.image1, self.image2, self.image3, self.image4, self.rect = image1, image2, image3, image4, rect
+        self.image5, self.image6 = image5, image6
         self.rect = self.image1.get_rect()
         self.imagesa.append(self.image1)
         self.imagesa.append(self.image2)
         self.imagesb.append(self.image3)
         self.imagesb.append(self.image4)
+        self.imagesc.append(self.image5)
+        self.imagesc.append(self.image6)
         self.screen = screen
         self.area = self.screen.get_rect()
         self.ground = ground
@@ -177,7 +181,7 @@ class Dude(pygame.sprite.Sprite):
             self.rect.right = self.area.centerx + 70
             self.walking = False
             self.glasses = True
-            self.state = 0
+            # self.state = 0
         if self.glasses:
             self.image = self.imagesb[0]
             self.glasses_counter -= 1
@@ -188,5 +192,17 @@ class Dude(pygame.sprite.Sprite):
                 self.image = self.imagesb[1]
                 self.glasses = False
                 self.hide_timer -= 1
+                self.dance()
                 if self.hide_timer <= 0:
                     self.hide = True
+
+    def dance(self):
+        self.image = self.imagesc[self.state]
+        self.walk_timer -= 1
+        if self.walk_timer <= 0:
+            if self.state < len(self.imagesb) - 1:
+                self.state += 1
+                self.walk_timer = 10
+            else:
+                self.state = 0
+                self.walk_timer = 10

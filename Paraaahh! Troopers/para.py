@@ -53,7 +53,7 @@ class Game():
         self.wave = 1
         self.spawn_heli = False
         self.spawn_plane = False
-        self.wave_timer = 50
+        self.wave_timer = 100
         self.wave_timer_base = 50
         self.heli_count_base = 5
         self.heli_count = 5
@@ -123,7 +123,7 @@ class Game():
         self.heli_count = self.heli_count_base
         self.wave = 1
         self.timer = 50
-        self.wave_timer = 50
+        self.wave_timer = 150
         self.mine_count = 2
         self.game_speed = self.game_speed_base
 
@@ -162,8 +162,8 @@ def main():
     # Set the width and height of the screen [width,height]
     # screen_width, screen_height = [1024, 768]
     screen_width, screen_height = [800, 600]
-    screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
-    # screen = pygame.display.set_mode([screen_width, screen_height])
+    # screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
+    screen = pygame.display.set_mode([screen_width, screen_height])
     area = screen.get_rect()
     pygame.display.set_caption("Paraaaahhhh! Troopers")
     background = pygame.Surface((screen_width, screen_height))
@@ -171,6 +171,7 @@ def main():
     background = background.convert()
 
     # static load of images that are used a lot
+
     star1_image, star_rect = player.load_image('star01.bmp')
     star2_image, star_rect = player.load_image('star02.bmp')
     heli1a_image, heli_rect = player.load_image('heli1a.bmp')
@@ -181,6 +182,8 @@ def main():
     dude2a_image, dude_rect = player.load_image('dude02.bmp')
     dude1b_image, dude_rect = player.load_image('dude03.bmp')
     dude2b_image, dude_rect = player.load_image('dude04.bmp')
+    dude1c_image, dude_rect = player.load_image('dude05.bmp')
+    dude2c_image, dude_rect = player.load_image('dude06.bmp')
     plane_image, plane_rect = player.load_image('plane.bmp')
     troop_image, troop_rect = player.load_image('trooper.bmp')
     bomb_image, bomb_rect = player.load_image('bomb.bmp')
@@ -210,7 +213,8 @@ def main():
     # Init game
     game = Game()
 
-    dude = player.Dude(dude1a_image, dude2a_image, dude1b_image, dude2b_image, dude_rect, ground_rect, screen)
+    dude = player.Dude(dude1a_image, dude2a_image, dude1b_image, dude2b_image, dude1c_image, dude2c_image, dude_rect,
+                       ground_rect, screen)
     dude.rect.bottom = ground_rect.top
     dude.rect.left = area.right
     dude.music = game.sounds.music
