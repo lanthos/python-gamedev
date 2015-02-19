@@ -142,7 +142,7 @@ class Sounds():
         self.explosion = pygame.mixer.Sound(os.path.join('data', 'explosion1.wav'))
         self.base_explosion = pygame.mixer.Sound(os.path.join('data', 'base_explosion.wav'))
         self.bomb_falling = pygame.mixer.Sound(os.path.join('data', 'bomb_falling.wav'))
-        self.music = pygame.mixer.Sound(os.path.join('data', 'who_likes_to_party.wav'))
+        self.music = pygame.mixer.Sound(os.path.join('data', 'who_likes_to_party.ogg'))
         self.music.set_volume(0.3)
 
 
