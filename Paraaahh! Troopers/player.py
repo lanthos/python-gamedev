@@ -129,7 +129,7 @@ class Bullet(pygame.sprite.Sprite):
 
 class Dude(pygame.sprite.Sprite):
 
-    def __init__(self, image1, image2, image3, image4, image5, image6, rect, ground, screen):
+    def __init__(self, image1, image2, image3, image4, image5, image6, rect, screen):
         pygame.sprite.Sprite.__init__(self)
         self.imagesa = []
         self.imagesb = []
@@ -145,16 +145,16 @@ class Dude(pygame.sprite.Sprite):
         self.imagesc.append(self.image6)
         self.screen = screen
         self.area = self.screen.get_rect()
-        self.ground = ground
+        # self.ground = ground
         self.speed = -3
         self.music = None
         self.state = 0
         self.hide = False
-        self.hide_timer = 30
+        self.hide_timer = 250
         self.walking = True
         self.glasses = False
-        self.glasses_counter = 10
-        self.walk_timer = 3
+        self.glasses_counter = 40
+        self.walk_timer = 10
         self.set_image()
         self.music_playing = False
 
@@ -165,17 +165,17 @@ class Dude(pygame.sprite.Sprite):
             if self.walk_timer <= 0:
                 if self.state < len(self.imagesa) - 1:
                     self.state += 1
-                    self.walk_timer = 3
+                    self.walk_timer = 10
                 else:
                     self.state = 0
-                    self.walk_timer = 3
+                    self.walk_timer = 10
 
     def update(self):
-        if self.rect.right + self.speed > self.area.centerx + 70:
+        if self.rect.right + self.speed > self.area.centerx:
             self.rect = self.rect.move((self.speed, 0))
             self.set_image()
         else:
-            self.rect.right = self.area.centerx + 70
+            self.rect.right = self.area.centerx
             self.walking = False
             self.glasses = True
             # self.state = 0
@@ -199,7 +199,7 @@ class Dude(pygame.sprite.Sprite):
         if self.walk_timer <= 0:
             if self.state < len(self.imagesb) - 1:
                 self.state += 1
-                self.walk_timer = 10
+                self.walk_timer = 20
             else:
                 self.state = 0
-                self.walk_timer = 10
+                self.walk_timer = 20

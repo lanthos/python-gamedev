@@ -61,7 +61,7 @@ class Game():
         self.plane_timer = 1
         self.music = True
         self.timer = 50
-        self.game_speed = 25
+        self.game_speed = 20
         self.game_speed_base = 25
         self.gameover = 0
         self.playing = False
@@ -163,8 +163,8 @@ def main():
     # Set the width and height of the screen [width,height]
     # screen_width, screen_height = [1024, 768]
     screen_width, screen_height = [800, 600]
-    screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
-    # screen = pygame.display.set_mode([screen_width, screen_height])
+    # screen = pygame.display.set_mode([screen_width, screen_height], pygame.FULLSCREEN)
+    screen = pygame.display.set_mode([screen_width, screen_height])
     area = screen.get_rect()
     pygame.display.set_caption("Paraaaahhhh! Troopers")
     background = pygame.Surface((screen_width, screen_height))
@@ -187,6 +187,7 @@ def main():
     dude2b_image, dude_rect = player.load_image('dude04.bmp')
     dude1c_image, dude_rect = player.load_image('dude05.bmp')
     dude2c_image, dude_rect = player.load_image('dude06.bmp')
+    intro_image, intro_rect = player.load_image('intro_1.bmp')
     plane_image, plane_rect = player.load_image('plane.bmp')
     troop_image, troop_rect = player.load_image('trooper.bmp')
     bomb_image, bomb_rect = player.load_image('bomb.bmp')
@@ -217,8 +218,8 @@ def main():
     game = Game()
 
     dude = player.Dude(dude1a_image, dude2a_image, dude1b_image, dude2b_image, dude1c_image, dude2c_image, dude_rect,
-                       ground_rect, screen)
-    dude.rect.bottom = ground_rect.top
+                       screen)
+    dude.rect.bottom = area.bottom - 308
     dude.rect.left = area.right
     dude.music = game.sounds.music
 
@@ -281,7 +282,9 @@ def main():
 
         if game.state == 'ingame':
             game.playing = True
-
+            if not dude.music_playing:
+                dude.music.play()
+                dude.music_playing = True
             if clear_events:
                 pygame.event.clear()
                 clear_events = False
@@ -897,6 +900,7 @@ def main():
                 canon.halt()
                 game.timer -= 1
                 if game.timer <= 0:
+                    dude.music.stop()
                     game.game_over()
 
             canon_sprite.update()
@@ -911,7 +915,6 @@ def main():
             plane_particle_sprites.update()
             bomb_particle_sprites.update()
             star_sprites.update()
-            dude_sprite.update()
 
             # ALL GAME LOGIC SHOULD GO ABOVE THIS COMMENT
 
@@ -941,8 +944,6 @@ def main():
                 screen.blit(canon.canontop, canon.cannontop_rect)
             troop_particle_sprites.draw(screen)
             base_particle_sprites.draw(screen)
-            if not dude.hide:
-                dude_sprite.draw(screen)
 
 
             # ALL CODE TO DRAW SHOULD GO ABOVE THIS COMMENT
@@ -1058,16 +1059,47 @@ def main():
             base_particle_sprites.empty()
             plane_particle_sprites.empty()
             bomb_sprites.empty()
+            dude.music.stop()
+            dude.rect.bottom = area.bottom - 208
+            dude.rect.left = area.right
+            dude.state = 0
+            dude.hide = False
+            dude.hide_timer = 250
+            dude.walking = True
+            dude.glasses = False
+            dude.glasses_counter = 20
+            dude.walk_timer = 10
+            dude.music_playing = False
 
             print 'resetting'
             canon_sprite = pygame.sprite.RenderPlain(canon)
             canon.angle = 90
             clear_events = True
             game.reset()
-            game.state = 'ingame'
+            game.state = 'intro'
 
         elif game.state == 'quit':
             sys.exit(0)
+
+        elif game.state == 'intro':
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        sys.exit()
+                    elif event.key == pygame.K_ESCAPE:
+                        sys.exit()
+                    elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
+                        game.state = 'ingame'
+            dude_sprite.update()
+
+            screen.blit(background, (0, 0))
+            screen.blit(intro_image, (0, 100))
+            if not dude.hide:
+                dude_sprite.draw(screen)
+            else:
+                game.state = 'ingame'
 
         else:
             print 'Error: unknown game state: ', game.state
