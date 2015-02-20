@@ -44,7 +44,7 @@ class Bullet(pygame.sprite.Sprite):
         self.DISPLAYSURF = DISPLAYSURF
         self.enemy_tank = enemy_tank
         self.my_tank = my_tank
-        self.tank_hit = pygame.mixer.Sound(os.path.join('data', 'tank_hit.wav'))
+        self.tank_hit = pygame.mixer.Sound(os.path.join('data', 'tank_hit_01.ogg'))
 
     def check_wall(self):
         self.tileX = int(self.rect.x / self.game_map.TILESIZE)

@@ -45,7 +45,7 @@ class Tank():
         self.hit_counter = 0
         self.hit = False
         self.hit_move = False
-        self.tank_shot = pygame.mixer.Sound(os.path.join('data', 'tank_shot.wav'))
+        self.tank_shot = pygame.mixer.Sound(os.path.join('data', 'tank_shot_01.ogg'))
 
     def hack(self, color):
         # This was a hack that was needed so that I could initialize the tanks before a color was selected so that the

@@ -130,9 +130,9 @@ def main():
     pygame.init()
 
     # Initialize sounds
-    tank_idle = pygame.mixer.Sound(os.path.join('data', 'tank_idle.wav'))
-    red_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving.wav'))
-    blue_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving.wav'))
+    tank_idle = pygame.mixer.Sound(os.path.join('data', 'tank_idle_01.ogg'))
+    red_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving_01.ogg'))
+    blue_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving_01.ogg'))
     tank_idle.play(-1)
 
     # initialize tanks
