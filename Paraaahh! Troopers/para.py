@@ -331,6 +331,9 @@ def main():
                         elif not game.music:
                             game.sounds.music.set_volume(0.3)
                             game.music = True
+                    if event.key == pygame.K_f:
+                        pygame.display.toggle_fullscreen()
+                        print 'toggle'
                     if event.key == pygame.K_l:
                         game.spawn_plane = True
                     if event.key == pygame.K_h:
@@ -583,6 +586,8 @@ def main():
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.para.rect, trooper.para.rect)
                     parachute_sprites.remove(trooper.para)
+                    if trooper.sound:
+                        trooper.sound.stop()
                     game.sounds.hit.play()
                     if trooper.chute_shot:
                         aahh_sprites.remove(trooper.aahh)
