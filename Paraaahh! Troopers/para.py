@@ -194,6 +194,10 @@ def main():
     falling_trooper_image, falling_trooper_rect = player.load_image('trooper_falling.bmp')
     parachute_image, parachute_rect = player.load_image('chute.bmp')
     aahh_image, aahh_rect = player.load_image('aahh.bmp')
+    cheer1a_image, cheer_rect = player.load_image('cheerleader01.bmp')
+    cheer2a_image, cheer_rect = player.load_image('cheerleader02.bmp')
+    cheer1b_image, cheer_rect = player.load_image('cheerleader03.bmp')
+    cheer2b_image, cheer_rect = player.load_image('cheerleader04.bmp')
 
     # initialize fonts
     menufont_h1 = pygame.font.Font(os.path.join('data', 'visitor1.ttf'), 40)
@@ -223,8 +227,13 @@ def main():
     dude.rect.left = area.right
     dude.music = game.sounds.music
 
+    cheer = player.Cheer(cheer1a_image, cheer2a_image, cheer1b_image, cheer2b_image, cheer_rect, screen)
+    cheer.rect.bottom = area.bottom - 207
+    cheer.rect.left = dude.rect.right + 10
+
     # Init sprites
     canon = player.Turret(ground_rect)
+    cheer_sprite = pygame.sprite.RenderPlain(cheer)
     dude_sprite = pygame.sprite.RenderPlain(dude)
     star_sprites = pygame.sprite.RenderPlain()
     mine_sprites = pygame.sprite.RenderPlain()
@@ -1098,10 +1107,12 @@ def main():
                     elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                         game.state = 'ingame'
             dude_sprite.update()
+            cheer_sprite.update()
 
             screen.blit(background, (0, 0))
             screen.blit(intro_image, (0, 100))
             if not dude.hide:
+                cheer_sprite.draw(screen)
                 dude_sprite.draw(screen)
             else:
                 game.state = 'ingame'

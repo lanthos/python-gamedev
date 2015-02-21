@@ -203,3 +203,59 @@ class Dude(pygame.sprite.Sprite):
             else:
                 self.state = 0
                 self.walk_timer = 20
+
+
+class Cheer(pygame.sprite.Sprite):
+
+    def __init__(self, image1, image2, image3, image4, rect, screen):
+        pygame.sprite.Sprite.__init__(self)
+        self.imagesa = []
+        self.imagesb = []
+        self.image1, self.image2, self.image3, self.image4, self.rect = image1, image2, image3, image4, rect
+        self.rect = self.image1.get_rect()
+        self.imagesa.append(self.image1)
+        self.imagesa.append(self.image2)
+        self.imagesb.append(self.image3)
+        self.imagesb.append(self.image4)
+        self.screen = screen
+        self.area = self.screen.get_rect()
+        self.speed = -3
+        self.state = 0
+        self.hide = False
+        self.hide_timer = 250
+        self.walking = True
+        self.walk_timer = 10
+        self.set_image()
+
+    def set_image(self):
+        if self.walking:
+            self.image = self.imagesa[self.state]
+            self.walk_timer -= 1
+            if self.walk_timer <= 0:
+                if self.state < len(self.imagesa) - 1:
+                    self.state += 1
+                    self.walk_timer = 10
+                else:
+                    self.state = 0
+                    self.walk_timer = 10
+
+    def update(self):
+        if self.rect.right + self.speed > self.area.centerx + 80:
+            self.rect = self.rect.move((self.speed, 0))
+            self.set_image()
+        else:
+            self.rect.right = self.area.centerx + 80
+            self.walking = False
+        if not self.walking:
+            self.dance()
+
+    def dance(self):
+        self.image = self.imagesb[self.state]
+        self.walk_timer -= 1
+        if self.walk_timer <= 0:
+            if self.state < len(self.imagesb) - 1:
+                self.state += 1
+                self.walk_timer = 20
+            else:
+                self.state = 0
+                self.walk_timer = 20
