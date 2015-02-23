@@ -55,8 +55,8 @@ class Game():
         self.spawn_plane = False
         self.wave_timer = 100
         self.wave_timer_base = 50
-        self.heli_count_base = 5
-        self.heli_count = 5
+        self.heli_count_base = 7
+        self.heli_count = 7
         self.heli_timer = 30
         self.plane_timer = 1
         self.music = True
@@ -283,7 +283,7 @@ def main():
     clock = pygame.time.Clock()
     var = 0
     shoot = False
-    shoot_lock = 6
+    shoot_lock = 7
     t = 0
     clear_events = True
     # -------- Main Program Loop -----------
@@ -405,7 +405,6 @@ def main():
 
             if shoot and t % shoot_lock == 0 and game.gameover == 0:
                 #shoot a bullet
-                print var
                 newbullet = player.Bullet('bullet')
                 newbullet.direction = canon.angle
                 newbullet.image = pygame.transform.rotate(newbullet.bullet, newbullet.direction)
@@ -485,7 +484,7 @@ def main():
                     game.heli_count -= 1
                     game.heli_timer = random.randint(20, 40)
             elif game.heli_count == 0 and len(heli_sprites) == 0:
-                game.heli_count = game.heli_count_base + game.wave
+                game.heli_count = game.heli_count_base + game.wave + 2
                 game.wave += 1
                 game.heli_timer = 50
                 game.wave_timer = 100
@@ -509,7 +508,6 @@ def main():
                                                    screen)
                         trooper.rect.midtop = heli.rect.midbottom
                         trooper_sprites.add(trooper)
-                        print 'trooper x {}'.format(trooper.rect.x)
 
                         trooper.para = para
                         para.trooper = trooper
