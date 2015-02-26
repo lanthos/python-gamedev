@@ -12,6 +12,7 @@ from tank import *
 from bullets import *
 from map import *
 import os
+import pyglet
 
 # Globals constants defined here.
 # Colors
@@ -130,9 +131,13 @@ def main():
     pygame.init()
 
     # Initialize sounds
-    tank_idle = pygame.mixer.Sound(os.path.join('data', 'tank_idle_01.ogg'))
-    red_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving_01.ogg'))
-    blue_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving_01.ogg'))
+    # tank_idle = pygame.mixer.Sound(os.path.join('data', 'tank_idle_01.ogg'))
+    # red_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving_01.ogg'))
+    # blue_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving_01.ogg'))
+    # tank_idle.play(-1)
+    tank_idle = pyglet.media.load(os.path.join('data', 'tank_idle_01.ogg'), streaming=False)
+    red_tank_move = pyglet.media.load(os.path.join('data', 'tank_moving_01.ogg'), streaming=False)
+    blue_tank_move = pyglet.media.load(os.path.join('data', 'tank_moving_01.ogg'), streaming=False)
     tank_idle.play(-1)
 
     # initialize tanks
