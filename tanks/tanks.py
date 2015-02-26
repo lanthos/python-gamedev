@@ -135,10 +135,22 @@ def main():
     # red_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving_01.ogg'))
     # blue_tank_move = pygame.mixer.Sound(os.path.join('data', 'tank_moving_01.ogg'))
     # tank_idle.play(-1)
-    tank_idle = pyglet.media.load(os.path.join('data', 'tank_idle_01.ogg'), streaming=False)
-    red_tank_move = pyglet.media.load(os.path.join('data', 'tank_moving_01.ogg'), streaming=False)
-    blue_tank_move = pyglet.media.load(os.path.join('data', 'tank_moving_01.ogg'), streaming=False)
-    tank_idle.play(-1)
+    tank_idle = pyglet.media.load(os.path.join('data', 'tank_idle.wav'), streaming=False)
+    tank_idle_player = pyglet.media.Player()
+    tank_idle_player.queue(tank_idle)
+    tank_idle_player.eos_action = tank_idle_player.EOS_LOOP
+    tank_idle_player.play()
+    red_tank_move = pyglet.media.load(os.path.join('data', 'tank_moving.wav'), streaming=False)
+    red_tank_move_player = pyglet.media.Player()
+    red_tank_move_player.queue(red_tank_move)
+    red_tank_move_player.eos_action = red_tank_move_player.EOS_LOOP
+    red_tank_move_player.play()
+    blue_tank_move = pyglet.media.load(os.path.join('data', 'tank_moving.wav'), streaming=False)
+    blue_tank_move_player = pyglet.media.Player()
+    blue_tank_move_player.queue(blue_tank_move)
+    blue_tank_move_player.eos_action = blue_tank_move_player.EOS_LOOP
+    blue_tank_move_player.play()
+
 
     # initialize tanks
     red_tank = Tank(150, 200, 'red')
@@ -205,10 +217,10 @@ def main():
                     sys.exit()
                 if event.key == pygame.K_w:
                     if not blue_tank.hit and not red_tank.hit:
-                        red_tank_move.play(-1)
+                        red_tank_move.play()
                 if event.key == pygame.K_UP:
                     if not blue_tank.hit and not red_tank.hit:
-                        blue_tank_move.play(-1)
+                        blue_tank_move.play()
                 if event.key == pygame.K_SPACE:
                     if not blue_tank.hit and not red_tank.hit:
                         red_tank.shoot(red_bullet)
@@ -238,9 +250,9 @@ def main():
                     game_map.load_map(game_map.level_number, red_tank, blue_tank)
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_w:
-                    red_tank_move.stop()
+                    red_tank_move_player.pause()
                 if event.key == pygame.K_UP:
-                    blue_tank_move.stop()
+                    blue_tank_move_player.pause()
         # This allows for you to hold down the keys and have it repeat affects instead of having to continually press.
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a]:

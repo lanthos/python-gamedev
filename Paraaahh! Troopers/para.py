@@ -153,6 +153,17 @@ def display_wave(wave, wave_count, font, screen):
     screen.blit(wave, wave_rect)
 
 
+def display_mute(mute, font, screen):
+    if mute:
+        status = 'on'
+    else:
+        status = 'off'
+    wave = font.render('Mute {}'.format(status), True, (255, 255, 255))
+    wave_rect = wave.get_rect()
+    wave_rect.topleft = (screen.get_width() / 2.7, screen.get_height() - 45)
+    screen.blit(wave, wave_rect)
+
+
 def main():
     """ Main function for the game. """
     pygame.mixer.pre_init(44100, -16, 2, 4096)
@@ -340,9 +351,6 @@ def main():
                         elif not game.music:
                             game.sounds.music.set_volume(0.3)
                             game.music = True
-                    if event.key == pygame.K_f:
-                        pygame.display.toggle_fullscreen()
-                        print 'toggle'
                     if event.key == pygame.K_l:
                         game.spawn_plane = True
                     if event.key == pygame.K_h:
@@ -658,6 +666,8 @@ def main():
                     aahh_sprites.remove(trooper.aahh)
                     screen.blit(background, trooper.rect, trooper.rect)
                     screen.blit(background, trooper.aahh.rect, trooper.aahh.rect)
+                    if trooper.sound:
+                        trooper.sound.stop()
                     game.sounds.splat.play()
                     for i in range(10):
                         part = particle.Particle(trooper.rect.centerx, trooper.rect.centery, RED, 'trooper')
@@ -949,6 +959,7 @@ def main():
             screen.blit(ground, ground_rect)
             screen.blit(dirt, dirt_rect)
             game.highscores.display_high(scorefont, screen, game.score)
+            display_mute(game.music, scorefont, screen)
             if game.wave_timer > 0:
                 display_wave(game.wave, game.heli_count, scorefont, screen)
             screen.blit(canon.canonbase, canon.canonbase_rect)
@@ -1082,6 +1093,12 @@ def main():
             dude.glasses_counter = 20
             dude.walk_timer = 10
             dude.music_playing = False
+            cheer.rect.left = dude.rect.right + 10
+            cheer.state = 0
+            cheer.hide = False
+            cheer.hide_timer = 250
+            cheer.walking = True
+            cheer.walk_timer = 10
 
             print 'resetting'
             canon_sprite = pygame.sprite.RenderPlain(canon)
@@ -1104,16 +1121,19 @@ def main():
                         sys.exit()
                     elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                         game.state = 'ingame'
-            dude_sprite.update()
-            cheer_sprite.update()
-
-            screen.blit(background, (0, 0))
-            screen.blit(intro_image, (0, 100))
-            if not dude.hide:
-                cheer_sprite.draw(screen)
-                dude_sprite.draw(screen)
-            else:
+            if not game.music:
                 game.state = 'ingame'
+            else:
+                dude_sprite.update()
+                cheer_sprite.update()
+
+                screen.blit(background, (0, 0))
+                screen.blit(intro_image, (0, 100))
+                if not dude.hide:
+                    cheer_sprite.draw(screen)
+                    dude_sprite.draw(screen)
+                else:
+                    game.state = 'ingame'
 
         else:
             print 'Error: unknown game state: ', game.state
