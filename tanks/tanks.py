@@ -144,12 +144,10 @@ def main():
     red_tank_move_player = pyglet.media.Player()
     red_tank_move_player.queue(red_tank_move)
     red_tank_move_player.eos_action = red_tank_move_player.EOS_LOOP
-    red_tank_move_player.play()
     blue_tank_move = pyglet.media.load(os.path.join('data', 'tank_moving.wav'), streaming=False)
     blue_tank_move_player = pyglet.media.Player()
     blue_tank_move_player.queue(blue_tank_move)
     blue_tank_move_player.eos_action = blue_tank_move_player.EOS_LOOP
-    blue_tank_move_player.play()
 
 
     # initialize tanks
