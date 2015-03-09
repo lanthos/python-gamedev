@@ -85,6 +85,10 @@ class Menu():
         newm = MenuItem("Jeremy Kenyon", "")
         newm.align = "right"
         self.add_item(newm)
+        self.add_item(MenuItem("Music", ""))
+        newm = MenuItem("Kevin MaCleod", "")
+        newm.align = "right"
+        self.add_item(newm)
         self.add_item(MenuItem("Back", "mainmenu"))
         self.selected = None
         self.move_down()
